@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .login-container {
+            width: 350px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group input {
+            width: 95%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-group label {
+            text-align: left;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .btn-container {
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 30px;
+            background-color:black;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background-color:black;
+            padding-top: 10px;
+            position: relative;
+            top: 10px;
+        }
+     
+
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <h2>Login</h2>
+    <form action="/user-Login" method="post">
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+    </div>
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+    </div>
+    
+    <div class="btn-container">
+        <button type="submit" class="btn" id="login">Login</button>
+    </div>
+    </form>
+     <!--error messages-->
+     <% if (typeof message !="undefined" ) {%>
+
+        <p class="mt-3 text-info ">
+            <%= message %>
+        </p>
+
+        <%} %>
+            <!--end messages-->
+    <div>
+     <a href="/register" >  <button class="btn btn-secondary"  id="register">SignUp</button></a>
+       <a href="#"> <button class="btn btn-secondary" id="loginAdmin">forgot password?</button></a>
+    </div>
+
+</div>
+</body>
+</html>

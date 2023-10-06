@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Skydash Admin</title>
+  <!-- plugins:css -->
+  <link rel="stylesheet" href="/admin/vendors/feather/feather.css">
+  <link rel="stylesheet" href="/admin/vendors/ti-icons/css/themify-icons.css">
+  <link rel="stylesheet" href="/admin/vendors/css/vendor.bundle.base.css">
+  <!-- endinject -->
+  <!-- Plugin css for this page -->
+  <!-- End plugin css for this page -->
+  <!-- inject:css -->
+  <link rel="stylesheet" href="/admin/css/vertical-layout-light/style.css">
+  <!-- endinject -->
+  <link rel="shortcut icon" href="/admin/images/favicon.png" />
+</head>
+
+<body>
+  <div class="container-scroller">
+    <!-- partial:../../partials/_navbar.html -->
+    <%- include("../layout/adminside/navbar") %>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:../../partials/_settings-panel.html -->
+      <%- include("../layout/adminside/settingspanel") %>
+      <!-- partial -->
+      <!-- partial:../../partials/_sidebar.html -->
+      <%- include("../layout/adminside/sidebar") %>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="row">
+            <div class="main-panel">
+                <div class="content-wrapper">
+                  <div class="page-header">
+                    <h3 class="page-title">Product Details</h3>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-12 grid-margin stretch-card">
+                      <div class="card">
+                        <div class="card-body">
+                          <h4 class="card-title">Product Information</h4>
+                          <p class="card-description text-info">Basic product info</p>
+                          <form action="/admin/product/create" method="post" enctype="multipart/form-data">
+                            <% if (message !== "") { %>
+                              <p class="text-danger"><%= message %></p>
+                            <% } %>
+              
+                            <!-- Product Name -->
+                            <div class="form-group">
+                              <label for="productName">Product Name</label>
+                              <input type="text" class="form-control " name="productName" id="productName" placeholder="Name">
+                            </div>
+              
+                           
+              
+                            <!-- Brand Name -->
+                            <div class="form-group">
+                              <label for="brandName">Brand Name</label>
+                              <input type="text" class="form-control " name="brandName" id="brandName" placeholder="Brand Name">
+                            </div>
+              
+            
+              
+                            <!-- Price -->
+                            <div class="form-group">
+                              <label for="price">Price</label>
+                              <input type="number" class="form-control " name="price" id="price" placeholder="Price">
+                            </div>
+              
+                           
+              
+                            <!-- Stock Count -->
+                            <div class="form-group">
+                              <label for="stockCount">Stock Count</label>
+                              <input type="number" class="form-control " name="stockCount" id="stockCount" placeholder="Count">
+                            </div>
+              
+                            <!-- Description -->
+                            <div class="form-group">
+                              <label for="description">Description</label>
+                              <textarea class=" form-control" id="description" name="description" rows="8" placeholder="Write about the Product"></textarea>
+                            </div>
+              
+                            <!-- Product Categories and Tags -->
+                            <div class="col-md-12 grid-margin stretch-card">
+                              <div class="card">
+                                <div class="card-body">
+                                  <h4 class="card-title">Product Categories</h4>
+                                  <div class="form-group">
+                                    <label for="category">Category</label>
+                                    <select class="form-control form-control-lg " name="category" id="category">
+                                      <option></option>
+                                      <% Categories.forEach((category) => { %>
+                                        <option><%= category.categoryName %></option>
+                                      <% }) %>
+                                     
+                                    
+                                    </select>
+                                  </div>
+                               
+                                </div>
+                              </div>
+                            </div>
+              
+                            <!-- Availability -->
+                            <div class="col-md-12 grid-margin stretch-card">
+                              <div class="card">
+                                <div class="card-body">
+                                  <h5 class="card-description">Availability</h5>
+                                  <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="availability" id="inStockRadio" value="true">
+                                    <label class="form-check-label" for="inStockRadio">In Stock</label>
+                                  </div>
+                                  <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="availability" id="outOfStockRadio" value="false">
+                                    <label class="form-check-label" for="outOfStockRadio">Out Of Stock</label>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            
+              
+                            <!-- Images Upload -->
+                            <div class="form-group">
+                              <label>Images Upload (Required: 3)</label>
+                              <div class="input-group col-md-12">
+                                <input type="file" id="images" multiple  name="image" class="form-control file-upload-info" required>
+                              </div>
+                            </div>
+                            <!-- Submit and Clear Buttons -->
+                            <button type="submit" class="btn btn-primary mb-2">Submit</button>
+                            <button type="reset" class="btn btn-primary mb-2">Clear</button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          
+        <!-- content-wrapper ends -->
+        <!-- partial:../../partials/_footer.html -->
+        <footer class="footer">
+          <div class="d-sm-flex justify-content-center justify-content-sm-between">
+            <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2021.  Premium <a href="https://www.bootstrapdash.com/" target="_blank">Bootstrap admin template</a> from BootstrapDash. All rights reserved.</span>
+            <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Hand-crafted & made with <i class="ti-heart text-danger ml-1"></i></span>
+          </div>
+        </footer>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+  <!-- plugins:js -->
+  <script src="/admin/vendors/js/vendor.bundle.base.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page -->
+  <!-- End plugin js for this page -->
+  <!-- inject:js -->
+  <script src="/admin/js/off-canvas.js"></script>
+  <script src="/admin/js/hoverable-collapse.js"></script>
+  <script src="/admin/js/template.js"></script>
+  <script src="/admin/js/settings.js"></script>
+  <script src="/admin/js/todolist.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <!-- End custom js for this page-->
+</body>
+
+</html>
