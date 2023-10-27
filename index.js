@@ -7,12 +7,8 @@ const app=express()
 const customerRoute=require('./routes/customerRoute')
 const adminRoute=require('./routes/adminRoute')
 const mongoose=require('mongoose')
-const morgan = require('morgan');
+// const flash=require('express-flash')
 
-
-
-
-app.use(morgan('dev'));
 
 app.set('view engine','ejs')
 app.use(express.urlencoded({ extended: true }));
@@ -32,6 +28,6 @@ mongoose
 .then(()=>console.log("DATABASE CONNECTED"))
 .catch((error)=>console.log(error))
 
-const PORT=3000
+const PORT=3008
 app.listen(PORT,()=>console.log("server running..."))
 

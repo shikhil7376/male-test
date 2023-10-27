@@ -154,7 +154,7 @@ const blockTheUser=async (req,res)=>{
     }
  }
 
- const  addProductcategory = async (req, res) => {
+ const   addProductcategory = async (req, res) => {
     try {
         if (!req.body.categoryName || !req.file) {
             return res.render("admin/addCategory", { message: "Fill all fields..." });

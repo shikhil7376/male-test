@@ -1,0 +1,225 @@
+<%- include("../layout/customerside/header") %>
+ <%-include("../layout/customerside/navbar") %>
+<!-- Header Section End -->
+
+<!-- Breadcrumb Section Begin -->
+<section class="breadcrumb-option">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="breadcrumb__text">
+          <h4>Shopping Cart</h4>
+          <div class="breadcrumb__links">
+            <a href="./index.html">Home</a>
+            <a href="./shop.html">Shop</a>
+            <span>Shopping Cart</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Breadcrumb Section End -->
+
+<!-- Shopping Cart Section Begin -->
+<!-- Shopping Cart Section Begin -->
+<!-- Shopping Cart Section Begin -->
+<section class="shopping-cart spad">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="shopping__cart__table">
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="cart-items">
+              <% customer.cart.forEach(item => { %>
+              <tr>
+                <td><%= item.product.product_name %></td>
+                <td>
+                  <!-- Add buttons for increasing and decreasing quantity -->
+                  <button
+                    onclick="changeQuantity('<%= item.product._id %>', -1)"
+                  >
+                    -
+                  </button>
+                  <span id="quantityElem_<%= item.product._id %>"><%= item.quantity %></span>
+                  <button
+                    onclick="changeQuantity('<%= item.product._id %>', 1)"
+                  >
+                    +
+                  </button>
+                </td>
+                <td><%= item.total %></td>
+                <td>
+                  <button class="remove-link" onclick="removeItem('<%= item.product._id %>')">Remove</button>
+
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+        <div class="row">
+          <div class="col-lg-6 col-md-6 col-sm-6">
+            <div class="continue__btn">
+              <a href="/user/shop">Continue Shopping</a>
+            </div>
+          </div>
+          <div class="col-lg-6 col-md-6 col-sm-6">
+            <div class="continue__btn update__btn">
+              <a href="#" onclick="updateCart()"
+                ><i class="fa fa-spinner"></i> Update cart</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cart__total" id="cart-total">
+        <h6>Cart total</h6>
+        <ul>
+          <li>Subtotal <span><%= totalCost %></span></li>
+          <li>Total <span><%= totalCost %></span></li>
+        </ul>
+        <a href="/user/checkout" class="primary-btn">Proceed to checkout</a>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+  // Function to change the quantity of an item in the cart
+  // Function to change the quantity of an item in the cart
+async function changeQuantity(productId, quantityChange) {
+    try {
+        const response = await fetch(`/change-quantity/${productId}/${quantityChange}`, { method: 'POST' });
+
+        if (response.ok) {
+            console.log("Quantity changed successfully");
+
+            // Reload the cart data after successful quantity change
+            await loadCart();
+
+            // Update the quantity in the UI
+            updateQuantityUI(productId, quantityChange);
+
+        } else {
+            console.error('Error changing quantity:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Error changing quantity:', error.message);
+    }
+}
+
+// Function to update the quantity in the UI
+function updateQuantityUI(productId, quantityChange) {
+    // Find the HTML element representing the quantity
+    const quantityElem = document.getElementById(`quantityElem_${productId}`);
+
+    // Update the quantity in the UI
+    if (quantityElem) {
+        quantityElem.textContent = parseInt(quantityElem.textContent) + parseInt(quantityChange);
+    }
+}
+
+
+  // Function to update the quantity in the UI
+
+  async function loadCart() {
+    try {
+      const response = await fetch("/get-cart-data"); // Adjust the route as per your server setup
+      if (response.ok) {
+        const cartData = await response.json();
+
+        // Update the UI with cart data
+        displayCart(cartData);
+      } else {
+        console.error("Error fetching cart data:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching cart data:", error.message);
+    }
+  }
+
+  // Function to remove an item from the cart
+  async function removeItem(productId) {
+    try {
+      const response = await fetch(`/remove-from-cart/${productId}`, {
+        method: "POST",
+      });
+
+      if (response.ok) {
+        // Reload the cart data after successful removal
+        location.reload();
+        await loadCart();
+      } else {
+        console.error("Error removing item from cart:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error removing item from cart:", error.message);
+    }
+  }
+
+  // Event listener for DOMContentLoaded
+  document.addEventListener("DOMContentLoaded", function () {
+    // Initial load of the cart data
+    loadCart();
+
+    // Function to display cart data on the page
+    function displayCart(cartData) {
+      const cartItemsContainer = document.getElementById("cart-items");
+      const cartTotalContainer = document.getElementById("cart-total");
+
+      // Clear previous content
+      cartItemsContainer.innerHTML = "";
+      cartTotalContainer.innerHTML = "";
+
+      // Iterate through cart items and add to the list
+      cartData.forEach((item) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+                <td>${item.product.product_name}</td>
+                <td>${item.quantity}</td>
+                <td>${item.total}</td>
+                <td><a href="#" onclick="removeItem('${item.product._id}')">Remove</a></td>
+            `;
+        cartItemsContainer.appendChild(row);
+      });
+
+      // Display cart total
+      const totalRow = document.createElement("ul");
+      totalRow.innerHTML = `
+            <li>Subtotal <span>${calculateSubtotal(cartData)}</span></li>
+            <li>Total <span>${calculateTotal(cartData)}</span></li>
+        `;
+      cartTotalContainer.appendChild(totalRow);
+    }
+
+    // Function to calculate subtotal
+    function calculateSubtotal(cartData) {
+      return cartData.reduce((total, item) => total + item.total, 0);
+    }
+
+    // Function to calculate total
+    function calculateTotal(cartData) {
+      return calculateSubtotal(cartData);
+    }
+
+    // Function to update the cart
+    window.updateCart = async function () {
+      await fetch("/update-cart", { method: "POST" }); // Adjust the route as per your server setup
+      loadCart();
+    };
+  });
+</script>
+
+<!-- Shopping Cart Section End -->
+
+<!-- Footer Section Begin -->
+<%- include("../layout/customerside/footer") %>
+<!-- Footer Section End -->

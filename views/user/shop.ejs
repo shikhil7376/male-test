@@ -224,9 +224,13 @@
                                 </div>
                                 <div class="product__item__text">
                                     <h6><%= element.product_name %></h6>
-                                    <a href="#" class="add-cart">+ Add To Cart</a>
+                                    
+                                    <button class="add-cart" data-product-id="<%= element._id %>">+ Add To Cart</button>
+
+                             
+
                                     <div class="rating">
-                                        <i class="fa fa-star-o"></i>
+                                        <i class="fa fa-star-o"></i>         
                                         <i class="fa fa-star-o"></i>
                                         <i class="fa fa-star-o"></i>
                                         <i class="fa fa-star-o"></i>
@@ -249,7 +253,41 @@
                         </div>
                         <% }); %>
                     </div>
-                       
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            // Add click event listener to all elements with class 'add-cart'
+                            const addToCartButtons = document.querySelectorAll('.add-cart');
+                    
+                            addToCartButtons.forEach(button => {
+                                button.addEventListener('click', function (event) {
+                                    event.preventDefault();
+                                    
+                                    // Get the product ID from the 'data-product-id' attribute
+                                    const productId = this.getAttribute('data-product-id');
+                    
+                                    // Perform the action to add the product to the cart
+                                    addToCart(productId);
+                                });
+                            });
+                    
+                            // Function to add product to the cart
+                            function addToCart(productId) {
+                                // You can use AJAX to send a request to your server to add the product to the cart
+                                // Example using fetch:
+                                fetch(`/add-to-cart/${productId}`, {
+                                    method: 'POST',
+                                })
+                                .then(response => {
+                                    // Handle the response, e.g., show a success message
+                                    console.log('Product added to cart successfully');
+                                })
+                                .catch(error => {
+                                    // Handle errors, e.g., show an error message
+                                    console.error('Error adding product to cart:', error);
+                                });
+                            }
+                        });
+                    </script> 
                        
                      
         

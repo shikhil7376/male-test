@@ -14,7 +14,8 @@ const CustomerSchema=new mongoose.Schema({
     required:true,
    },
    password: {
-    type: String,
+
+      type: String,
     required: true,
    },
    is_varified:{
@@ -32,8 +33,23 @@ const CustomerSchema=new mongoose.Schema({
    image:{
       data:Buffer,
       contentType:String
-   }
-})
+   },
+   cart:[{
+      product:{
+         type:mongoose.Schema.Types.ObjectId,
+         
+         ref:'product'
+      },
+      quantity:{
+         type:Number,
+         default:0
+      },
+      total:{
+         type:Number,
+         default:0
+      }
+   }]
+})  
 
 const Customer=mongoose.model('Customer',CustomerSchema)
 module.exports=Customer;

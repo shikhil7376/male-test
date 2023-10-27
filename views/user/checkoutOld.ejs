@@ -1,0 +1,256 @@
+
+<%- include("../layout/customerside/header") %>
+<%-include("../layout/customerside/navbar") %>
+
+
+        <div class="site-wrap">
+                <div class="bg-light py-3">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12 mb-0"><a href="/" style="color: black;">Home</a> <span class="mx-2 mb-0">/</span> <strong
+                                    class="text-black">Checkout</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="container">
+                    <div class="site-section">
+                       <% if (!cartProducts.length) { %>
+                               your cart is empty
+                                        <% } else { %>
+                                <div class="row">
+                                    <% cartProducts.forEach((cartItem)=>{ %>
+                                    <form class="col-md-12" action="" method="">
+                                        <div class="site-blocks-table">
+                                            <div class="container">
+                                               
+
+                                                    <div class="col-lg-12 p-4 border mb-3 d-flex">
+                                                        <div class="col-md-4">
+                                                            <a href="#">
+                                                                <img src="<%= cartItem.product.image[0] %>" alt="Image"
+                                                                    height="180px" width="180px" class="img-fluid">
+                                                            </a>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <span class="d-block text-dark h6 text-uppercase">
+                                                                <%= cartItem.product.product_name %>
+                                                            </span>
+                                                            <p>
+                                                                <%= cartItem.product.description %><br>
+                                                                    Category: <%= cartItem.product.category %> <br>
+                                                                  <strong class="text-black">₹<%= cartItem.product.price %>.00</strong> 
+                                                            </p>
+                                                            <p>
+                                                                Stock: <%= cartItem.product.stock_count %>
+                                                            </p>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <span class="text-black">
+                                                                Quantity: <%= cartItem.quantity %> <br>
+                                                                Total Price:  ₹ <span id="totalPrice_<%= cartItem._id %>"
+                                                                    class="text-black">
+                                                                    <%= cartItem.product.price * cartItem.quantity %>.00
+                                                                </span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                   <% }) %>
+                                            </div>
+                                        </div>
+                                </div>
+                                </form>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-5">
+                                        <div class="d-flex">
+                                            <p class="m-3">
+                                                <a href="/shop" class="btn btn-outline-dark btn-sm btn-block">
+                                                    Continue Shopping
+                                                </a>
+                                            </p>
+                                            <p class="m-3">
+                                                <a href="/cart" class="btn btn-dark btn-sm btn-block">
+                                                    Back To cart
+                                                </a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 address border p-3">
+                                        <div class="d-flex justify-content-between">
+                                            <h3>Shipping Address</h3>
+                                             <%    if (currentAddress) { %>
+                                                <a href="/change-address" class="btn btn-dark">Change</a>
+                                           <% } else { %>
+                                                <a href="/new-address" class="btn btn-outline-dark">
+                                                    Add New Address
+                                                </a>
+                                            <% } %>
+                                            
+                                        </div>
+                                            <% if (currentAddress) { %>
+                                            <p>
+                                                <%= currentAddress.state %>,
+                                                <%= currentAddress.city %>,
+                                                <%= currentAddress.area %>,
+                                                <%= currentAddress.building %>,
+                                                <%= currentAddress.pincode %>,
+                                            </p>
+                                            <% } else { %>
+                                                <p>No delivery address found.</p>
+                                                <% } %>
+                                    </div>
+                                </div>
+
+                    </div>
+                     <% } %>
+                    <form action="/checkout" method="post">
+                        <div class="row">
+                            <div class="col-md-6 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div>
+                                        <label class="text-black h4" for="payment">Payment Methods</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="method"
+                                            value="rzp" checked>
+                                        <label class="form-check-label" for="flexRadioDefault1">
+                                            Razorpay
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="method"
+                                            value="wlt">
+                                        <label class="form-check-label" for="flexRadioDefault2">
+                                            Wallet
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="method"
+                                            value="cod">
+                                        <label class="form-check-label" for="flexRadioDefault3">
+                                            Cash on Delivery
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                             <div class="col-md-6 pl-5">
+                    
+                                <div class="col-md-6 pl-5">
+                                    <div class="row justify-content-end">
+                                        <div class="col-md-7">
+                                            <div class="row">
+                                                <div class="col-md-12 text-right border-bottom mb-5">
+                                                    <h3 class="text-black h4 text-uppercase">Price Details</h3>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <span>Price(<%= cartProducts.length %> items)</span>
+                                                </div>
+                                                <div class="col-md-6 pl-0">
+                                                    <span class="text-black">
+                                                        ₹<span id="totalPrice" class="text-black">
+                                                            <%= grandTotal %>.00
+                                                        </span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <span>Delivery Charges</span>
+                                                </div>
+                                                <div class="col-md-6 pl-0">
+                                                    <span class="text-black">
+                                                        ₹<span class="text-black">
+                                                            5.00
+                                                        </span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <span>Discount</span>
+                                                </div>
+                                                <div class="col-md-6 pl-0">
+                                                    <span class="text-black">
+                                                       <% if (discount===0) { %>
+                                                        ₹<span class="text-black">
+                                                                00.00
+                                                            </span>
+                                                        <% }else{ %>
+                                                            ₹ <%= discount %>.00
+                                                        <% } %>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-5">
+                                                <div class="col-md-6">
+                                                    <span>Grand Total</span>
+                                                </div>
+                                                <div class="col-md-6 pl-0">
+                                                    <span class="h5 text-black">
+                                                        <span class="h5 text-black">
+                                                            ₹<span id="grandTotalPrice" class="text-black">
+                                                                <%= discount === 0 ? grandTotal + 5 : grandTotal - discount + 5 %>.00
+                                                            </span>
+                                                        </span>
+                                                        
+                                                </div>
+                                            </div>
+                                            <div class="row mb-5">
+                                                <div class="col-md-12">
+                                                         <% if (!currentAddress){ %>
+                                                        <p class="text-center">No Address found.</p>
+                                                        <a href="/profile" class="btn btn-outline-dark btn-lg btn-block">
+                                                            Go To Profile
+                                                        </a>
+                                                           <%  }else { %>
+                                                            <div>
+                                                                <input type="hidden" name="addressId"
+                                                                  >
+                                                                <input type="hidden" name="discount"
+                                                                   >
+                                                                <input type="hidden" name="currentCoupon"
+                                                                   >
+                                                                <button type="submit"
+                                                                    class="btn btn-dark btn-lg py-3 btn-block">
+                                                                    Place Order
+                                                                </button>
+                                                                <p class="text-danger">
+                                                                    <%= error %>
+                                                                  </p>
+                                                            </div>
+                                                            <% } %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                </div>
+                                </form>
+
+
+                    <div class="row col-lg-12">
+                        <form action="/apply-coupon" method="post">
+                            <div>
+                                <div>
+                                    <label class="text-black h4" for="coupon">Coupon</label>
+                                    <p>Enter your coupon code if you have one.</p>
+                                </div>
+                                <div class="d-flex">
+                                    <input type="text" class="form-control py-3" name="coupon" id="coupon"
+                                        placeholder="Paste Coupon Code">
+                                    <div class="col-md-4">
+                                        <button type="submit" class="btn btn-dark btn-sm">Apply Coupon</button>
+                                    </div>
+                                </div>
+                                <p class="text-danger"></p>
+                                <a href="/coupons" class="btn btn-outline-dark btn-sm mt-4">View Available Coupons</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+        </div>
+
+        <%- include("../layout/customerside/footer") %>

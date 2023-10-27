@@ -1,5 +1,5 @@
 const session=require("express-session")
-
+const Customer = require("../models/customerModel");
 //user authenticated or not
 const userAuth=(req,res,next)=>{
     try{
@@ -12,6 +12,27 @@ const userAuth=(req,res,next)=>{
         console.log(error.message);
     }
 }
+
+const logged=(req,res,next)=>{
+    try{
+        if(req.session.user){
+            next()
+        }else{
+            res.redirect("/")
+        }
+    }catch(error){
+        console.log(error.message);
+    }
+}
+
+const checkToBlock=async (req,res,next)=>{
+    const currentUser=await Customer.findById(req.session.user)
+    if(currentUser && currentUser.blocked===true){
+        req.session.user=null
+    }
+    next()
+}
+
 
 // admin authentication
 
@@ -28,6 +49,7 @@ const adminAuth=(req,res,next)=>{
 }
 
 
+
 module.exports={
-    userAuth,adminAuth
+    userAuth,adminAuth,logged,checkToBlock
 }

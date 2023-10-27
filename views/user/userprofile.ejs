@@ -1,0 +1,140 @@
+
+
+<%- include("../layout/customerside/header") %>
+   
+<%- include("../layout/customerside/navbar") %>
+
+
+        <div class="site-section">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h2 class="h3 mb-3 text-black">Your Profile</h2>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <form action="#" method="post" enctype="multipart/form-data">
+                            <div class="p-3 p-lg-5 border">
+                                <div class="form-group" id="preview-group">
+                                   
+                                        <img src="/customer/img/userprofile.png"
+                                        style="border-radius: 10px;" height="100px" width="100px"
+                                        id="preview-img" alt="profileImage">
+                                </div>
+                               
+                                <div class="form-group row">
+                                    <div class="col-md-6">
+                                        <label for="username" class="text-black">Username <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="username" name="username" value="<%= customer.name %>">
+                                            
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="phone" class="text-black">Phone <span
+                                                class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" id="phone" name="phone" value="<%= customer.mobile %>">
+                                            
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                        <label for="email" class="text-black">Email <span
+                                                class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="email" name="email" value="<%= customer.email %>">
+                                    </div>
+                                   
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                        <a href="/user/profile/changepassword" class="btn btn-dark ">Change Password </a>
+                                    </div>
+                                </div>
+                                <p class="text-danger">
+                                 
+                                </p>
+                                <div class="form-group row">
+                                    <div class="col-lg-12">
+                                        <button type="submit" class="btn btn-dark btn-lg btn-block">
+                                            Update Profile
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group row">
+                            <div class="col-lg-12">
+                                <div>
+                                    <a href="/orders" class="btn btn-outline-dark btn-lg btn-block">
+                                        Orders
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 d-flex mt-3">
+                                <div class="col-md-6">
+                                    <a href="/wallet" class="btn btn-outline-dark btn-lg btn-block">
+                                        Wallet
+                                    </a>
+                                </div>
+                                <div class="col-md-6">
+                                    <a href="/Coupons" class="btn btn-outline-dark btn-lg btn-block">
+                                        Coupons
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                         
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                        <label for="address" class="text-black">
+                                                  Address
+                                                   </label>
+                                                   <% for(let i=0;i<addresses.length;i++){ %>
+
+                                     
+                                            <div class="col-lg-12 p-4 border mb-3">
+                                                <span class="d-block text-dark h6 text-uppercase">
+                                              Address <%= i+1 %>
+                                                </span>
+                                                <p class="mb-0">
+                                              <%= addresses[i].city %>,<%= addresses[i].pincode %>,<%= addresses[i].area %>,<%= addresses[i].building%>,<%= addresses[i].state %>
+                                                </p>
+                                                <p class="mt-3">
+                                                    <a href="/user/profile/edit-address?addressId=<%= addresses[i]._id%>"
+                                                        class="btn btn-sm btn-outline-dark">Edit</a>
+                                                    <a href="/user/profile/delete-address?addressId=<%= addresses[i]._id %>"
+                                                        class="btn btn-sm btn-dark">Delete</a>
+                                                  
+                                                </p>
+                                            </div>
+                                               <% } %>
+                                       <% if (addresses.length < 3){ %>
+                                            <div class="form-group row">
+                                                <div class="col-lg-12">
+                                                    <a href="/user/profile/add-address"
+                                                        class="btn btn-outline-dark btn-lg btn-block">
+                                                        Add New Address
+                                                    </a>
+                                                </div>
+                                            </div>
+                                           <% }else{ %>
+                                                <div class="form-group row">
+                                                    <div class="col-lg-12 text-center" >
+                                                        <span class="text-danger">Address limit is 3</span>
+                                                    </div>
+                                                </div>
+                                            <% } %>
+                                
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+<%- include("../layout/customerside/footer") %>
