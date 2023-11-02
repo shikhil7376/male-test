@@ -1,16 +1,16 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Customer',
+    ref: "Customer",
     required: true,
   },
   products: [
     {
       product: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'product',
+        ref: "product",
         required: true,
       },
       quantity: {
@@ -18,13 +18,13 @@ const orderSchema = new mongoose.Schema({
         required: true,
       },
       isCancelled: {
-        type: Number,
+        type: Boolean,
         default: false,
       },
       returnRequested: {
         type: String,
-        enum: ['Nil', 'Pending', 'Approved', 'Rejected', 'Completed'],
-        default: 'Nil',
+        enum: ["Nil", "Pending", "Approved", "Rejected", "Completed"],
+        default: "Nil",
       },
     },
   ],
@@ -56,19 +56,28 @@ const orderSchema = new mongoose.Schema({
       softdeleted: Boolean,
       __v: Number,
     },
-    ref: 'Address',
+    ref: "Address",
   },
   status: {
     type: String,
-    enum: ['Processing', 'Shipped', 'Deleivered', 'Pending', 'Cancelled'],
-    default: 'Processing',
+    enum: ["Processing", "Shipped", "Deleivered", "Pending", "Cancelled"],
+    default: "Processing",
   },
   transactionId: {
     type: String,
   },
 });
 
-// add a pre-save hook to calculate the delivery date 
+// add a pre-save hook to calculate the delivery date
 
-const Order = mongoose.model('Order', orderSchema);
+orderSchema.pre("save", function (next) {
+  const orderDate = this.orderDate;
+  const deliveryDate = new Date(orderDate);
+  deliveryDate.setDate(deliveryDate.getDate() + 7);
+  this.deliveryDate = deliveryDate;
+
+  next();
+});
+
+const Order = mongoose.model("Order", orderSchema);
 module.exports = Order;

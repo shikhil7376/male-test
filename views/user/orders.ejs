@@ -22,36 +22,40 @@
           <% orders.forEach((order)=>{ %>
         <div class="d-flex flex-column flex-md-row border p-3 mb-3">
           <div class="col-md-3 col-12 d-flex justify-content-center mb-5">
-            <a href="/single/<%= order.orderedProducts[0]._id %>">
-              <img src="" alt="Image" height="180px" width="180px" class="img-fluid">
-            </a>
+            <% if (order.orderedProducts && order.orderedProducts[0] && order.orderedProducts[0].image && order.orderedProducts[0].image[0]) { %>
+              <a href="/single/<%= order.orderedProducts[0]._id %>">
+                <img class="product-image" src="data:<%= order.orderedProducts[0].image[0].contentType %>;base64,<%= order.orderedProducts[0].image[0].data.toString('base64') %>">
+              </a>
+            <% } else { %>
+              <p>Image not available</p>
+            <% } %>
           </div>
           <div class="col-md-6">
             <span class="d-block text-primary h6 text-uppercase">
               <%= order.orderedProducts[0].name %>
             </span>
             <p>
-              Price:  ₹<%= order.orderedProducts[0].price.toFixed(2) %>,<br>
-              Quantity: <%= order.products.quantity %><br>
+              Price: ₹<%= order.orderedProducts[0].price.toFixed(2) %>,<br>
+                Quantity: <%= order.products.quantity %><br>
               Payment Method:<%= order.paymentMethod %> <br>
-             
             </p>
             <div class="d-flex">
               <div>
                 <p class="text-black">
-                 order Confirmed, <%= order.orderDate.toLocaleDateString() %>
+                  Order Confirmed, <%= order.orderDate.toLocaleDateString() %>
                 </p>
                 <p class="text-black">
-                  Delivery, <%= order.deliveryDate %><br>
-                  <% if(!order.products.isCancelled){ %>
-                  <strong>Status: <%= order.status %> </strong>
-                   <% } %>
+                  Delivery, <%= order.deliveryDate ? order.deliveryDate.toLocaleDateString() : 'N/A' %><br>
+                  <% if (order.products && order.products.length > 0 && !order.products[0].isCancelled) { %>
+                    <strong>Status: <%= order.status %> </strong>
+                  <% } %> 
                 </p>
               </div>
             </div>
           </div>
+          
           <div class="col-md-3">
-           <% if(!order.products.iscancelled){ %>
+           <% if(order.products.iscancelled){ %>
             <p class="text-danger ml-3">
               Order Cancelled
             </p>

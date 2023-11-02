@@ -12,6 +12,10 @@ const productCategorySchema = new mongoose.Schema({
      image: {
         data: Buffer,
         contentType: String
+     },
+     removed :  {
+      type: Boolean,
+      default:false
      }
 });
 

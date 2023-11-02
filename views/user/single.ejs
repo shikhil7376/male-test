@@ -1,0 +1,101 @@
+<%- include("../layout/customerside/header") %>
+
+<%- include("../layout/customerside/navbar") %>
+<div class="bg-light py-3">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12 mb-0">
+          <a href="/">Home</a> <span class="mx-2 mb-0">/</span> 
+          <strong class="text-black"><%= productData.product_name %></strong>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="site-section">
+    <div class="container custom-container">
+      <div id="imageCarousel" class="carousel slide mb-5" data-ride="carousel">
+        <div class="carousel-inner text-center">
+          <% productData.image.forEach((image, index) => { %>
+            <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+              <img src="data:<%= image.contentType %>;base64,<%= image.data.toString('base64') %>" alt="Image <%= index + 1 %> " onclick="openModal('<%= image %>')" class="img-fluid"  style="max-width: 500px; max-height: 500px;">
+            </div>
+          <% }) %>
+  
+          <!-- Modal for image zoom -->
+          <div id="imageModal" class="modal">
+            <button id="closeButton" class="close-button">
+              <i class="bi bi-x-lg"></i>
+            </button>
+            <div class="image-zoom" id="zoomContainer">
+              <img src="" id="modalImage" alt="Image">
+            </div>
+          </div>
+        </div>
+        <style>
+            .carousel-control-prev,
+            .carousel-control-next {
+              width: 30px;
+              height: 30px;
+              font-size: 15px;
+            }
+          </style>
+        <!-- Carousel controls -->
+        <a class="bg-primary carousel-control-prev" href="#imageCarousel" role="button" data-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="sr-only">Previous</span>
+        </a>
+        <a class="bg-primary carousel-control-next" href="#imageCarousel" role="button" data-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="sr-only">Next</span>
+        </a>
+  
+        <!-- Product information -->
+        <div class="d-md-flex justify-content-between">
+          <div class="col-md-6 col-12 order-md-1">
+            <h2 class="text-black"><%= productData.product_name %></h2>
+            <p>
+                <%= productData.description %>
+            </p>
+            <p class="mb-4">Ex numquam veritatis debitis minima quo error quam eos dolorum quidem
+              perferendis. Quos repellat dignissimos minus, eveniet nam voluptatibus molestias
+              omnis
+              reiciendis perspiciatis illum hic magni iste, velit aperiam quis.
+            </p>
+          </div>
+  
+          <div class="col-md-3 order-md-2">
+            <div>
+              <div class="input-group">
+                <div>
+                  <p><strong class="text-primary h4">₹<%= productData.price.toFixed(2) %></strong></p>
+                  <% if(productData.stock_count){  %>
+                  <p><strong class="text-primary h6" id="stock">Stock: <%= productData.stock_count %></strong></p>
+                  <% } %>
+                  <% if(!productData.stock_count){ %>
+                  <p class="text-danger mt-5">Currently Unavailable</p>
+                  <% } else { %>
+                    <% if(currentUser && currentUser.cart && productData && productData._id && currentUser.cart.some((item) => item.product && item.product.toString() === productData._id.toString())) { %>
+                      <a href="/cart" class="buy-now btn btn-sm btn-outline-primary">Go To Cart</a>
+                    <% } else { %>
+                      <form action="/add-to-cart" method="post">
+                        <input type="hidden" name="Product" value="<%= productData._id %>">
+                        <input type="hidden" name="hiddenQuantity" value="1">
+                        <input type="hidden" name="ProductPrice" value="<%= productData.price %>">
+                        <button type="submit" class="buy-now btn btn-sm btn-primary">Add To Cart</button>
+                      </form>
+                    <% } %>
+                    
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+
+<%- include("../layout/customerside/footer") %>

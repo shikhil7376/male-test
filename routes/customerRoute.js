@@ -15,7 +15,7 @@ const{
     loadcart,
     addToCart,
     removeFromCart,
-    changeQuantity,
+    updateCartItem,
     loadprofile, 
     loadChangePassword, 
     changePassword,
@@ -24,9 +24,12 @@ const{
     deleteAddAddress,
     loadEditAddress,
     EditAddress,
+    getAddresses,
     loadCheckout,
     placeOrder,
-   getOrders
+   getOrders,
+   getSingleProduct,
+   changeDefaultAddress
 }=require('../controllers/customerController')
 
 
@@ -50,15 +53,17 @@ Customer_Route.get('/user/otpVerification',Auth.userAuth,loadOTPpage)
 Customer_Route.post("/user/otpVerification",checkOTPValid)
 
 // render the shop page
-Customer_Route.get('/user/shop',loadShop)
+Customer_Route.get('/shop/:page',loadShop)
+Customer_Route.get("/single/:id",Auth.checkToBlock,getSingleProduct)
 
 //display the products
 Customer_Route.get("user/displayProduct",)
 
 // CART AND DELETE DISPLAY   
-Customer_Route.get("/user/cart",Auth.logged,loadcart) 
-Customer_Route.post('/add-to-cart/:productId',)
-
+Customer_Route.get("/cart",Auth.logged,loadcart) 
+Customer_Route.post('/add-to-cart/',Auth.logged,Auth.checkToBlock,addToCart)
+Customer_Route.delete('/remove-from-cart/:cartItemId', Auth.logged, removeFromCart);
+Customer_Route.put('/update-cart-item/:cartItemId/:action', Auth.logged, updateCartItem);
 //user profile 
 Customer_Route.get('/user/profile',Auth.logged,loadprofile)
 Customer_Route.get('/user/profile/changepassword',Auth.logged,loadChangePassword)
@@ -67,16 +72,14 @@ Customer_Route.post('/user/profile/changepassword',Auth.logged,changePassword)
 // user Address
 Customer_Route.get('/user/profile/add-address',Auth.checkToBlock,Auth.logged,loadAddaddress)
 Customer_Route.post('/user/profile/add-address',Auth.checkToBlock,Auth.logged,addAddress)
+
 Customer_Route.get('/user/profile/delete-address',Auth.checkToBlock,Auth.logged,deleteAddAddress)
+
 Customer_Route.get('/user/profile/edit-address',Auth.checkToBlock,Auth.logged,loadEditAddress)
 Customer_Route.post('/user/profile/edit-address',Auth.checkToBlock,Auth.logged,EditAddress)
 
-// CART AND DELETE DISPLAY  
-Customer_Route.get("/user/cart",Auth.logged,loadcart) 
-Customer_Route.post('/add-to-cart/:productId', addToCart)
-Customer_Route.post('/remove-from-cart/:productId', removeFromCart);
-Customer_Route.post('/change-quantity/:productId/:quantityChange', changeQuantity);
-
+Customer_Route.get('/change-address',Auth.logged,Auth.checkToBlock,getAddresses)
+Customer_Route.post('/change-address',Auth.logged,Auth.checkToBlock, changeDefaultAddress)
 //checkout
 Customer_Route.get("/user/checkout",Auth.checkToBlock,Auth.logged,loadCheckout)
 Customer_Route.post("/user/checkout",Auth.checkToBlock,Auth.logged,placeOrder)
