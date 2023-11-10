@@ -1,6 +1,8 @@
 
 
 <%- include("../layout/customerside/header") %>
+<!-- Include jQuery from CDN -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
 <%- include("../layout/customerside/navbar") %>
   <div class="site-wrap">
@@ -37,7 +39,11 @@
             <p>
               Price: ₹<%= order.orderedProducts[0].price.toFixed(2) %>,<br>
                 Quantity: <%= order.products.quantity %><br>
-              Payment Method:<%= order.paymentMethod %> <br>
+                Payment Method:<%= order.paymentMethod %> <br>
+                Delivery Address:<%= order.deliveryAddress.state %>
+                <%= order.deliveryAddress.city %>,
+                <%= order.deliveryAddress.area %>,
+                <%= order.deliveryAddress.pincode %>
             </p>
             <div class="d-flex">
               <div>
@@ -46,9 +52,12 @@
                 </p>
                 <p class="text-black">
                   Delivery, <%= order.deliveryDate ? order.deliveryDate.toLocaleDateString() : 'N/A' %><br>
-                  <% if (order.products && order.products.length > 0 && !order.products[0].isCancelled) { %>
+                    <!-- <% if (order.products && order.products.length > 0 && !order.products[0].isCancelled) { %>
+             //       <strong>Status: <%= order.status %> </strong>
+               //   <% } %>  -->
+                  <% if(!order.products.isCancelled){ %>
                     <strong>Status: <%= order.status %> </strong>
-                  <% } %> 
+                    <% } %>
                 </p>
               </div>
             </div>
@@ -66,12 +75,14 @@
        <% }else { %>
         <% if (order.status==='Processing'){ %>
             <p class="ml-3">
-            <form action="/cancel-order" method="post" id="orders-form">
-              <input type="hidden" name="orderId" >
-              <input type="hidden" name="productId" >
-              <button type="button" class="btn btn-sm btn-outline-danger mb-3" >
+              <form action="/cancel-order" method="post" id="order-form">
+
+              <input type="hidden" name="orderId" value="<%= order._id %>">
+              <input type="hidden" name="productId" value="<%= order.orderedProducts[0]._id %>">
+              <button type="button" class="btn btn-sm btn-outline-danger mb-3" onclick="openCancelOrderModal()">
                 Cancel
               </button>
+              
             </form>
             </p>
            <% }else if(order.status==='Delivered'){ %>
@@ -146,17 +157,19 @@
     </div>
 
   <script>
-    function openCancelOrderModal(){
-      $('#cancelOrderModal').modal('show')
-    }
-    $('#confirmCancelOrder').on('click',function(){
-      const ordersForm = document.getElementById("order-form")
-      ordersForm.submit();
-      $('#cancelOrderModal').modal('hide')
-    })
+   function openCancelOrderModal() {
+  console.log('openCancelOrderModal executed');
+  $('#cancelOrderModal').modal('show');
+}
+
+$('#confirmCancelOrder').on('click', function () {
+  console.log('confirmCancelOrder clicked');
+  const ordersForm = document.getElementById("order-form");
+  ordersForm.submit();
+  $('#cancelOrderModal').modal('hide');
+});
+
   </script>
     
-
-
 <%- include("../layout/customerside/footer") %>
   

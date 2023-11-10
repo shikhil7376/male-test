@@ -29,7 +29,11 @@ const{
     placeOrder,
    getOrders,
    getSingleProduct,
-   changeDefaultAddress
+   changeDefaultAddress,
+   loadOrderSuccess,
+   getWallet ,
+   saveRzpOrder,
+   cancelOrder
 }=require('../controllers/customerController')
 
 
@@ -83,6 +87,13 @@ Customer_Route.post('/change-address',Auth.logged,Auth.checkToBlock, changeDefau
 //checkout
 Customer_Route.get("/user/checkout",Auth.checkToBlock,Auth.logged,loadCheckout)
 Customer_Route.post("/user/checkout",Auth.checkToBlock,Auth.logged,placeOrder)
-
+Customer_Route.post("/save-rzporder",Auth.checkToBlock,Auth.logged, saveRzpOrder)
+Customer_Route.get("/order-successfull",Auth.logged,Auth.checkToBlock,loadOrderSuccess )
+                                                                
 Customer_Route.get("/orders",Auth.checkToBlock,Auth.logged,getOrders)
+Customer_Route.get("/wallet",Auth.checkToBlock,Auth.logged,getWallet)
+
+Customer_Route.post("/cancel-order",Auth.checkToBlock,Auth.logged,cancelOrder)
+
+
 module.exports=Customer_Route

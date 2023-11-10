@@ -9,8 +9,11 @@ const UserOTPVerification = require("../models/userOTPVerification");
 const product = require("../models/productModel");
 const productCategory = require("../models/productCategory");
 const mongoose = require("mongoose");
+const Razorpay = require("razorpay");
+const razorpayConfig = require("./utils/razorpayConfig");
 const sharp = require("sharp");
 const { log } = require("console");
+const { ok } = require("assert");
 
 // Password hashing function
 async function hashPassword(password) {
@@ -557,7 +560,7 @@ const EditAddress = async (req, res) => {
         },
       }
     );
-    console.log(req.body);
+    // console.log(req.body);
     res.redirect("/user/profile");
   } catch (error) {
     console.log(error.message);
@@ -633,45 +636,127 @@ const loadCheckout = async (req, res) => {
   }
 };
 
-const placeOrder = async (req,res)=>{
-  try{
-   const currentUser = await Customer.findById(req.session.user)
-   await currentUser.populate("cart.product")
-   const address = await Address.findOne({
-    User:req.session.user,
-    default:true
-   })
-   const grandTotal = currentUser.cart.reduce((total,element)=>{
-    return total + element.quantity * element.product.price
-   },0)
-   const orderedProducts = currentUser.cart.map((item)=>{
-    return {
-      product : item.product._id,
-      quantity : item.quantity
+const placeOrder = async (req, res) => {
+  try {
+    const currentUser = await Customer.findById(req.session.user);
+    await currentUser.populate("cart.product");
+    const address = await Address.findOne({
+      User: req.session.user,
+      default: true,
+    });
+
+    const grandTotal = currentUser.cart.reduce((total, element) => {
+      return total + element.quantity * element.product.price;
+    }, 0);
+
+    const orderedProducts = currentUser.cart.map((item) => {
+      return {
+        product: item.product._id,
+        quantity: item.quantity,
+      };
+    });
+
+    let newOrder = new Order({
+      user: req.session.user,
+      products: orderedProducts,
+      totalAmount: grandTotal - req.body.discount + 5,
+      paymentMethod: req.body.method,
+      deliveryAddress: address,
+    });
+
+    if (req.body.method === "cod") {
+      await newOrder.save();
+      res.redirect("/order-successfull");
+    } else if (req.body.method === "rzp") {
+      const razorpay = new Razorpay({
+        key_id: razorpayConfig.RAZORPAY_ID_KEY,
+        key_secret: razorpayConfig.RAZORPAY_SECRET_KEY,
+      });
+
+      const amountR = grandTotal - req.body.discount + 5;
+      const options = {
+        amount: amountR * 100,
+        currency: "INR",
+        receipt: `${Math.floor(Math.random() * 10000)
+          .toString()
+          .padStart(4, "0")}${Date.now()}`,
+      };
+
+      // create a razorpay order
+      const razorpayOrder = await razorpay.orders.create(options);
+
+      // save the order detail to your database
+      newOrder.razorpayOrderId = razorpayOrder.id;
+
+      // render the razorpay checkout page
+      res.render("user/rzp", {
+        order: razorpayOrder,
+        key_id: process.env.RAZORPAY_ID_KEY,
+        user: currentUser,
+      });
     }
-   })
-     let newOrder = await new Order({
-        user: req.session.user,
-        products : orderedProducts,
-        totalAmount : grandTotal - req.body.discount + 5,
-        paymentMethod : req.body.method,
-        deliveryAddress : address
-     })
-     if(req.body.method ==="cod"){
-      await newOrder.save()
-      res.redirect('/orders')
-     }
-  }catch(error){
+  } catch (error) {
     console.log(error.message);
   }
-}
+};
+
+const saveRzpOrder = async (req, res) => {
+  try {
+    const { transactionId, orderId, signature } = req.body;
+    const amount = parseInt(req.body.amount / 100);
+
+    const currentUser = await Customer.findById(req.session.user);
+
+    await currentUser.populate("cart.product");
+    console.log(currentUser.cart[0]);
+    const deliveryAddress = await Address.findOne({
+      User: req.session.user,
+      default: true,
+    });
+    if (transactionId && orderId && signature) {
+      // stock update
+
+      currentUser.cart.forEach(async (item) => {
+        console.log("itm", item);
+        // const foundProduct = await product.findById(item.product._id);
+        // console.log(foundProduct);
+        // foundProduct.stock_count -= item.quantity;
+        // await foundProduct.save();
+      });
+      const grandTotal = currentUser.cart.reduce((total, element) => {
+        return total + element.quantity * element.product.price;
+      }, 0);
+      const orderedProducts = currentUser.cart.map((item) => {
+        return {
+          product: item.product._id,
+          quantity: item.quantity,
+        };
+      });
+      console.log("here.........");
+      let newOrder = new Order({
+        user: req.session.user,
+        products: orderedProducts,
+        totalAmount: amount,
+        paymentMethod: "rzp",
+        deliveryAddress,
+      });
+
+      await newOrder.save();
+      console.log(newOrder);
+    }
+    // res.redirect('/order-successfull')
+    res.json({ success: true });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
 
 const getOrders = async (req, res) => {
   try {
     await updateOrderStatus();
-  console.log("here");
+
     const currentUser = await Customer.findById(req.session.user);
-    
+
     const orders = await Order.aggregate([
       { $match: { user: new mongoose.Types.ObjectId(req.session.user) } },
       { $unwind: "$products" },
@@ -685,9 +770,7 @@ const getOrders = async (req, res) => {
       },
       { $sort: { orderDate: -1 } },
     ]);
-   
-    console.log(orders);
-   
+
     res.render("user/orders", {
       currentUser,
       orders,
@@ -727,6 +810,101 @@ const updateOrderStatus = async () => {
   }
 };
 
+const loadOrderSuccess = async (req, res) => {
+  try {
+    res.render("user/orderSuccesful");
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const getWallet = async (req, res) => {
+  try {
+    const currentUser = await Customer.findById(req.session.user).sort({
+      "wallet.transactions.timestamp": -1,
+    });
+    res.render("user/wallet", {
+      currentUser,
+    });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const cancelOrder = async(req,res)=>{
+  try{
+    console.log("hai");
+    const foundOrder = await Order.findById(req.body.orderId).populate("products.product")
+    const foundProduct = foundOrder.products.find((order)=>order.product._id.toString()=== req.body.productId)
+    console.log(foundProduct);
+    if(foundOrder.paymentMethod!=='cod'){
+      const currentUser = await Customer.findById(req.session.user)
+      console.log(currentUser);
+      const refundAmount = (foundProduct.product.price * foundProduct.quantity) + 5
+       console.log(refundAmount);
+      currentUser.wallet.balance += refundAmount
+
+      foundOrder.totalAmount -=(foundProduct.product.price * foundProduct.quantity ) 
+        if(foundOrder.totalAmount ===5){
+          foundOrder.totalAmount = 0
+        }
+
+        const transactionData = {
+          amount: refundAmount,
+          description:'Order cancelled',
+          type:'Credit'
+        }
+        currentUser.wallet.transactions.push(transactionData)
+        foundProduct.isCancelled = true
+
+        // need to stock update 
+        await currentUser.save()
+      // save increased stock 
+    }else{
+      let amount = (foundProduct.product.price * foundProduct.quantity)
+       console.log(amount);
+       console.log(foundOrder.totalAmount);
+      foundOrder.totalAmount -= amount
+    
+      
+      if(foundOrder.totalAmount ===5){
+        foundOrder.totalAmount =0
+      }
+       
+      foundProduct.isCancelled = true;
+      const foundCurrentOrder = foundOrder.products.find((order) => order.product._id.toString() === req.body.productId);
+      
+      const foundCurrentProduct = await product.findById(req.body.productId);
+      // foundCurrentProduct.stock += foundCurrentOrder.quantity;
+      // stock update 
+      await foundCurrentProduct.save()
+      
+    }
+
+    function areAllProductsCancelled(order){
+      for(const product of order.products){
+        if(!product.isCancelled){
+          return false
+        }
+      }
+      return true 
+    }
+
+   if(areAllProductsCancelled(foundOrder)){
+    foundOrder.status ="Cancelled"
+   }
+   
+   await foundOrder.save()
+   res.redirect("/orders")
+
+  }catch(error){
+    console.log(error.message);
+  }
+}
+
+
+
+
 module.exports = {
   loadHome,
   loadLogin,
@@ -755,4 +933,8 @@ module.exports = {
   getSingleProduct,
   getAddresses,
   changeDefaultAddress,
+  loadOrderSuccess,
+  getWallet,
+  saveRzpOrder,
+  cancelOrder
 };

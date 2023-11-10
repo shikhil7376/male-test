@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include("../layout/customerside/header") %>
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pay with Razorpay</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script
+      src="https://checkout.razorpay.com/v1/checkout.js"
+      data-key="<%= key_id %>"
+    ></script>
+  </head>
+
+  <body>
+    <div class="container mt-5">
+      <h5 id="heading" style="display: block">Payment processing...</h5>
+      <p id="error" class="text-danger"></p>
+      <a
+        id="link"
+        href="/checkout"
+        class="btn btn-primary"
+        style="display: none"
+        >Go back to checkout</a
+      >
+    </div>
+
+    <script>
+      const headingElement = document.getElementById("heading");
+      const errorElement = document.getElementById("error");
+      const linkElement = document.getElementById("link");
+
+      // Initialize Razorpay checkout
+      var options = {
+        key: "<%= key_id %>",
+        amount: "<%= order.amount %>", // Amount in paise
+        currency: "INR",
+        name: "Mens_Fashion",
+        description: "Order Payment",
+        order_id: "<%= order.id %>", // Order ID from the
+        modal: {
+          // Define an ondismiss callback function
+          ondismiss: function () {
+            // This function is called when the modal is dismissed
+            // Handle the user closing the payment popup here
+            headingElement.style.display = "none";
+            errorElement.textContent = "Payment was canceled or unsuccessful";
+            linkElement.style.display = "block";
+          },
+        },
+        handler: function (response) {
+          if (response.razorpay_payment_id) {
+            const transactionId = response.razorpay_payment_id;
+            const orderId = response.razorpay_order_id;
+            const signature = response.razorpay_signature;
+            // Handle successful payment
+            // Send an AJAX POST request to save the order
+          //   fetch("/save-rzporder", {
+          //     method: "POST",
+          //     headers: {
+          //       "Content-Type": "application/json",
+          //     },
+          //     body: JSON.stringify({
+          //       transactionId,
+          //       orderId,
+          //       signature,
+          //       amount: "<%= order.amount %>",
+          //     }),
+          //   })
+          //     .then((response) => response.json())
+          //     .then((data) => {
+          //       if (data.success) {
+          //         window.location.href = "/orders";
+          //       } else {
+          //         // Handle other cases if needed
+          //         headingElement.style.display = "none";
+          //         errorElement.textContent =
+          //           "Unexpected response from the server";
+          //         linkElement.style.display = "block";
+          //       }
+          //     })
+          //     .catch((error) => {
+          //       // Handle errors or unsuccessful order saving
+          //       headingElement.style.display = "none";
+          //       errorElement.textContent = error.message;
+          //       linkElement.style.display = "block";
+          //     });
+
+
+          $.ajax({
+            type: 'POST',
+            url: '/save-rzporder',
+            contentType: 'application/json',
+            data: JSON.stringify({
+              transactionId,
+              orderId,
+              amount: "<%= order.amount %>",
+              signature
+            }),
+            success: function(data) {
+              window.location.href = "/orders";
+            },
+            error: function(xhr, textStatus, errorThrown) {
+              // Handle errors or unsuccessful order saving
+              headingElement.style.display = 'none';
+              errorElement.textContent = "Order save failed";
+              linkElement.style.display = 'block';
+            }
+          });
+
+
+          }
+        },
+        prefill: {
+          name: "<%= user.name %>",
+          email: "<%= user.email %>",
+          contact: "<%= user.mobile %>",
+        },
+        theme: {
+          color: "#4B49AC",
+        },
+      };
+
+      var rzp = new Razorpay(options);
+      rzp.open();
+    </script>
+  </body>
+</html>

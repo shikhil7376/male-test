@@ -60,14 +60,18 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["Processing", "Shipped", "Deleivered", "Pending", "Cancelled"],
+    enum: ["Processing", "Shipped", "Delivered", "Pending", "Cancelled"],
     default: "Processing",
+  },
+  razorpayOrderId :{
+    type: String
   },
   transactionId: {
     type: String,
   },
 });
 
+  
 // add a pre-save hook to calculate the delivery date
 
 orderSchema.pre("save", function (next) {
