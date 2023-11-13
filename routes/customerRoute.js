@@ -33,7 +33,8 @@ const{
    loadOrderSuccess,
    getWallet ,
    saveRzpOrder,
-   cancelOrder
+   cancelOrder,
+   getReturnProductForm 
 }=require('../controllers/customerController')
 
 
@@ -94,6 +95,8 @@ Customer_Route.get("/orders",Auth.checkToBlock,Auth.logged,getOrders)
 Customer_Route.get("/wallet",Auth.checkToBlock,Auth.logged,getWallet)
 
 Customer_Route.post("/cancel-order",Auth.checkToBlock,Auth.logged,cancelOrder)
+
+Customer_Route.get("/return-product",Auth.checkToBlock,Auth.logged,getReturnProductForm )
 
 
 module.exports=Customer_Route

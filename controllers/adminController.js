@@ -3,7 +3,7 @@ const bcrypt=require('bcrypt')
 const Customer=require("../models/customerModel")
 const productCategory = require('../models/productCategory')
 const product = require('../models/productModel')
-
+const Order = require('../models/orderModel')
 
 
 const loadAdminLogin=async(req,res)=>{
@@ -329,7 +329,52 @@ const editProduct=async(req,res)=>{
     }
 }
 
+const loadOrder = async(req,res) =>{
+    const perPage = 8; // Number of order per page 
+    const page = req.query.page || 1 // Get the current page from the query parameters (default to page !) 
+    const {customer , status} = req.query
+    try{
+           let ordersQuery = Order.find().populate([{path:'products.product'},{path:'user'}])
+           if(customer){
+            ordersQuery = ordersQuery.where('user.name').regex(new RegExp(customer, 'i'))
+           }
+           if(status){
+              ordersQuery = ordersQuery.where('status').equals(status)
+           }
+
+           const orders = await ordersQuery
+            .sort({orderDate:-1}) // sort orderDate in descending order 
+            .skip((page - 1)* perPage) // skip orders on previous page
+            .limit(perPage) // Limit the number of orders per page 
+
+            const totalOrders = await Order.countDocuments()
+            const totalPages = Math.ceil(totalOrders/ perPage)
+
+            res.render("admin/order",{
+                 activePage : "orders",
+                 orders,
+                 totalPages,
+                 currentPage: page
+            })
+    }catch(error){
+        console.log(error.message);
+    }
+}
+
+const updateActionOrder = async(req,res) =>{
+    const order = await Order.findById(req.query.orderId)
+    const userData = await Customer.findById(order.user)
+         try{
+            if(req.query.action === "Delivered"){
+                await Order.updateOne({_id:req.query.orderId},{status : req.query.action})
+                
+        res.redirect("/admin/order")
+            }
+         }catch(error){
+            console.log(error.message);
+         }
+}
 
 module.exports={
-    loadAdminLogin,loginValidation,adminValid,loadDash,displayCustomers,loadCategory,loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate,productDeactivate,UnblockTheUser,blockTheUser,loadProductEditPage,editProduct,adminLogout
+    loadAdminLogin,loginValidation,adminValid,loadDash,displayCustomers,loadCategory,loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate,productDeactivate,UnblockTheUser,blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder
 }

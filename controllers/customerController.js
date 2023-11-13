@@ -836,6 +836,7 @@ const cancelOrder = async(req,res)=>{
     console.log("hai");
     const foundOrder = await Order.findById(req.body.orderId).populate("products.product")
     const foundProduct = foundOrder.products.find((order)=>order.product._id.toString()=== req.body.productId)
+    console.log(foundOrder);
     console.log(foundProduct);
     if(foundOrder.paymentMethod!=='cod'){
       const currentUser = await Customer.findById(req.session.user)
@@ -862,24 +863,28 @@ const cancelOrder = async(req,res)=>{
       // save increased stock 
     }else{
       let amount = (foundProduct.product.price * foundProduct.quantity)
-       console.log(amount);
-       console.log(foundOrder.totalAmount);
       foundOrder.totalAmount -= amount
     
       
       if(foundOrder.totalAmount ===5){
         foundOrder.totalAmount =0
       }
+      
        
       foundProduct.isCancelled = true;
       const foundCurrentOrder = foundOrder.products.find((order) => order.product._id.toString() === req.body.productId);
+
       
       const foundCurrentProduct = await product.findById(req.body.productId);
-      // foundCurrentProduct.stock += foundCurrentOrder.quantity;
+      console.log("gggg",foundCurrentProduct);
+      
+      foundCurrentProduct.stock += foundCurrentOrder.quantity;
       // stock update 
       await foundCurrentProduct.save()
+      console.log("hhhhhssss");
       
     }
+    
 
     function areAllProductsCancelled(order){
       for(const product of order.products){
@@ -902,7 +907,25 @@ const cancelOrder = async(req,res)=>{
   }
 }
 
+const getReturnProductForm = async(req,res)=>{
+  try{
+    console.log("here");
+        const Product = await product.findById(req.query.product)
+         const currentUser = await Customer.findById(req.session.user)
+        
+        const category = await  productCategory.findById(req.query.category)
 
+        const defaultAddress = await Address.findOne({User:req.session.user,default:true})
+        res.render("user/returnForm",{
+          currentAddress:defaultAddress,
+          currentUser,
+          category,
+          Product
+        })
+  }catch(error){
+    console.log(error.message);
+}
+}
 
 
 module.exports = {
@@ -936,5 +959,6 @@ module.exports = {
   loadOrderSuccess,
   getWallet,
   saveRzpOrder,
-  cancelOrder
+  cancelOrder,
+  getReturnProductForm 
 };

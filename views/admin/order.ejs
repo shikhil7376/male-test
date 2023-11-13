@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Skydash Admin</title>
+  <!-- plugins:css -->
+  <link rel="stylesheet" href="/admin/vendors/feather/feather.css">
+  <link rel="stylesheet" href="/admin/vendors/ti-icons/css/themify-icons.css">
+  <link rel="stylesheet" href="/admin/vendors/css/vendor.bundle.base.css">
+  <!-- endinject -->
+  <!-- Plugin css for this page -->
+  <!-- End plugin css for this page -->
+  <!-- inject:css -->
+  <link rel="stylesheet" href="/admin/css/vertical-layout-light/style.css">
+  <!-- endinject -->
+  <link rel="shortcut icon" href="/admin/images/favicon.png" />
+</head>
+
+<body>
+  <div class="container-scroller">
+    <!-- partial:../../partials/_navbar.html -->
+    <%- include("../layout/adminside/navbar") %>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:../../partials/_settings-panel.html -->
+      <%- include("../layout/adminside/navbar") %>
+      <!-- partial -->
+      <!-- partial:../../partials/_sidebar.html -->
+      <%- include("../layout/adminside/sidebar") %>
+      <!-- partial -->
+           
+
+        <!-- Layout container -->
+        <div class="layout-page">
+
+          <!-- Content wrapper -->
+          <div class="content-wrapper">
+            <!-- Content -->
+
+            <div class="container-xxl flex-grow-1 container-p-y">
+
+              <form action="/admin/order" id="search">
+                <div class="row d-flex">
+                  <div class="col-10">
+                  <!-- Status filter dropdown -->
+                  <select name="status" class="form-select">
+                   <option value="">All Status</option>
+                   <option value="Processing">Processing</option>
+                   <option value="Shipped">Shipped</option>
+                   <option value="Delivered">Delivered</option>
+                   <option value="Cancelled">Cancelled</option>
+                  </select>
+                  </div>
+                  <button type="submit" class="btn btn-primary col-2">Apply Filters</button>
+                </div>           
+            </form>
+
+              <!-- Basic Bootstrap Table -->
+              <div class="card" style="margin-top: 20px;">
+                <a href="/admin/return-requests" style="margin-left: 25px; margin-top: 20px;">View Retuen Request</a>
+                <h5 class="card-header" style="display: inline;">Orders</h5>
+
+                <div class="table-responsive text-nowrap">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Customer</th>
+                        <th>Products <br> name & quantity</th>
+                        <th>Address</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Payment Option</th>
+                      </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                      <%
+                         if (orders.length > 0) {
+                            for (let i = 0; i < orders.length; i++) {
+                              %>
+                               <tr>
+                                 <td><%= orders[i].user.name %><br><%= orders[i].user.email %></td>
+                                 <td>
+                                    <% for ( let j = 0; j < orders[i].products.length; j++ ) { %>
+                                      <%= orders[i].products[j].product.product_name %> : <%= orders[i].products[j].quantity %><br>
+                                    <% } %>
+                                </td>
+                                 <td><%= orders[i].deliveryAddress.pincode %>,<br>
+                                    <%= orders[i].deliveryAddress.state %>,
+                                    <%= orders[i].deliveryAddress.city %>,<br>
+                                    <%= orders[i].deliveryAddress.building %>,<br>
+                                    <%= orders[i].deliveryAddress.area %>,
+                                   
+                                 </td>
+                                 <td>₹<%= orders[i].totalAmount %></td>
+                                 <td>
+                                    <% if (orders[i].status === "Cancelled"){ %>
+                                        <h6 class="text-danger">Canceled</h6>
+                                    <% } else if (orders[i].status === "Delivered"){ %>
+                                        <h6 class="text-success">Delivered</h6>
+                                    <% } else { %>
+                                        <div class="btn-group">
+                                            <button type="button"
+                                                class="btn btn-danger dropdown-toggle dropdown-toggle-split"
+                                                data-toggle="dropdown"
+                                                aria-haspopup="true"
+                                                aria-expanded="false">
+                                                <%= orders[i].status %> 
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item"
+                                                    href="/admin/order/action-update?action=Processing&orderId=<%= orders[i]._id %>">Processing</a>
+                                                <a class="dropdown-item"
+                                                    href="/admin/order/action-update?action=Shipped&orderId=<%= orders[i]._id %>">Shipped</a>
+                                                <a class="dropdown-item"
+                                                    href="/admin/order/action-update?action=Delivered&orderId=<%= orders[i]._id %>">Delivered</a>
+                                                <a class="dropdown-item"
+                                                    href="/admin/order-cancel?action=Cancelled&orderId=<%= orders[i]._id %>">Cancel order</a>
+                                            </div>
+                                        </div>
+                                    <%}%>
+                                 </td>
+                                 <td><%= orders[i].paymentMethod %></td>
+                               </tr>
+                              <%          
+                            }
+                         } else {
+                           %>
+                            <tr>
+                              <td colspan="6">Products Not Found</td>
+                            </tr>
+                           <%
+                         }
+                      %>
+                      <!-- Add more rows as needed -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <!--/ Basic Bootstrap Table -->
+
+              <!-- Pagination controls -->
+              <div class="pagination" style="margin-top: 15px;">
+
+                  <% for (let i = 1; i <= totalPages; i++) { %>
+                    <a href="?page=<%= i %>" class="page-link"><%= i %></a>
+                  <% } %>
+
+              </div>
+
+
+
+            </div>
+            <!-- / Content -->
+
+            <div class="content-backdrop fade"></div>
+          </div>
+          <!-- Content wrapper -->
+        </div>
+        <!-- / Layout page -->
+      </div>
+
+      <!-- Overlay -->
+      <div class="layout-overlay layout-menu-toggle"></div>
+    </div>
+    <!-- / Layout wrapper -->
+
+
+        <!-- content-wrapper ends -->
+        <!-- partial:../../partials/_footer.html -->
+        <footer class="footer">
+            <div class="d-sm-flex justify-content-center justify-content-sm-between">
+              <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2021.  Premium <a href="https://www.bootstrapdash.com/" target="_blank">Bootstrap admin template</a> from BootstrapDash. All rights reserved.</span>
+              <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Hand-crafted & made with <i class="ti-heart text-danger ml-1"></i></span>
+            </div>
+          </footer>
+          <!-- partial -->
+        </div>
+        <!-- main-panel ends -->
+      </div>
+      <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller -->
+    <!-- plugins:js -->
+    <script src="/admin/vendors/js/vendor.bundle.base.js"></script>
+    <!-- endinject -->
+    <!-- Plugin js for this page -->
+    <!-- End plugin js for this page -->
+    <!-- inject:js -->
+    <script src="/admin/js/off-canvas.js"></script>
+    <script src="/admin/js/hoverable-collapse.js"></script>
+    <script src="/admin/js/template.js"></script>
+    <script src="/admin/js/settings.js"></script>
+    <script src="/admin/js/todolist.js"></script>
+    <!-- endinject -->
+    <!-- Custom js for this page-->
+    <!-- End custom js for this page-->
+  </body>
+  
+  </html>

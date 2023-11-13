@@ -34,7 +34,7 @@
           </div>
           <div class="col-md-6">
             <span class="d-block text-primary h6 text-uppercase">
-              <%= order.orderedProducts[0].name %>
+              <%= order.orderedProducts[0]. product_name %>
             </span>
             <p>
               Price: ₹<%= order.orderedProducts[0].price.toFixed(2) %>,<br>
@@ -52,11 +52,10 @@
                 </p>
                 <p class="text-black">
                   Delivery, <%= order.deliveryDate ? order.deliveryDate.toLocaleDateString() : 'N/A' %><br>
-                    <!-- <% if (order.products && order.products.length > 0 && !order.products[0].isCancelled) { %>
-             //       <strong>Status: <%= order.status %> </strong>
-               //   <% } %>  -->
-                  <% if(!order.products.isCancelled){ %>
+                  <% if(!order.products .isCancelled){ %>
                     <strong>Status: <%= order.status %> </strong>
+                    <% } else {%>
+                      <strong>Status: Order Cancelled </strong>
                     <% } %>
                 </p>
               </div>
@@ -108,6 +107,7 @@
             <% }else if(currentDate<=sevenDaysAfterDelivery){ %>
             <p class="ml-3">
             <a>
+              <a href="/return-product?order=<%= order._id %>&product=<%= order.orderedProducts[0]._id %>&category=<%= order.orderedProducts[0].category %>&quantity=<%= order.products.quantity %>" class="btn btn-sm btn-outline-primary mb-3">
                 Return
               </a>
             </p>
