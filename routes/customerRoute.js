@@ -34,7 +34,9 @@ const{
    getWallet ,
    saveRzpOrder,
    cancelOrder,
-   getReturnProductForm 
+   getReturnProductForm ,
+   requestReturnProduct,
+
 }=require('../controllers/customerController')
 
 
@@ -69,6 +71,8 @@ Customer_Route.get("/cart",Auth.logged,loadcart)
 Customer_Route.post('/add-to-cart/',Auth.logged,Auth.checkToBlock,addToCart)
 Customer_Route.delete('/remove-from-cart/:cartItemId', Auth.logged, removeFromCart);
 Customer_Route.put('/update-cart-item/:cartItemId/:action', Auth.logged, updateCartItem);
+
+
 //user profile 
 Customer_Route.get('/user/profile',Auth.logged,loadprofile)
 Customer_Route.get('/user/profile/changepassword',Auth.logged,loadChangePassword)
@@ -97,6 +101,6 @@ Customer_Route.get("/wallet",Auth.checkToBlock,Auth.logged,getWallet)
 Customer_Route.post("/cancel-order",Auth.checkToBlock,Auth.logged,cancelOrder)
 
 Customer_Route.get("/return-product",Auth.checkToBlock,Auth.logged,getReturnProductForm )
-
+Customer_Route.post("/return-product",Auth.checkToBlock,Auth.logged,requestReturnProduct)
 
 module.exports=Customer_Route

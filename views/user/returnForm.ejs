@@ -1,5 +1,5 @@
 <%- include("../layout/customerside/header") %>
-
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <%- include("../layout/customerside/navbar") %>
   <div class="site-wrap">
     <div class="bg-light py-3">
@@ -24,7 +24,7 @@
 
             <form action="/return-product" method="post" id="return-form">
               <div class="p-3 p-lg-5 border">
-                
+                <input type="hidden" name="order" value="<%= order %>">
                 <div class="form-group row">
                   <div class="col-md-6">
                     <label for="c_fname" class="text-black">Username<span class="text-danger">*</span></label>
@@ -38,15 +38,15 @@
                 <div class="form-group row">
                   <div class="col-md-4">
                     <label for="c_fname" class="text-black">Product<span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="c_fname" name="product"   readonly>
+                    <input type="text" class="form-control" id="c_fname" name="product" value="<%= Product.product_name %>"  readonly>
                   </div>
                   <div class="col-md-4">
                     <label for="c_lname" class="text-black">Category<span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="c_lname" name="category"  readonly>
+                    <input type="text" class="form-control" id="c_lname" name="category" value="<%= category %>" readonly>
                   </div>
                   <div class="col-md-4">
                     <label for="c_lname" class="text-black">Quantity<span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="c_lname" name="quantity" readonly>
+                    <input type="text" class="form-control" id="c_lname" name="quantity" value="<%= quantity %>" readonly>
                   </div>
                 </div>
                 <div class="form-group row">
@@ -164,6 +164,7 @@
 
       // Event handler for the "Place Order" button click
       $('#confirmReturnProduct').on('click', function() {
+        console.log('Return Product button clicked');
         const returnForm = document.getElementById("return-form");
         returnForm.submit();
         // After placing the order, you can close the modal

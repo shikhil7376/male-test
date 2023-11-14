@@ -4,7 +4,7 @@ const Customer=require("../models/customerModel")
 const productCategory = require('../models/productCategory')
 const product = require('../models/productModel')
 const Order = require('../models/orderModel')
-
+const Return = require("../models/returnProductModel")
 
 const loadAdminLogin=async(req,res)=>{
     try{
@@ -365,16 +365,56 @@ const updateActionOrder = async(req,res) =>{
     const order = await Order.findById(req.query.orderId)
     const userData = await Customer.findById(order.user)
          try{
-            if(req.query.action === "Delivered"){
-                await Order.updateOne({_id:req.query.orderId},{status : req.query.action})
+          
+     await Order.updateOne({_id:req.query.orderId},{status : req.query.action})
                 
         res.redirect("/admin/order")
-            }
+            
          }catch(error){
             console.log(error.message);
          }
 }
 
+const updateOrderCancel = async(req,res)=>{
+    try{
+         const foundOrder = await Order.findById(req.query.orderId) 
+         for(let i=0;i< foundOrder.products.length ; i++){
+            foundOrder.products[i].isCancelled = true
+         }
+         foundOrder.status = req.query.action 
+         await foundOrder.save()
+         res.redirect("/admin/order")
+    }catch(error){
+        console.log(error.message);
+    }
+}
+
+ const getreturnRequests = async(req,res)=>{
+    try{
+        const ITEM_PER_PAGE = 5; // no of item to display per page 
+        const page = parseInt(req.query.page) || 1
+        const totalRequests = await Return.countDocuments()
+        const returnRequests = await Return.find()
+        .populate([
+           {path:'user'},
+           {path:'order'},
+           {path:'product'},
+           {path:'address'} 
+        ])
+        .skip((page - 1)* ITEM_PER_PAGE) // calculate the number of items to skip
+         .limit(ITEM_PER_PAGE)
+         const totalPages = Math.ceil(totalRequests / ITEM_PER_PAGE);
+    res.render('admin/returns',{
+        activePage:"order",
+        returnRequests,
+        totalPages
+    });
+    }catch(error){
+        console.log(error.message);
+    }
+ }
+
+
 module.exports={
-    loadAdminLogin,loginValidation,adminValid,loadDash,displayCustomers,loadCategory,loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate,productDeactivate,UnblockTheUser,blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder
+    loadAdminLogin,loginValidation,adminValid,loadDash,displayCustomers,loadCategory,loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate,productDeactivate,UnblockTheUser,blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests
 }

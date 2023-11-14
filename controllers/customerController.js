@@ -8,6 +8,7 @@ const nodemailer = require("nodemailer");
 const UserOTPVerification = require("../models/userOTPVerification");
 const product = require("../models/productModel");
 const productCategory = require("../models/productCategory");
+const Return = require("../models/returnProductModel")
 const mongoose = require("mongoose");
 const Razorpay = require("razorpay");
 const razorpayConfig = require("./utils/razorpayConfig");
@@ -404,12 +405,16 @@ const updateCartItem = async (req, res) => {
     cartItem.total = cartItem.product.price * cartItem.quantity;
 
     await currentUser.save();
-    res.status(200).json({ message: "Cart item updated successfully" });
+    res.status(200).json({ message: "Cart item updated successfully",totalSum:cartItem.total, });
   } catch (error) {
     console.error(error.message);
     res.status(500).send("Internal Server Error");
   }
 };
+
+
+
+
 
 const removeFromCart = async (req, res) => {
   try {
@@ -668,6 +673,7 @@ const placeOrder = async (req, res) => {
       await newOrder.save();
       res.redirect("/order-successfull");
     } else if (req.body.method === "rzp") {
+
       const razorpay = new Razorpay({
         key_id: razorpayConfig.RAZORPAY_ID_KEY,
         key_secret: razorpayConfig.RAZORPAY_SECRET_KEY,
@@ -695,6 +701,15 @@ const placeOrder = async (req, res) => {
         user: currentUser,
       });
     }
+
+// stock update
+     currentUser.cart.forEach(async(item)=>{
+       const foundProduct = await product.findById(item.product._id)
+       foundProduct.stock_count-= item.quantity
+       await foundProduct.save()
+     })
+     currentUser.cart = [];
+   await currentUser.save()
   } catch (error) {
     console.log(error.message);
   }
@@ -820,9 +835,11 @@ const loadOrderSuccess = async (req, res) => {
 
 const getWallet = async (req, res) => {
   try {
-    const currentUser = await Customer.findById(req.session.user).sort({
+    console.log(("here cpmeon"));
+    const currentUser = await Customer.findById(req.session.user).populate("wallet").sort({
       "wallet.transactions.timestamp": -1,
     });
+    console.log(currentUser);
     res.render("user/wallet", {
       currentUser,
     });
@@ -833,16 +850,15 @@ const getWallet = async (req, res) => {
 
 const cancelOrder = async(req,res)=>{
   try{
-    console.log("hai");
+    
     const foundOrder = await Order.findById(req.body.orderId).populate("products.product")
     const foundProduct = foundOrder.products.find((order)=>order.product._id.toString()=== req.body.productId)
-    console.log(foundOrder);
-    console.log(foundProduct);
+  
     if(foundOrder.paymentMethod!=='cod'){
       const currentUser = await Customer.findById(req.session.user)
-      console.log(currentUser);
+     
       const refundAmount = (foundProduct.product.price * foundProduct.quantity) + 5
-       console.log(refundAmount);
+   
       currentUser.wallet.balance += refundAmount
 
       foundOrder.totalAmount -=(foundProduct.product.price * foundProduct.quantity ) 
@@ -857,10 +873,14 @@ const cancelOrder = async(req,res)=>{
         }
         currentUser.wallet.transactions.push(transactionData)
         foundProduct.isCancelled = true
-
-        // need to stock update 
+        
+         // update the stock of the cancelled product
+             const foundCurrentProduct = await product.findById(req.body.productId)
+             foundCurrentProduct.stock_count += foundProduct.quantity
+           
+             // save the changes
         await currentUser.save()
-      // save increased stock 
+         await foundCurrentProduct.save()
     }else{
       let amount = (foundProduct.product.price * foundProduct.quantity)
       foundOrder.totalAmount -= amount
@@ -873,16 +893,9 @@ const cancelOrder = async(req,res)=>{
        
       foundProduct.isCancelled = true;
       const foundCurrentOrder = foundOrder.products.find((order) => order.product._id.toString() === req.body.productId);
-
-      
       const foundCurrentProduct = await product.findById(req.body.productId);
-      console.log("gggg",foundCurrentProduct);
-      
-      foundCurrentProduct.stock += foundCurrentOrder.quantity;
-      // stock update 
-      await foundCurrentProduct.save()
-      console.log("hhhhhssss");
-      
+      foundCurrentProduct.stock_count += foundCurrentOrder.quantity;
+      await foundCurrentProduct.save();  
     }
     
 
@@ -909,24 +922,61 @@ const cancelOrder = async(req,res)=>{
 
 const getReturnProductForm = async(req,res)=>{
   try{
-    console.log("here");
+
+    
         const Product = await product.findById(req.query.product)
-         const currentUser = await Customer.findById(req.session.user)
+        const currentUser = await Customer.findById(req.session.user)
+     
+       
         
-        const category = await  productCategory.findById(req.query.category)
+        const category = req.query.category
+        const quantity = req.query.quantity
 
         const defaultAddress = await Address.findOne({User:req.session.user,default:true})
         res.render("user/returnForm",{
           currentAddress:defaultAddress,
           currentUser,
           category,
-          Product
+          Product,
+          quantity,
+          order:req.query.order
         })
   }catch(error){
     console.log(error.message);
 }
 }
 
+const requestReturnProduct = async(req,res)=>{
+  try{
+  
+
+    const foundOrder = await Order.findById(req.body.order).populate('products.product')
+    const currentUser = await Customer.findById(req.session.user)
+    const foundProduct = await product.findOne({ product_name: req.body.product})
+   
+    const returnProduct = new Return({
+      user : currentUser,
+      order:foundOrder._id,
+      product: foundProduct._id,
+      quantity: parseInt(req.body.quantity),
+      reason: req.body.reason,
+      condition:req.body.condition,
+      address:req.body.address
+    })
+    
+    await returnProduct.save()
+
+    foundOrder.products.forEach((product) => {
+      if (product.product._id.toString() === foundProduct._id.toString()) {
+          product.returnRequested = 'Pending';
+      }
+  });
+  await foundOrder.save();
+    res.redirect("/orders")
+  }catch(error){
+    console.log(error.message);
+  }
+}
 
 module.exports = {
   loadHome,
@@ -960,5 +1010,6 @@ module.exports = {
   getWallet,
   saveRzpOrder,
   cancelOrder,
-  getReturnProductForm 
+  getReturnProductForm ,
+  requestReturnProduct
 };

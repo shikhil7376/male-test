@@ -66,7 +66,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="cart__price"> ₹ <%= cartItem.total %></td>
+                                <td class="cart__price" id = 'totalOg'> ₹ <%= cartItem.total %></td>
                                 <td class="cart__close">
                                     <button class="btn btn-dark" onclick="removeCartItem('<%= cartItem._id %>')">
                                       <i class="fa fa-close"></i> Remove
@@ -98,8 +98,8 @@
                 <div class="cart__total">
                     <h6>Cart total</h6>
                     <ul>
-                        <li>Subtotal <span><%= grandTotal %></span></li>
-                        <li>Total <span><%= grandTotal %></span></li>
+                        <li >Subtotal <span id="subTotal"><%= grandTotal %></span></li>
+                        <li>Total <span id="total"><%= grandTotal %></span></li>
                     </ul>
                     <a href="/user/checkout" class="primary-btn">Proceed to checkout</a>
                 </div>
@@ -140,6 +140,8 @@
         })
         .then(response => response.json())
         .then(data => {
+            const {totalSum } = data
+            console.log(data)
             // Handle success, for example, you can reload the page
             let currentQuantity = document.getElementById('quantityElement_' + cartItemId).value;
             let stock = document.getElementById("stock_" + cartItemId).textContent;
@@ -149,6 +151,9 @@
                 currentQuantity = parseInt(currentQuantity) - 1;
             }
             document.getElementById('quantityElement_' + cartItemId).value = currentQuantity;
+            document.getElementById('subTotal').innerHTML ="₹ " + totalSum;
+            document.getElementById('total').innerHTML = "₹ " + totalSum;
+            document.getElementById('totalOg').innerHTML = "₹ " + totalSum;
             // location.reload();
         })
         .catch(error => {
@@ -157,7 +162,7 @@
         });
     }
 
-
+    
 
   </script>
   
