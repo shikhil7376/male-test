@@ -57,16 +57,16 @@
                                     <div class="quantity" style="max-width: 115px;">
                                         <div class="input-group">
                                             <div class="input-group-prepend">
-                                                <button class="btn btn-outline-primary" type="button" onclick="updateCartItem('<%= cartItem._id %>', 'decrement')">&minus;</button>
+                                                <button class="btn btn-outline-dark" type="button" onclick="updateCartItem('<%= cartItem._id %>', 'decrement')">&minus;</button>
                                             </div>
                                             <input type="text" class="form-control text-center" value="<%= cartItem.quantity %>" id="quantityElement_<%= cartItem._id %>" aria-label="Example text with button addon" aria-describedby="button-addon1" readonly>
                                             <div class="input-group-append">
-                                                <button class="btn btn-outline-primary" type="button" onclick="updateCartItem('<%= cartItem._id %>', 'increment')">&plus;</button>
+                                                <button class="btn btn-outline-dark" type="button" onclick="updateCartItem('<%= cartItem._id %>', 'increment')">&plus;</button>
                                             </div>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="cart__price" id = 'totalOg'> ₹ <%= cartItem.total %></td>
+                                <td class="cart__price" id = 'totalOg<%=cartItem._id%>'> ₹ <%= cartItem.total %></td>
                                 <td class="cart__close">
                                     <button class="btn btn-dark" onclick="removeCartItem('<%= cartItem._id %>')">
                                       <i class="fa fa-close"></i> Remove
@@ -81,7 +81,7 @@
                 <div class="row">
                     <div class="col-lg-6 col-md-6 col-sm-6">
                         <div class="continue__btn">
-                            <a href="#">Continue Shopping</a>
+                            <a href="/shop/1">Continue Shopping</a>
                         </div>
                     </div>
                     
@@ -140,7 +140,7 @@
         })
         .then(response => response.json())
         .then(data => {
-            const {totalSum } = data
+            const {totalSum,totalCartSum } = data
             console.log(data)
             // Handle success, for example, you can reload the page
             let currentQuantity = document.getElementById('quantityElement_' + cartItemId).value;
@@ -151,9 +151,9 @@
                 currentQuantity = parseInt(currentQuantity) - 1;
             }
             document.getElementById('quantityElement_' + cartItemId).value = currentQuantity;
-            document.getElementById('subTotal').innerHTML ="₹ " + totalSum;
-            document.getElementById('total').innerHTML = "₹ " + totalSum;
-            document.getElementById('totalOg').innerHTML = "₹ " + totalSum;
+            document.getElementById('subTotal').innerHTML ="₹ " + totalCartSum;
+            document.getElementById('total').innerHTML = "₹ " + totalCartSum;
+            document.getElementById(`totalOg${cartItemId}`).innerHTML = "₹ " + totalSum;
             // location.reload();
         })
         .catch(error => {

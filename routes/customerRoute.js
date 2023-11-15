@@ -60,7 +60,8 @@ Customer_Route.get('/user/otpVerification',Auth.userAuth,loadOTPpage)
 Customer_Route.post("/user/otpVerification",checkOTPValid)
 
 // render the shop page
-Customer_Route.get('/shop/:page',loadShop)
+Customer_Route.get('/shop/:page', loadShop);
+
 Customer_Route.get("/single/:id",Auth.checkToBlock,getSingleProduct)
 
 //display the products

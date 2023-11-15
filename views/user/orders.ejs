@@ -33,7 +33,7 @@
             <% } %>
           </div>
           <div class="col-md-6">
-            <span class="d-block text-primary h6 text-uppercase">
+            <span class="d-block text-info h6 text-uppercase">
               <%= order.orderedProducts[0]. product_name %>
             </span>
             <p>
@@ -52,7 +52,7 @@
                 </p>
                 <p class="text-black">
                   Delivery, <%= order.deliveryDate ? order.deliveryDate.toLocaleDateString() : 'N/A' %><br>
-                  <% if(!order.products .isCancelled){ %>
+                  <% if(!order.products.isCancelled){ %>
                     <strong>Status: <%= order.status %> </strong>
                     <% } else {%>
                       <strong>Status: Order Cancelled </strong>
@@ -72,7 +72,7 @@
               Returned
             </p>
        <% }else { %>
-        <% if (order.status==='Processing'){ %>
+        <% if (order.status==='Processing' &&!order.products.isCancelled){ %>
           <% order.orderedProducts.forEach(function(product){ %>
             <p class="ml-3">
               <form action="/cancel-order" method="post" id="order<%=product._id %>">
@@ -86,7 +86,7 @@
             </form>
             </p>
             <% }) %>
-           <% }else if(order.status==='Delivered'){ %>
+           <% }else if(order.status==='Delivered' ){ %>
             <% const currentDate=new Date() %>
             <% const deliveryDate = new Date(order.deliveryDate) %>
             <% const sevenDaysAfterDelivery= new Date(deliveryDate) %>
@@ -102,14 +102,14 @@
             <p class="ml-4">Return
               Request: <span class="text-success">Approved</span>
             </p>
-           <% }else if(order.products.returnRequested==="completed"){ %>
+           <% }else if(order.products.returnRequested==="Completed"){ %>
            
             <span class="text-dark ml-4">Returned</span>
             </p>
-            <% }else if(currentDate<=sevenDaysAfterDelivery){ %>
+            <% }else if(currentDate<=sevenDaysAfterDelivery &&!order.products.isCancelled){ %>
             <p class="ml-3">
             <a>
-              <a href="/return-product?order=<%= order._id %>&product=<%= order.orderedProducts[0]._id %>&category=<%= order.orderedProducts[0].category %>&quantity=<%= order.products.quantity %>" class="btn btn-sm btn-outline-primary mb-3">
+              <a href="/return-product?order=<%= order._id %>&product=<%= order.orderedProducts[0]._id %>&category=<%= order.orderedProducts[0].category %>&quantity=<%= order.products.quantity %>" class="btn btn-sm btn-outline-info mb-3">
                 Return
               </a>
             </p>

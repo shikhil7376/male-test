@@ -391,7 +391,7 @@ const updateOrderCancel = async(req,res)=>{
 
  const getreturnRequests = async(req,res)=>{
     try{
-        const ITEM_PER_PAGE = 5; // no of item to display per page 
+        const ITEM_PER_PAGE = 4; // no of item to display per page 
         const page = parseInt(req.query.page) || 1
         const totalRequests = await Return.countDocuments()
         const returnRequests = await Return.find()
@@ -414,7 +414,38 @@ const updateOrderCancel = async(req,res)=>{
     }
  }
 
+ const returnRequsetActions = async(req,res)=>{
+    try{
+        
+           const foundRequest =  await Return.findById(req.body.request)
+           const foundOrder = await Order.findById(req.body.order)
+           const currentProduct = foundOrder.products.find((product)=>product.product.toString()=== req.body.product.toString())
+           console.log(currentProduct);
+           if(req.body.action ==="approve"){
+            foundRequest.status = "Approved";
+            currentProduct.returnRequested = 'Approved'
+           } else if(req.body.action ==="reject"){
+              foundRequest.status = "Rejected";
+              currentProduct.returnRequested = "Rejected"
+           }else{
+               const currentUser = await Customer.findById(foundOrder.user)
+               const EditProduct = await product.findOne({_id:req.body.product})
+
+               const currentStock = EditProduct.stock_count;
+               EditProduct.stock_count = currentStock + foundRequest.quantity
+               await EditProduct.save()
+
+               foundRequest.status = 'Completed';
+               currentProduct.returnRequested = 'Completed'
+           }
+           await foundRequest.save()
+           await foundOrder.save()
+           res.redirect('/admin/return-requests')
+    }catch(error){
+        console.log(error.message);
+    }
+ }
 
 module.exports={
-    loadAdminLogin,loginValidation,adminValid,loadDash,displayCustomers,loadCategory,loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate,productDeactivate,UnblockTheUser,blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests
+    loadAdminLogin,loginValidation,adminValid,loadDash,displayCustomers,loadCategory,loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate,productDeactivate,UnblockTheUser,blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests,returnRequsetActions
 }

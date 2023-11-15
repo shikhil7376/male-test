@@ -71,37 +71,40 @@
                         </tr>
                       </thead>
                       <tbody>
-                        <% if (!returnRequests.length) { %>
+                      <% if(! returnRequests.length){ %>
                         <tr>
                           <td colspan="5">No requests found.</td>
                         </tr>
-                        <% } else { %>
-                        <% returnRequests.forEach((request)=> { %>
+                        <% }else{ %>
+                          <% returnRequests.reverse()%>
+                            <% returnRequests.forEach((request)=>{ %>
                         <tr>
                           <td>
-                            <%= request.user.username %><br>
+                           <%= request.user.name %>
                             <p class="text-dark">
-                              <%= request.user.email %>
+                                <%= request.user.email %>
                             </p><br>
                             <%= request.user.mobile %>
                           </td>
                           <td>
                             <div>
-                              <div class="border-bottom mb-3">
+                              <div class="border-bottom mb-3" >
                                 <span class="h6 text-uppercase">
-                                  <%= request.product?.name %>
+                               <%= request.product.product_name %>
                                 </span><br>
-                                Total price: ₹<%= request.totalPrice %> <br>
-                                Quantity: <%= request.quantity %> <br>
+                                Total price: ₹ <%= request.quantity * request.product.price %><br>
+                                Quantity: <%= request.quantity %><br>
                               </div>
                               Requested Date: <%= request.createdAt.toLocaleDateString() %>
                             </div>
                           </td>
                           <td>
-                            <%= request.order?.deliveryAddress.post %>,
-                            <%= request.order?.deliveryAddress.postCode%>,
+                            <%= request.order?.deliveryAddress.pincode %>,
+                            <%= request.order?.deliveryAddress.state%>,
+                            <%= request.order?.deliveryAddress.city %>,
                             <%= request.order?.deliveryAddress.district %>,
-                            <%= request.order?.deliveryAddress.state %>,<br>
+                            <%= request.order?.deliveryAddress.area %>
+                            <br>
                           
                           </td>
                           <td>
@@ -110,22 +113,23 @@
                           </td>
                           <td>
                             <div class="d-flex justify-content-between">
-                              <% if (request.status==="Completed" ) { %>
+                               <% if (request.status==="Completed"){ %>
                               <p class="text-success font-weight-bolder">Completed</p>
-                              <% } else { %>
+                              <% }else{ %>
                               <div class="btn-group">
+
                                   <button type="button"
                                       class="btn btn-danger dropdown-toggle dropdown-toggle-split"
                                       data-toggle="dropdown"
                                       aria-haspopup="true"
-                                      aria-expanded="false">
-                                      <%= request.status %> 
+                                      aria-expanded="false"> <%= request.status %>
+                                   
                                   </button>
                                   <div class="dropdown-menu">
                                       <form action="/admin/return-requests" method="post">
                                           <input type="hidden" name="action" value="approve">
                                           <input type="hidden" name="request" value="<%= request._id %>">
-                                          <input type="hidden" name="order" value="<%= request.order._id %>">
+                                          <input type="hidden" name="order"value="<%= request.order._id %>">
                                           <input type="hidden" name="product" value="<%= request.product._id %>">
                                           <button type="submit" class="dropdown-item text-warning">
                                             Approve
@@ -142,7 +146,7 @@
                                       </form>
                                       <form action="/admin/return-requests" method="post" class="ml-1" id="action-form">
                                           <input type="hidden" name="action" value="Completed">
-                                          <input type="hidden" name="request" value="<%= request._id %>">
+                                          <input type="hidden" name="request" value="<%= request._id %>" >
                                           <input type="hidden" name="order" value="<%= request.order._id %>">
                                           <input type="hidden" name="product" value="<%= request.product._id %>">
                                           <button type="submit" class="dropdown-item text-success">
@@ -151,17 +155,25 @@
                                       </form>
                                   </div>
                               </div>
-                              <% } %>
+                             <% } %>
                             </div>
                           </td>
                         </tr>
-                        <% }) %>
+                       <% }) %>
                         <% } %>
                       </tbody>
                     </table>
                   </div>
                 
               </div>
+          </div>
+             <!-- Pagination controls -->
+             <div class="pagination" style="margin-top: 15px;">
+
+              <% for (let i = 1; i <= totalPages; i++) { %>
+                <a href="?page=<%= i %>" class="page-link"><%= i %></a>
+              <% } %>
+
           </div>
       </div>
       <!-- / Content -->

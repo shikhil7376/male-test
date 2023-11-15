@@ -41,7 +41,7 @@
               </a>
             </div>
             <div class="col-md-4">
-              <span class="d-block text-primary h6 text-uppercase">
+              <span class="d-block text-info h6 text-uppercase">
                  <%= cartItem.product.product_name %>
               </span>
               <p>
@@ -69,12 +69,12 @@
           <div class="col-md-6 mb-5">
             <div class="d-flex">
               <p class="m-3">
-                <a href="/shop" class="btn btn-outline-primary btn-sm btn-block">
+                <a href="/shop" class="btn btn-outline-secondary btn-sm btn-block">
                   Continue Shopping
                 </a>
               </p>
               <p class="m-3">
-                <a href="/cart" class="btn btn-primary btn-sm btn-block">
+                <a href="/cart" class="btn btn-secondary btn-sm btn-block">
                   Back To cart
                 </a>
               </p>
@@ -84,9 +84,9 @@
             <div class="d-flex justify-content-between">
               <h3>Shipping Address</h3>
                       <% if(currentAddress){ %>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
-              <a href="/change-address" class="btn btn-primary">Change</a>
+              <a href="/change-address" class="btn btn-secondary">Change</a>
                 <% }else{ %>
-              <a href="/new-address" class="btn btn-outline-primary">
+              <a href="/new-address" class="btn btn-outline-secondary">
                 Add New Address
               </a>
               <% } %>
@@ -200,7 +200,7 @@
                   <div class="col-md-12">
                    <% if  (!currentAddress){ %>
                     <p class="text-center">No Address found.</p>
-                    <a href="/profile" class="btn btn-outline-primary btn-lg btn-block">
+                    <a href="/profile" class="btn btn-outline-dark btn-lg btn-block">
                       Go To Profile
                     </a>
                     <%  }else { %>
@@ -208,7 +208,7 @@
                       <input type="hidden" name="addressId" >
                       <input type="hidden" name="discount">
                       <input type="hidden" name="currentCoupon" >
-                      <button type="button" class="btn btn-primary btn-lg py-3 btn-block" onclick="openPlaceOrderModal()">
+                      <button type="button" class="btn btn-secondary btn-lg py-3 btn-block" onclick="openPlaceOrderModal()">
                         Place Order
                       </button>
                       <p class="text-danger">
@@ -235,13 +235,13 @@
             <div class="d-flex">
               <input type="text" class="form-control py-3" name="coupon" id="coupon" placeholder="Paste Coupon Code">
               <div class="col-md-4">
-                <button type="submit" class="btn btn-primary btn-sm">Apply Coupon</button>
+                <button type="submit" class="btn btn-dark btn-sm">Apply Coupon</button>
               </div>
             </div>
             <p class="text-danger">
         
             </p>
-            <a href="/coupons" class="btn btn-outline-primary btn-sm mt-4">View Available
+            <a href="/coupons" class="btn btn-outline-dark btn-sm mt-4">View Available
               Coupons</a>
           </div>
         </form>
@@ -264,7 +264,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" id="confirmPlaceOrder" onclick="show()">Place Order</button>
+          <button type="button" class="btn btn-dark" id="confirmPlaceOrder" onclick="show()">Place Order</button>
         </div>
       </div>
     </div>

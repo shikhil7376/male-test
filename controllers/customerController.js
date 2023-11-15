@@ -34,6 +34,35 @@ function validatePassword(password) {
   return /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}$/.test(password);
 }
 
+const totalSum = async function(id){
+  try {
+    const userData = await Customer.findById(id);
+
+    if (!userData || Object.keys(userData).length === 0) {
+      // Handle the case where userData is null or empty
+      return 0;
+    }
+
+    const cart = userData.cart;
+
+    if(cart.length !== 0){
+      // Move the console.log(cart) here
+      console.log(cart);
+
+      const totalSum = cart.reduce((acc, item) => {
+        return acc + item.total;
+      }, 0);
+
+      return totalSum;
+    } else {
+      return 0;
+    }
+  } catch (error) {
+    // Handle any potential errors during the async operation
+    console.error("Error fetching user data:", error);
+    return 0;
+  }
+}
 // load Home
 const loadHome = async (req, res) => {
   try {
@@ -343,9 +372,6 @@ const addToCart = async (req, res) => {
   try {
     const currentUser = await Customer.findById(req.session.user);
     const { Product, hiddenQuantity, ProductPrice } = req.body;
-
-    console.log(req.body);
-    console.log(ProductPrice);
     const existingCartItem = currentUser.cart.find((item) => {
       return item.product && item.product.toString() === Product;
     });
@@ -371,7 +397,8 @@ const addToCart = async (req, res) => {
 const updateCartItem = async (req, res) => {
   const { cartItemId, action } = req.params;
   try {
-    const currentUser = await Customer.findById(req.session.user);
+    const id = req.session.user
+    const currentUser = await Customer.findById(id);
     await currentUser.populate("cart.product");
 
     if (!currentUser) {
@@ -403,9 +430,13 @@ const updateCartItem = async (req, res) => {
     }
 
     cartItem.total = cartItem.product.price * cartItem.quantity;
+    
+    
 
     await currentUser.save();
-    res.status(200).json({ message: "Cart item updated successfully",totalSum:cartItem.total, });
+    const totSum = await totalSum(id)
+    console.log(totSum)
+    res.status(200).json({ message: "Cart item updated successfully",totalSum:cartItem.total,totalCartSum:totSum });
   } catch (error) {
     console.error(error.message);
     res.status(500).send("Internal Server Error");

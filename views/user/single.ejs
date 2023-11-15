@@ -41,11 +41,11 @@
             }
           </style>
         <!-- Carousel controls -->
-        <a class="bg-primary carousel-control-prev" href="#imageCarousel" role="button" data-slide="prev">
+        <a class="bg-dark carousel-control-prev" href="#imageCarousel" role="button" data-slide="prev">
           <span class="carousel-control-prev-icon" aria-hidden="true"></span>
           <span class="sr-only">Previous</span>
         </a>
-        <a class="bg-primary carousel-control-next" href="#imageCarousel" role="button" data-slide="next">
+        <a class="bg-dark carousel-control-next" href="#imageCarousel" role="button" data-slide="next">
           <span class="carousel-control-next-icon" aria-hidden="true"></span>
           <span class="sr-only">Next</span>
         </a>
@@ -68,21 +68,21 @@
             <div>
               <div class="input-group">
                 <div>
-                  <p><strong class="text-primary h4">₹<%= productData.price.toFixed(2) %></strong></p>
+                  <p><strong class="text-dark h4">₹<%= productData.price.toFixed(2) %></strong></p>
                   <% if(productData.stock_count){  %>
-                  <p><strong class="text-primary h6" id="stock">Stock: <%= productData.stock_count %></strong></p>
+                  <p><strong class="text-dark h6" id="stock">Stock: <%= productData.stock_count %></strong></p>
                   <% } %>
                   <% if(!productData.stock_count){ %>
                   <p class="text-danger mt-5">Currently Unavailable</p>
                   <% } else { %>
                     <% if(currentUser && currentUser.cart && productData && productData._id && currentUser.cart.some((item) => item.product && item.product.toString() === productData._id.toString())) { %>
-                      <a href="/cart" class="buy-now btn btn-sm btn-outline-primary">Go To Cart</a>
+                      <a href="/cart" class="buy-now btn btn-sm btn-outline-secondary">Go To Cart</a>
                     <% } else { %>
                       <form action="/add-to-cart" method="post">
                         <input type="hidden" name="Product" value="<%= productData._id %>">
                         <input type="hidden" name="hiddenQuantity" value="1">
                         <input type="hidden" name="ProductPrice" value="<%= productData.price %>">
-                        <button type="submit" class="buy-now btn btn-sm btn-primary">Add To Cart</button>
+                        <button type="submit" class="buy-now btn btn-sm btn-secondary">Add To Cart</button>
                       </form>
                     <% } %>
                     
