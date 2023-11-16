@@ -36,7 +36,7 @@ const{
    cancelOrder,
    getReturnProductForm ,
    requestReturnProduct,
-
+   resendOtp
 }=require('../controllers/customerController')
 
 
@@ -57,27 +57,28 @@ Customer_Route.post("/register",insertUser)
 
 // otp verification
 Customer_Route.get('/user/otpVerification',Auth.userAuth,loadOTPpage)
-Customer_Route.post("/user/otpVerification",checkOTPValid)
+              .post("/user/otpVerification",checkOTPValid)
+              .post('/resend-otp',resendOtp)
 
 // render the shop page
-Customer_Route.get('/shop/:page', loadShop);
+Customer_Route.get('/shop/:page',Auth.logged,Auth.checkToBlock, loadShop);
 
-Customer_Route.get("/single/:id",Auth.checkToBlock,getSingleProduct)
+Customer_Route.get("/single/:id",Auth.logged,Auth.checkToBlock,getSingleProduct)
 
 //display the products
 Customer_Route.get("user/displayProduct",)
 
 // CART AND DELETE DISPLAY   
-Customer_Route.get("/cart",Auth.logged,loadcart) 
+Customer_Route.get("/cart",Auth.logged,Auth.checkToBlock,loadcart) 
 Customer_Route.post('/add-to-cart/',Auth.logged,Auth.checkToBlock,addToCart)
-Customer_Route.delete('/remove-from-cart/:cartItemId', Auth.logged, removeFromCart);
-Customer_Route.put('/update-cart-item/:cartItemId/:action', Auth.logged, updateCartItem);
+Customer_Route.delete('/remove-from-cart/:cartItemId', Auth.logged,Auth.checkToBlock, removeFromCart);
+Customer_Route.put('/update-cart-item/:cartItemId/:action', Auth.logged,Auth.checkToBlock, updateCartItem);
 
 
 //user profile 
-Customer_Route.get('/user/profile',Auth.logged,loadprofile)
-Customer_Route.get('/user/profile/changepassword',Auth.logged,loadChangePassword)
-Customer_Route.post('/user/profile/changepassword',Auth.logged,changePassword)
+Customer_Route.get('/user/profile',Auth.logged,Auth.checkToBlock,loadprofile)
+Customer_Route.get('/user/profile/changepassword',Auth.logged,Auth.checkToBlock,loadChangePassword)
+Customer_Route.post('/user/profile/changepassword',Auth.logged,Auth.checkToBlock,changePassword)
 
 // user Address
 Customer_Route.get('/user/profile/add-address',Auth.checkToBlock,Auth.logged,loadAddaddress)

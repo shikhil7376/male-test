@@ -18,10 +18,18 @@
         <div class="carousel-inner text-center">
           <% productData.image.forEach((image, index) => { %>
             <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
-              <img src="data:<%= image.contentType %>;base64,<%= image.data.toString('base64') %>" alt="Image <%= index + 1 %> " onclick="openModal('<%= image %>')" class="img-fluid"  style="max-width: 500px; max-height: 500px;">
+              <img class="zoom-image" src="data:<%= image.contentType %>;base64,<%= image.data.toString('base64') %>" alt="Image <%= index + 1 %>" onclick="openModal('<%= image %>')" class="img-fluid"  style="max-width: 400px; max-height: 400px;">
             </div>
           <% }) %>
-  
+        </div>
+        
+        <!-- Thumbnails for other images -->
+        <div class="thumbnails-container mt-3">
+          <% productData.image.forEach((image, index) => { %>
+            <img src="data:<%= image.contentType %>;base64,<%= image.data.toString('base64') %>" alt="Thumbnail <%= index + 1 %>" class="thumbnail" onclick="changeCarouselImage(<%= index %>)">
+          <% }) %>
+        </div>
+        
           <!-- Modal for image zoom -->
           <div id="imageModal" class="modal">
             <button id="closeButton" class="close-button">
@@ -96,6 +104,57 @@
     </div>
   </div>
   
+  <script>
 
+    
+    const image = document.querySelector('.zoom-image');
+
+    image.addEventListener('mousemove', (e) => {
+        const { offsetX, offsetY, width, height } = e.target.getBoundingClientRect();
+        const centerX = offsetX / width;
+        const centerY = offsetY / height;
+        image.style.transformOrigin = `${centerX * 100}% ${centerY * 100}%`;
+    });
+
+    function changeCarouselImage(index) {
+    $('#imageCarousel').carousel(index); // Change the active image in the main carousel
+  }
+    
+</script>
+
+    <style>
+       .image-container {
+        position: relative;
+        width: 500px; /* Adjust the width to your desired size */
+    }
+
+    /* Define CSS for the image */
+    .zoom-image {
+        width: 100%;
+        height: auto;
+        cursor: zoom-in;
+        transition: transform 0.3s;
+    }
+
+    /* On hover, increase the image size */
+    .zoom-image:hover {
+        transform: scale(1.2); /* Adjust the scale factor for zoom level */
+    }
+
+    .thumbnails-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.thumbnail {
+  width: 80px; /* Adjust the thumbnail width as needed */
+  height: auto;
+  margin: 0 10px; /* Adjust the margin between thumbnails as needed */
+  cursor: pointer;
+}
+
+
+    </style>
 
 <%- include("../layout/customerside/footer") %>

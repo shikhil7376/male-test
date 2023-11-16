@@ -286,6 +286,19 @@ const checkOTPValid = async (req, res) => {
   }
 };
 
+const resendOtp = async(req,res)=>{
+  try{
+     const {userId} = req.body
+     const userDate = await Customer.findById(userId)
+     await sendOTPVerificationEmail(userDate)
+     if(userDate){
+      return res.redirect(`/user/otpVerification?userId=${userId}`)
+     }
+  }catch(error){
+    console.log(error.message);
+  }
+}
+
 const loadShop = async (req, res) => {
   try {
     const page = parseInt(req.params.page) || 1;
@@ -335,7 +348,7 @@ const getSingleProduct = async (req, res) => {
 const loadcart = async (req, res) => {
   try {
     const currentUser = await Customer.findById(req.session.user);
-
+    console.log(currentUser);
     if (currentUser.is_varified) {
       await currentUser.populate("cart.product");
       await currentUser.populate("cart.product.category");
@@ -617,15 +630,19 @@ const getAddresses = async (req, res) => {
 
 const changeDefaultAddress = async (req, res) => {
   try {
+      
     await Address.updateOne(
       { User: req.session.user, default: true },
       { $set: { default: false } }
     );
+  
     await Address.findByIdAndUpdate(req.body.addressId, {
       $set: { default: true },
     });
     //  const previousPage = req.headers.referer || '/user/checkout'
+   
     res.redirect("/user/checkout");
+  
   } catch (error) {
     console.log(error.message);
   }
@@ -634,6 +651,8 @@ const changeDefaultAddress = async (req, res) => {
 const loadCheckout = async (req, res) => {
   try {
     const currentUser = await Customer.findById(req.session.user);
+   
+  console.log(currentUser);
     if (currentUser.is_varified) {
       const defaultAddress = await Address.findOne({
         User: req.session.user,
@@ -1042,5 +1061,6 @@ module.exports = {
   saveRzpOrder,
   cancelOrder,
   getReturnProductForm ,
-  requestReturnProduct
+  requestReturnProduct,
+  resendOtp
 };
