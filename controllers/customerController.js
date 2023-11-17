@@ -650,9 +650,11 @@ const changeDefaultAddress = async (req, res) => {
 
 const loadCheckout = async (req, res) => {
   try {
-    const currentUser = await Customer.findById(req.session.user);
    
-  console.log(currentUser);
+    const currentUser = await Customer.findById(req.session.user);
+    const addresses = await Address.find({ User: req.session.user })
+
+
     if (currentUser.is_varified) {
       const defaultAddress = await Address.findOne({
         User: req.session.user,
@@ -677,9 +679,10 @@ const loadCheckout = async (req, res) => {
         res.render("user/checkout", {
           currentUser,
           cartProducts,
-          currentAddress: defaultAddress,
+         
           grandTotal,
           discount: 0,
+          addresses,
           error: "",
         });
       } else {
@@ -693,12 +696,17 @@ const loadCheckout = async (req, res) => {
 
 const placeOrder = async (req, res) => {
   try {
+    
     const currentUser = await Customer.findById(req.session.user);
     await currentUser.populate("cart.product");
-    const address = await Address.findOne({
-      User: req.session.user,
-      default: true,
-    });
+    // const address = await Address.findOne({
+    //   User: req.session.user,
+    //   default: true,
+    // });
+        let shippingAddress = req.body.shippingAddress
+      
+    const address = await Address.findOne({User:req.session.user,_id:shippingAddress})
+ 
 
     const grandTotal = currentUser.cart.reduce((total, element) => {
       return total + element.quantity * element.product.price;
@@ -721,6 +729,7 @@ const placeOrder = async (req, res) => {
 
     if (req.body.method === "cod") {
       await newOrder.save();
+ 
       res.redirect("/order-successfull");
     } else if (req.body.method === "rzp") {
 
@@ -782,7 +791,7 @@ const saveRzpOrder = async (req, res) => {
       // stock update
 
       currentUser.cart.forEach(async (item) => {
-        console.log("itm", item);
+    
         // const foundProduct = await product.findById(item.product._id);
         // console.log(foundProduct);
         // foundProduct.stock_count -= item.quantity;
@@ -797,7 +806,7 @@ const saveRzpOrder = async (req, res) => {
           quantity: item.quantity,
         };
       });
-      console.log("here.........");
+   
       let newOrder = new Order({
         user: req.session.user,
         products: orderedProducts,

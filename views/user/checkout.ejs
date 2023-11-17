@@ -80,26 +80,27 @@
               </p>
             </div>
           </div>
-          <div class="col-md-6 address border p-3">
+          <form action="/user/checkout" method="post" id="checkout-form"onsubmit="return validateForm()" >
+          <div class="col-md-12 address border p-3" id="checkoutAddressContainer">
             <div class="d-flex justify-content-between">
               <h3>Shipping Address</h3>
-                      <% if(currentAddress){ %>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
-              <a href="/change-address" class="btn btn-secondary">Change</a>
-                <% }else{ %>
+                      <% if(!addresses){ %>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+  
               <a href="/user/profile/add-address" class="btn btn-outline-secondary">
                 Add New Address
               </a>
               <% } %>
 
             </div>
-            <% if (currentAddress){ %>
-            <p>
-            <%= currentAddress.city %>
-            <%= currentAddress.pincode %>
-            <%= currentAddress.area %>
-            <%= currentAddress.building %>
-            <%= currentAddress.state %>
-            </p>
+            <% if (addresses){ %>
+              <% addresses.forEach((address) => { %>
+                <div>
+                  <input type="radio" name="shippingAddress" value="<%= address._id %>" >
+                  <label>
+                    <%= address.city %>, <%= address.pincode %>, <%= address.area %>, <%= address.building %>, <%= address.state %>
+                  </label>
+                </div>
+              <% }) %>
             <% }else{ %>
             <p>No delivery address found.</p>
         <% } %>
@@ -107,8 +108,11 @@
         </div>
          <% } %>
       </div>
-    
-      <form action="/user/checkout" method="post" id="checkout-form">
+    <div>
+  
+
+    </div>
+     
         <div class="row">
           <div class="col-md-6 d-flex flex-column justify-content-between">
             <div>
@@ -198,7 +202,7 @@
                 </div>
                 <div class="row mb-5">
                   <div class="col-md-12">
-                   <% if  (!currentAddress){ %>
+                   <% if  (!addresses){ %>
                     <p class="text-center">No Address found.</p>
                     <a href="/profile" class="btn btn-outline-dark btn-lg btn-block">
                       Go To Profile
@@ -208,9 +212,8 @@
                       <input type="hidden" name="addressId" >
                       <input type="hidden" name="discount">
                       <input type="hidden" name="currentCoupon" >
-                      <button type="button" class="btn btn-secondary btn-lg py-3 btn-block" onclick="openPlaceOrderModal()">
-                        Place Order
-                      </button>
+                      <button type="button" class="btn btn-secondary btn-lg py-3 btn-block" onclick="validateAndPlaceOrder()">Place Order</button>
+                      
                       <p class="text-danger">
                         <%= error %>
                       </p>
@@ -271,6 +274,36 @@
   </div>
 
   <script>
+    function validateForm() {
+      console.log("Validating form...");
+      // Validate payment method
+      var paymentMethod = document.querySelector('input[name="method"]:checked');
+      if (!paymentMethod) {
+        alert("Please choose a payment method");
+        return false;
+      }
+
+      // Validate shipping address
+      var shippingAddress = document.querySelector('input[name="shippingAddress"]:checked');
+      console.log("shipping Address:",shippingAddress);
+      if (!shippingAddress) {
+        alert("Please choose a shipping address");
+        return false;
+      }
+
+      // If both validations pass, the form will be submitted
+      return true;
+    }
+  </script>
+<script>
+  function validateAndPlaceOrder() {
+      if (validateForm()) {
+          openPlaceOrderModal();
+      }
+  }
+</script>
+
+  <script>
     function openPlaceOrderModal(){
       $('#placeOrderModal').modal('show')
     }
@@ -285,6 +318,8 @@
       $('#placeOrderModal').modal('hide')
     }
   </script>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
 
 
