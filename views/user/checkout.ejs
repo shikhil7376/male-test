@@ -95,7 +95,7 @@
             <% if (addresses){ %>
               <% addresses.forEach((address) => { %>
                 <div>
-                  <input type="radio" name="shippingAddress" value="<%= address._id %>" >
+                  <input type="radio"  name="shippingAddress" value="<%= address._id %>">
                   <label>
                     <%= address.city %>, <%= address.pincode %>, <%= address.area %>, <%= address.building %>, <%= address.state %>
                   </label>
@@ -149,7 +149,7 @@
                 </div>
                 <div class="row">
                   <div class="col-md-6">
-                    <span>Price (<%= cartProducts.length %> items)</span>
+                    <span>Price (<%= noOfItems %> items)</span>
                   </div>
                   <div class="col-md-6 pl-0">
                     <span class="text-black">
@@ -182,7 +182,7 @@
                         00.00
                       </span>
                       <% }else{ %>
-                        ₹ <%= discount %>.00
+                        ₹ <%= discount %>
                         <% } %>
                    
                     </span>
@@ -195,23 +195,28 @@
                   <div class="col-md-6 pl-0">
                     <span class="h5 text-black">
                       ₹<span id="grandTotalPrice" class="text-black">
-                        <%= discount === 0 ? grandTotal + 5 : grandTotal - discount + 5 %>.0
+
+                        <%=  (discount === 0 ? grandTotal + 5 : grandTotal - discount + 5)  %>
+                        
                       </span>
                     </span>
                   </div>
                 </div>
                 <div class="row mb-5">
                   <div class="col-md-12">
-                   <% if  (!addresses){ %>
+                   
+                   <% if  (!addresses.length){ %>
                     <p class="text-center">No Address found.</p>
-                    <a href="/profile" class="btn btn-outline-dark btn-lg btn-block">
+                    <a href="/user/profile" class="btn btn-outline-dark btn-lg btn-block">
                       Go To Profile
                     </a>
                     <%  }else { %>
+                    <!-- <% console.log("addresses") %> -->
+
                     <div>
                       <input type="hidden" name="addressId" >
-                      <input type="hidden" name="discount">
-                      <input type="hidden" name="currentCoupon" >
+                      <input type="hidden" name="discount"  value="<%= discount %>">
+                      <input type="hidden" name="currentCoupon" value="<%= currentCoupon %>" >
                       <button type="button" class="btn btn-secondary btn-lg py-3 btn-block" onclick="validateAndPlaceOrder()">Place Order</button>
                       
                       <p class="text-danger">
@@ -229,7 +234,7 @@
 
 
       <div class="row col-lg-12">
-        <form action="/apply-coupon" method="post" >
+        <form action="/apply-coupon" method="post" id="checkout-form" >
           <div>
             <div>
               <label class="text-black h4" for="coupon">Coupon</label>

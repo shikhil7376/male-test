@@ -36,7 +36,9 @@ const{
    cancelOrder,
    getReturnProductForm ,
    requestReturnProduct,
-   resendOtp
+   resendOtp,
+   getCoupons,
+   applyCoupon
 }=require('../controllers/customerController')
 
 
@@ -99,7 +101,9 @@ Customer_Route.post("/save-rzporder",Auth.checkToBlock,Auth.logged, saveRzpOrder
 Customer_Route.get("/order-successfull",Auth.logged,Auth.checkToBlock,loadOrderSuccess )
                                                                 
 Customer_Route.get("/orders",Auth.checkToBlock,Auth.logged,getOrders)
-Customer_Route.get("/wallet",Auth.checkToBlock,Auth.logged,getWallet)
+              .get("/wallet",Auth.checkToBlock,Auth.logged,getWallet)
+              .get("/coupons",Auth.checkToBlock,Auth.logged, getCoupons )
+              .post('/apply-coupon',Auth.checkToBlock,Auth.logged,applyCoupon)
 
 Customer_Route.post("/cancel-order",Auth.checkToBlock,Auth.logged,cancelOrder)
 

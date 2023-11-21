@@ -22,13 +22,7 @@ const transactionSchema = new mongoose.Schema({
 
 
 
-const walletSchema = new mongoose.Schema({
-   balance: {
-      type: Number,
-      default:0
-   },
-   transactions : [transactionSchema]
-  })
+// const walletSchema =
 
 
 
@@ -81,7 +75,25 @@ const CustomerSchema=new mongoose.Schema({
          default:0
       }
    }],
-   wallet : walletSchema
+   earnedCoupons:[
+      {
+         coupon:{
+            type:mongoose.Schema.Types.ObjectId,
+            ref:'Coupon'
+         },
+         isUsed:{
+            type:Boolean,
+            default:false
+         }
+      }
+   ],
+   wallet : {
+      balance: {
+         type: Number,
+         default:0
+      },
+      transactions : [transactionSchema]
+     }
 })  
 
 

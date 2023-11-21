@@ -106,7 +106,45 @@
                                 </div>
                               </div>
                             </div>
-              
+                       
+                            
+                            <!-- Images Upload -->
+                            <div class="form-group">
+                              <label>Images Upload (Required: 3)</label>
+                              <div class="input-group col-md-12">
+                                <div class="col-md-12 grid-margin stretch-card">
+                                  <% if (Product && Product.images) { %>
+                                  <% Product.images.forEach(image=> { %>
+                                    <!-- <form action="/admin/product/img-delete" method="post"> -->
+                                      <div style="position: relative;">
+                                        <!-- Display the image -->
+                                        <img
+                                           src="data:<%= image.contentType %>;base64,<%= image.data.toString('base64') %>"
+                                          alt="<%= Product.product_name %>" style="width: 180px;height: 180px;">
+
+                                        <!-- Add a "Delete" button (X button) -->
+                                      
+
+                                        <!-- Add a hidden input field to identify which image to delete -->
+
+                                      
+                                        <!-- <a class="btn btn-danger btn-delete-image" href="/admin/product/<%= image._id %>/<%= id %>/deleteImg">X</a> -->
+                   
+                                        <!-- <button type="submit" class="btn btn-danger btn-delete-image">X</button> -->
+                                      </div>
+                                    <!-- </form> -->
+
+                                    <% }) %>
+                                    <% } else { %>
+                                      <!-- Handle the case where Product or Product.images is undefined -->
+                                      <p>No images available.</p>
+                                    <% } %>
+                                </div>
+                                <input type="file" id="images" name="images" multiple class="form-control file-upload-info" >
+                              </div>
+                            </div>
+
+
                             <!-- Availability -->
                             <div class="col-md-12 grid-margin stretch-card">
                               <div class="card">

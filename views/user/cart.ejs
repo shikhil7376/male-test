@@ -1,171 +1,212 @@
 <%- include("../layout/customerside/header") %>
- <%-include("../layout/customerside/navbar") %>
+<%-include("../layout/customerside/navbar") %>
 <!-- Header Section End -->
 
-   <!-- Breadcrumb Section Begin -->
-   <section class="breadcrumb-option">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="breadcrumb__text">
-                    <h4>Shopping Cart</h4>
-                    <div class="breadcrumb__links">
-                        <a href="./index.html">Home</a>
-                        <a href="./shop.html">Shop</a>
-                        <span>Shopping Cart</span>
-                    </div>
-                </div>
-            </div>
+<!-- Breadcrumb Section Begin -->
+<section class="breadcrumb-option">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="breadcrumb__text">
+          <h4>Shopping Cart</h4>
+          <div class="breadcrumb__links">
+            <a href="./index.html">Home</a>
+            <a href="./shop.html">Shop</a>
+            <span>Shopping Cart</span>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </section>
 <!-- Breadcrumb Section End -->
 
 <!-- Shopping Cart Section Begin -->
 <section class="shopping-cart spad">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8">
-                <div class="shopping__cart__table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>Quantity</th>
-                                <th>Total</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="shopping__cart__table">
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (!cartProducts.length){ %>
+              <tr>
+                <td>Your cart is empty</td>
+              </tr>
 
-                            <% if (!cartProducts.length){ %>
-                                Your cart is empty
-                                <% }else{ %>
-                                    <% cartProducts.forEach((cartItem) => { %>
-                            <tr>
-                                <td class="product__cart__item">
-                                    <div class="product__cart__item__pic"> 
-                                        <img src="data:<%= cartItem.product.image[0].contentType %>;base64,<%= cartItem.product.image[0].data.toString('base64') %>">
-                                    </div>
-                                    <div class="product__cart__item__text">
-                                        <h6><%= cartItem.product.product_name  %></h6>
-                                        <h5><%= cartItem.product.price %></h5>
-                                        <p style="display: none;" id="stock_<%= cartItem._id %>"><%= cartItem.product.stock_count %></p>
-                                    </div>
-                                </td>
-                                <td class="quantity__item">
-                                    <div class="quantity" style="max-width: 115px;">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <button class="btn btn-outline-dark" type="button" onclick="updateCartItem('<%= cartItem._id %>', 'decrement')">&minus;</button>
-                                            </div>
-                                            <input type="text" class="form-control text-center" value="<%= cartItem.quantity %>" id="quantityElement_<%= cartItem._id %>" aria-label="Example text with button addon" aria-describedby="button-addon1" readonly>
-                                            <div class="input-group-append">
-                                                <button class="btn btn-outline-dark" type="button" onclick="updateCartItem('<%= cartItem._id %>', 'increment')">&plus;</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="cart__price" id = 'totalOg<%=cartItem._id%>'> ₹ <%= cartItem.total %></td>
-                                <td class="cart__close">
-                                    <button class="btn btn-dark" onclick="removeCartItem('<%= cartItem._id %>')">
-                                      <i class="fa fa-close"></i> Remove
-                                    </button>
-                                  </td>
-                            </tr>
-                              <% }) %>
-                              <% } %>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="row">
-                    <div class="col-lg-6 col-md-6 col-sm-6">
-                        <div class="continue__btn">
-                            <a href="/shop/1">Continue Shopping</a>
-                        </div>
+              <% }else{ %> <% cartProducts.forEach((cartItem) => { %>
+              <tr>
+                <td class="product__cart__item">
+                  <div class="product__cart__item__pic">
+                    <img
+                      src="data:<%= cartItem.product.image[0].contentType %>;base64,<%= cartItem.product.image[0].data.toString('base64') %>"
+                    />
+                  </div>
+                  <div class="product__cart__item__text">
+                    <h6><%= cartItem.product.product_name %></h6>
+                    <h5><%= cartItem.product.price %></h5>
+                    <p style="display: none" id="stock_<%= cartItem._id %>">
+                      <%= cartItem.product.stock_count %>
+                    </p>
+                  </div>
+                </td>
+                <td class="quantity__item">
+                  <div class="quantity" style="max-width: 115px">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <button
+                          class="btn btn-outline-dark"
+                          type="button"
+                          onclick="updateCartItem('<%= cartItem._id %>', 'decrement')"
+                        >
+                          &minus;
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        class="form-control text-center"
+                        value="<%= cartItem.quantity %>"
+                        id="quantityElement_<%= cartItem._id %>"
+                        aria-label="Example text with button addon"
+                        aria-describedby="button-addon1"
+                        readonly
+                      />
+                      <div class="input-group-append">
+                        <button
+                          class="btn btn-outline-dark"
+                          type="button"
+                          onclick="updateCartItem('<%= cartItem._id %>', 'increment')"
+                        >
+                          &plus;
+                        </button>
+                      </div>
                     </div>
-                    
-                </div>
-            </div>
-            <div class="col-lg-4">
-                <div class="cart__discount">
-                    <h6>Discount codes</h6>
-                    <form action="#">
-                        <input type="text" placeholder="Coupon code">
-                        <button type="submit">Apply</button>
-                    </form>
-                </div>
-                <div class="cart__total">
-                    <h6>Cart total</h6>
-                    <ul>
-                        <li >Subtotal <span id="subTotal"><%= grandTotal %></span></li>
-                        <li>Total <span id="total"><%= grandTotal %></span></li>
-                    </ul>
-                    <a href="/user/checkout" class="primary-btn">Proceed to checkout</a>
-                </div>
-            </div>
+                  </div>
+                </td>
+                <td class="cart__price" id="totalOg<%=cartItem._id%>">
+                  ₹ <%= cartItem.total %>
+                </td>
+                <td class="cart__close">
+                  <button
+                    class="btn btn-dark"
+                    onclick="removeCartItem('<%= cartItem._id %>')"
+                  >
+                    <i class="fa fa-close"></i> Remove
+                  </button>
+                </td>
+              </tr>
+              <% }) %> <% } %>
+            </tbody>
+          </table>
         </div>
+        <div class="row">
+          <div class="col-lg-6 col-md-6 col-sm-6">
+            <div class="continue__btn">
+              <a href="/shop/1">Continue Shopping</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="cart__discount">
+          <h6>Discount codes</h6>
+          <form action="#">
+            <input type="text" placeholder="Coupon code" />
+            <button type="submit">Apply</button>
+          </form>
+        </div>
+        <div class="cart__total">
+          <h6>Cart total</h6>
+          <ul>
+            <li>Subtotal <span id="subTotal"><%= grandTotal %></span></li>
+            <li>Total <span id="total"><%= grandTotal %></span></li>
+          </ul>
+
+          <% if (!cartProducts.length){ %>
+          <div class="primary-btn">
+            Your cart is empty
+          </div>
+          <% }else{ %>
+          <a href="/user/checkout" class="primary-btn">Proceed to checkout</a>
+          <% } %>
+        </div>
+      </div>
     </div>
+  </div>
 </section>
 <!-- Shopping Cart Section End -->
 <!-- Add this script at the end of your EJS file -->
 <script>
-    function removeCartItem(cartItemId) {
-      if (confirm("Are you sure you want to remove this item from your cart?")) {
-        fetch(`/remove-from-cart/${cartItemId}`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-        .then(response => response.json())
-        .then(data => {
+  function removeCartItem(cartItemId) {
+    if (confirm("Are you sure you want to remove this item from your cart?")) {
+      fetch(`/remove-from-cart/${cartItemId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
           // Handle success, for example, you can reload the page
           location.reload();
         })
-        .catch(error => {
-          console.error('Error removing item from cart:', error);
+        .catch((error) => {
+          console.error("Error removing item from cart:", error);
           // Handle error, show an alert or provide feedback to the user
         });
-      }
     }
+  }
 
-   
-    function updateCartItem(cartItemId, action) {
-        fetch(`/update-cart-item/${cartItemId}/${action}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            const {totalSum,totalCartSum } = data
-            console.log(data)
-            // Handle success, for example, you can reload the page
-            let currentQuantity = document.getElementById('quantityElement_' + cartItemId).value;
-            let stock = document.getElementById("stock_" + cartItemId).textContent;
-            if (action === 'increment'&& parseInt(currentQuantity) + 1 <= parseInt(stock)) {
-                currentQuantity = parseInt(currentQuantity) + 1;
-            } else if (action === 'decrement' && parseInt(currentQuantity) - 1 > 0) {
-                currentQuantity = parseInt(currentQuantity) - 1;
-            }
-            document.getElementById('quantityElement_' + cartItemId).value = currentQuantity;
-            document.getElementById('subTotal').innerHTML ="₹ " + totalCartSum;
-            document.getElementById('total').innerHTML = "₹ " + totalCartSum;
-            document.getElementById(`totalOg${cartItemId}`).innerHTML = "₹ " + totalSum;
-            // location.reload();
-        })
-        .catch(error => {
-            console.error('Error updating cart item:', error);
-            // Handle error, show an alert or provide feedback to the user
-        });
-    }
+  function updateCartItem(cartItemId, action) {
+    fetch(`/update-cart-item/${cartItemId}/${action}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const { totalSum, totalCartSum } = data;
+        console.log(data);
+        // Handle success, for example, you can reload the page
+        let currentQuantity = document.getElementById(
+          "quantityElement_" + cartItemId
+        ).value;
+        let stock = document.getElementById("stock_" + cartItemId).textContent;
+        if (
+          action === "increment" &&
+          parseInt(currentQuantity) + 1 <= parseInt(stock)
+        ) {
+          currentQuantity = parseInt(currentQuantity) + 1;
+        } else if (
+          action === "decrement" &&
+          parseInt(currentQuantity) - 1 > 0
+        ) {
+          currentQuantity = parseInt(currentQuantity) - 1;
+        }
+        document.getElementById("quantityElement_" + cartItemId).value =
+          currentQuantity;
+        document.getElementById("subTotal").innerHTML = "₹ " + totalCartSum;
+        document.getElementById("total").innerHTML = "₹ " + totalCartSum;
+        document.getElementById(`totalOg${cartItemId}`).innerHTML =
+          "₹ " + totalSum;
+        // location.reload();
+      })
+      .catch((error) => {
+        console.error("Error updating cart item:", error);
+        // Handle error, show an alert or provide feedback to the user
+      });
+  }
+</script>
 
-    
-
-  </script>
-  
 <!-- Footer Section Begin -->
 <%- include("../layout/customerside/footer") %>
 <!-- Footer Section End -->

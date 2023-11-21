@@ -5,6 +5,8 @@ const productCategory = require('../models/productCategory')
 const product = require('../models/productModel')
 const Order = require('../models/orderModel')
 const Return = require("../models/returnProductModel")
+const Coupon = require("../models/couponModel")
+
 
 const loadAdminLogin=async(req,res)=>{
     try{
@@ -160,7 +162,8 @@ const blockTheUser=async (req,res)=>{
             return res.render("admin/addCategory", { message: "Fill all fields..." });
         }
 
-        const exist = await productCategory.findOne({ categoryName: req.body.categoryName });
+        const exist = await productCategory.findOne({ categoryName: { $regex: new RegExp(req.body.categoryName, 'i') } });
+
 
         if (!exist) {
             const category = new productCategory({
@@ -309,8 +312,11 @@ const loadProductEditPage =async(req,res)=>{
 }
 
 const editProduct=async(req,res)=>{
-    const { productName, brandName, price, description, stockCount, category,id } = req.body;
+
+   
+    const { productName, brandName, price, description, stockCount, category,id,images } = req.body;
     try{
+        const images = req.files
         const productId=id;
         const data={
                     product_name:productName,
@@ -318,10 +324,26 @@ const editProduct=async(req,res)=>{
                     price:price,
                     stock_count:stockCount,
                     description:description,
-                    category:category
+                    category:category,
+                    image:images
+                    
                 }
-                
+                if (images && images.length > 0) {
+                    // Logic to update images - Replace existing images or add new ones
+                    const imageData = images.map((image) => ({
+                      data: image.buffer, // Assuming multer provides 'buffer' for file data
+                      contentType: image.mimetype,
+                    }));
+                    data.image = imageData; // Assign imageData to 'images' property
+                  }
     const updatedProduct=await product.findByIdAndUpdate(productId,{$set:data},{new:true})
+    // if(req.files){
+    //     req.files.forEach((file)=>{
+    //         updatedProduct.image.push({data: file.buffer, contentType: file.mimetype})
+    //     })
+    // }
+            res.redirect("/admin/product")
+    
     await updatedProduct.save()
     res.redirect('/admin/product')
     }catch(error){
@@ -365,7 +387,21 @@ const updateActionOrder = async(req,res) =>{
     const order = await Order.findById(req.query.orderId)
     const userData = await Customer.findById(order.user)
          try{
-          
+          if(req.query.action ==="Delivered"){
+            const foundCoupon = await Coupon.findOne({
+                isActive:true,minimumPurchaseAmount:{$lte:order.totalAmount}
+            }).sort({minimumPurchaseAmount:-1})
+
+            console.log("ggg",foundCoupon);
+            if(foundCoupon){
+                const couponExists = userData.earnedCoupons.some((coupon)=>coupon.coupon.equals(foundCoupon._id))
+                console.log(couponExists);
+                if(!couponExists){
+                   userData.earnedCoupons.push({coupon: foundCoupon._id})
+                }
+            }
+            await userData.save()
+          }
      await Order.updateOne({_id:req.query.orderId},{status : req.query.action})
                 
         res.redirect("/admin/order")
@@ -446,6 +482,109 @@ const updateOrderCancel = async(req,res)=>{
     }
  }
 
+ const loadCoupons = async (req, res) => {
+    try {
+        console.log("here");
+        // pagination
+        const page = req.query.page || 1;
+        const pageSize = 8;
+        const skip = (page - 1) * pageSize;
+        const totalCoupons = await Coupon.countDocuments();
+       
+        const totalPages = Math.ceil(totalCoupons / pageSize);
+        
+        let foundCoupons;
+
+        if (req.query.search) {
+            foundCoupons = await Coupon.find({
+                isActive: req.body.searchQuery === "1" ? true : false
+            });
+            return res.status(200).json({
+                couponDatas: foundCoupons,
+            });
+        } else {
+            foundCoupons = await Coupon.find().skip(skip).limit(pageSize);
+            res.render('admin/coupons', {
+                activePage: "coupon",
+                foundCoupons,
+                filtered: req.query.search ? true : false,
+                currentPage: page || 1,
+                totalPages: totalPages || 1,
+            });
+        }
+    } catch (error) {
+        res.render("error/internalError", { error })
+    }
+};
+
+const getAddNewCoupon = (req,res)=>{
+    try{
+        console.log("nnn");
+        res.render('admin/newCoupons')
+    }catch(error){
+        res.render("error/internalError", { error:"" })
+    }
+}
+
+ function generateCouponCode(){
+    const codeRegex = /^[A-Z0-9]{5,15}$/;
+    let code ='';
+    while(!codeRegex.test(code)){
+        code = Math.random().toString(36).substring(7)
+    }
+    return Coupon.findOne({code}).then(existingCoupon=>{
+        if(existingCoupon){
+            return generateCouponCode()
+        }
+        return code
+    })
+ }
+
+const addNewCoupon = async(req,res)=>{
+  try{
+    const {description,discountType,discountAmount,minimumPurchaseAmount,usageLimit} = req.body
+     if(!description || !discountType || !discountAmount || !minimumPurchaseAmount || !usageLimit){
+        res.render('admin/newCoupons',{error:"All fields are required"})
+     }else{
+        if(discountType ==="percentage" && discountAmount>100){
+            return res.render('admin/newCoupon',{
+                error:"Discount percentage is greater than 100"
+            })
+        }
+        if(description.length <4 || description.length >100){
+            return res.render('admin/newCoupons',{
+                error:"Description must be between 4 and 100 characters"
+            })
+        }else{
+            const uniqueCode = await generateCouponCode()
+            const newCoupon = new Coupon({
+                code:uniqueCode,
+                discountType,
+                description,
+                discountAmount,
+                minimumPurchaseAmount,
+                usageLimit
+            })
+            await newCoupon.save()
+            res.redirect("/admin/coupons")
+        }
+     }
+  }catch(error){
+    console.log(error.message);
+  }
+}
+
+const couponAction = async(req,res)=>{
+    try{
+       const state = req.body.state ===""
+       const couponId = req.params.id;
+       await Coupon.findOneAndUpdate(couponId,{$set:{isActive:state}})
+       res.redirect('/admin/coupons')
+    }catch(error){
+        res.render("error/internalError", { error })
+    }
+}
+
 module.exports={
-    loadAdminLogin,loginValidation,adminValid,loadDash,displayCustomers,loadCategory,loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate,productDeactivate,UnblockTheUser,blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests,returnRequsetActions
+    loadAdminLogin,loginValidation,adminValid,loadDash,displayCustomers,loadCategory,loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate,productDeactivate,UnblockTheUser,blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests,returnRequsetActions,loadCoupons,getAddNewCoupon,addNewCoupon,couponAction
 }
