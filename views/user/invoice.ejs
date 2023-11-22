@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+  <title>Invoice</title>
+</head>
+
+<body>
+
+
+
+  <style>
+    body {
+      background: #ccc;
+    }
+
+    
+
+    .invoice {
+      background: #fff;
+      width: 100%;
+      padding: 50px;
+    }
+
+    .logo {
+      width: 2.5cm;
+    }
+
+    .document-type {
+      text-align: right;
+      color: #444;
+    }
+
+    .conditions {
+      font-size: 0.7em;
+      color: #666;
+    }
+
+    .bottom-page {
+      font-size: 0.7em;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .download-button {
+      background: linear-gradient(to right, #0b0a69, #087e0e);
+      /* Example gradient colors */
+      color: #fff;
+      /* Text color */
+      padding: 10px 20px;
+      /* Adjust padding as needed */
+      border: none;
+      border-radius: 5px;
+      /* Rounded corners */
+      cursor: pointer;
+      margin-right: 10px;
+      /* Adjust margin as needed */
+    }
+  </style>
+
+
+
+  <div class="container ">
+<div class="invoice ">
+
+      <div class="ml-auto text-right w-100">
+        <button class="download-button" onclick="downloadSalesReportPDF()">Download as PDF</button>
+      </div>
+      <div id="salesReportContent" class="col p-3">
+
+        <div class="row">
+            <div class="col">
+                <p class="text-left"><strong id="currentDateTime"></strong></p>
+            </div>
+          <div class="col-5 align-self-end">
+            <h1 class="document-type display-4">Mens Fashion</h1>
+            <p class="text-right">
+              Hr TRADING<br>
+              6B Avenue NewBasl<br>
+              Navi-MUMBAI-INDIA
+            </p>
+          </div>
+        </div>
+        <div class="row">
+
+          <div class="col-5">
+
+            <strong>To:</strong>
+           <p><%=deliveryAddress.pincode  %>,
+            <%=deliveryAddress.state  %>,
+            <%=deliveryAddress.city  %>,
+            <%=deliveryAddress.building  %>,
+            <%=deliveryAddress.area  %>
+          </p>
+          </div>
+        </div>
+        <br>
+        <br>
+        <h4>Order date: <%= order.orderDate %></h4>
+        <br>
+        <table class="table table-striped p-2">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Total Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% order.products.forEach(element => { %>
+            <tr>
+              <td><%= element.product.product_name %></td>
+              <td><%= element.quantity %></td>
+              <td><%= element.product.price %></td>
+              <td><%= element.product.price * element.quantity%></td>
+              <% }) %>
+              <td></td>
+            </tr>
+            
+          </tbody>
+        </table>
+        <div class="row">
+          <div class="col-8"></div>
+          <div class="col-4 d-flex justify-content-end">
+            <div class="text-right">
+              <div><strong>Total HT </strong> : &nbsp; <span>₹ <%= totalHt %></span></div>
+              <br>
+
+              <div><strong>Discount </strong> : &nbsp; <span>₹ <%= order.discount %></span> </div>
+              <br>
+              <div><strong>TotalAmount </strong> : &nbsp; <span>₹ <%= totalAmount %></span> </div>
+            </div>
+
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.0/html2pdf.bundle.min.js"></script>
+  <script>
+    // Get the current timestamp in milliseconds
+    var currentTimestamp = Date.now();
+
+    // Create a new Date object using the timestamp
+    var currentDate = new Date(currentTimestamp);
+
+    // Get the individual components of the date and time
+    var year = currentDate.getFullYear();
+    var month = currentDate.getMonth() + 1; // Months are zero-based, so we add 1
+    var day = currentDate.getDate();
+    var hours = currentDate.getHours();
+    var minutes = currentDate.getMinutes();
+    var seconds = currentDate.getSeconds();
+
+    // Create a formatted date string
+    var formattedDate = `${year}-${month}-${day}: ${hours}:${minutes}:${seconds}`;
+
+    // Update the content of the element with the id "currentDateTime"
+    document.getElementById('currentDateTime').innerText = formattedDate;
+
+
+
+
+    function downloadSalesReportPDF() {
+      var element = document.getElementById("salesReportContent");
+      html2pdf(element);
+    }
+  </script>
+
+</body>
+
+</html>

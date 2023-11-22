@@ -311,41 +311,58 @@ const loadProductEditPage =async(req,res)=>{
     }
 }
 
-const editProduct=async(req,res)=>{
-
-   
-    const { productName, brandName, price, description, stockCount, category,id,images } = req.body;
-    try{
-        const images = req.files
-        const productId=id;
-        const data={
-                    product_name:productName,
-                    brand_name:brandName,
-                    price:price,
-                    stock_count:stockCount,
-                    description:description,
-                    category:category,
-                    image:images
-                    
-                }
-                if (images && images.length > 0) {
-                    // Logic to update images - Replace existing images or add new ones
-                    const imageData = images.map((image) => ({
-                      data: image.buffer, // Assuming multer provides 'buffer' for file data
-                      contentType: image.mimetype,
-                    }));
-                    data.image = imageData; // Assign imageData to 'images' property
-                  }
-    const updatedProduct=await product.findByIdAndUpdate(productId,{$set:data},{new:true})
-    // if(req.files){
-    //     req.files.forEach((file)=>{
-    //         updatedProduct.image.push({data: file.buffer, contentType: file.mimetype})
-    //     })
-    // }
-            res.redirect("/admin/product")
+const editProduct = async (req, res) => {
+    console.log(">....here>,..");
+    console.log(req.body)
     
-    await updatedProduct.save()
-    res.redirect('/admin/product')
+     const { productName, brandName, price, description, stockCount, category, id, images: requestImages } = req.body;
+     try {
+         // ...
+         const images = req.files;
+         const productId = id;
+         const data = {
+             product_name: productName,
+             brand_name: brandName,
+             price: price,
+             stock_count: stockCount,
+             description: description,
+             category: category,
+         }
+ 
+         const updatedProduct = await product.findByIdAndUpdate(productId, { $set: data }, { new: true })
+ 
+         if (req.files && req.files.length > 0) {
+             // Assuming 'req.files' contains the uploaded image files
+             req.files.forEach((file) => {
+                 updatedProduct.image.push({
+                     data: file.buffer,
+                     contentType: file.mimetype,
+                 });
+             });
+         }
+ 
+         await updatedProduct.save()
+ 
+         res.redirect('/admin/product')
+     } catch (error) {
+         console.log(error.message);
+     }
+ }
+ 
+
+const deleteImgDelete = async(req,res)=>{
+    const id = req.params.id
+    const imageId = req.params.imageId
+    try{
+        const deleteImg = await product.findByIdAndUpdate(
+            {_id:id},
+            {$pull:{"image":{_id:imageId}}},
+            {new:true}
+        )
+
+        if(deleteImg){
+            return res.redirect(`/admin/product/${req.params.id}/Edit`)
+        }
     }catch(error){
         console.log(error.message);
     }
@@ -464,13 +481,23 @@ const updateOrderCancel = async(req,res)=>{
               foundRequest.status = "Rejected";
               currentProduct.returnRequested = "Rejected"
            }else{
-               const currentUser = await Customer.findById(foundOrder.user)
+            const transactionData = {
+                amount: foundOrder.totalAmount ,
+                description: 'Order return.',
+                type: 'Credit',
+            };
+            // currentUser.wallet.transactions.push(transactionData);
+            console.log(foundOrder.user);
+               const currentUser = await Customer.updateOne({_id:foundOrder.user},{$inc:{"wallet.":foundOrder.totalAmount },$push:{"wallet.transactions":transactionData}})
+            console.log(currentUser);
                const EditProduct = await product.findOne({_id:req.body.product})
 
                const currentStock = EditProduct.stock_count;
                EditProduct.stock_count = currentStock + foundRequest.quantity
                await EditProduct.save()
-
+               
+               
+                // await 
                foundRequest.status = 'Completed';
                currentProduct.returnRequested = 'Completed'
            }
@@ -586,5 +613,5 @@ const couponAction = async(req,res)=>{
 }
 
 module.exports={
-    loadAdminLogin,loginValidation,adminValid,loadDash,displayCustomers,loadCategory,loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate,productDeactivate,UnblockTheUser,blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests,returnRequsetActions,loadCoupons,getAddNewCoupon,addNewCoupon,couponAction
+    loadAdminLogin,loginValidation,adminValid,loadDash,displayCustomers,loadCategory,loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate,productDeactivate,UnblockTheUser,blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests,returnRequsetActions,loadCoupons,getAddNewCoupon,addNewCoupon,couponAction,deleteImgDelete
 }

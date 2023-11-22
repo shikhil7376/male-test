@@ -64,11 +64,14 @@
                      <% products.forEach((product,i)=>{ %>
                         <tr>
                           <td><%= i+1 %></td>
-                            <td>
-                                <% product.image.forEach(image => { %>
-                                  <img src="data:<%= image.contentType %>;base64,<%= image.data.toString('base64') %>" alt="<%= product.price %>">
-                                    <% }) %>  
-                            </td>
+                          <td>
+                            <% product.image.forEach(image => { %>
+                              <% if (image.data) { %>
+                                <img src="data:<%= image.contentType %>;base64,<%= image.data.toString('base64') %>" alt="<%= product.price %>">
+                              <% } %>
+                            <% }) %>
+                          </td>
+                          
                             <td><%= product.product_name %></td>
                             <td><%= product.brand_name %></td>
                             <td><%= product.category %></td>

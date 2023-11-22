@@ -659,7 +659,9 @@ const loadCheckout = async (req, res) => {
     discountAmount = 0
    }
     const currentUser = await Customer.findById(req.session.user);
+   
     const addresses = await Address.find({ User: req.session.user })
+   
     const currentCoupon = req.body.currentCoupon
 
     if (currentUser.is_varified) {
@@ -671,15 +673,16 @@ const loadCheckout = async (req, res) => {
       await currentUser.populate("cart.product");
       await currentUser.populate("cart.product.category");
       const cartProducts = currentUser.cart;
+     
       const noOfItems = cartProducts.length
-
+      
       let grandTotal = cartProducts.reduce((total, element) => {
         return total + element.quantity * element.product.price;
       }, 0);
-      // console.log("grandTotal",grandTotal)
+     
       // grandTotal = grandTotal - discountAmount
       
-      // console.log("grandTotal",grandTotal)
+      // console.log("grandTotal",grandTotal)  
       let insufficientStockProduct;
       cartProducts.forEach((cartProduct) => {
         if (cartProduct.product.stock_count < cartProduct.quantity) {
@@ -708,6 +711,7 @@ const loadCheckout = async (req, res) => {
 
 const placeOrder = async (req, res) => {
   try {
+    
     const currentUser = await Customer.findById(req.session.user);
     await currentUser.populate("cart.product");
     let shippingAddress = req.body.shippingAddress
@@ -726,7 +730,7 @@ const placeOrder = async (req, res) => {
         quantity: item.quantity,
       };
     });
- console.log(orderedProducts);
+ 
     let newOrder = new Order({
       user: req.session.user,
       products: orderedProducts,
@@ -737,8 +741,11 @@ const placeOrder = async (req, res) => {
 
     if (req.body.method === "cod") {
       await newOrder.save();
- 
-      res.redirect("/order-successfull");
+    
+      const order = await Order.findById(newOrder._id)
+    
+      // res.redirect("/order-successfull");
+      res.render("user/orderSuccesful",{order});
     } else if (req.body.method === "rzp") {
 
       const razorpay = new Razorpay({
@@ -990,13 +997,14 @@ const updateOrderStatus = async () => {
   }
 };
 
-const loadOrderSuccess = async (req, res) => {
-  try {
-    res.render("user/orderSuccesful");
-  } catch (error) {
-    console.log(error.message);
-  }
-};
+// const loadOrderSuccess = async (req, res) => {
+//   const order = await Order.findOne()
+//   try {
+//     res.render("user/orderSuccesful");
+//   } catch (error) {
+//     console.log(error.message);
+//   }
+// };
 
 const getWallet = async (req, res) => {
   try {
@@ -1143,6 +1151,22 @@ const requestReturnProduct = async(req,res)=>{
   }
 }
 
+const loadInvoice = async(req,res)=>{
+  const id = req.params.id
+  const order = await Order.findById(id).populate("products.product")
+  const totalHt = order.totalAmount - 5
+  const totalAmount = order.totalAmount - order.discount
+  console.log(totalHt);
+  const user = await Customer.findById(req.session.user)
+  console.log("user>>>>",user);
+  const deliveryAddress = await Address.findOne({User:req.session.user,default:true})
+  try{
+    res.render("user/invoice",{order,user,totalHt,totalAmount,deliveryAddress })
+  }catch(error){
+  console.log(error.message);
+  }
+}
+
 module.exports = {
   loadHome,
   loadLogin,
@@ -1171,7 +1195,7 @@ module.exports = {
   getSingleProduct,
   getAddresses,
   changeDefaultAddress,
-  loadOrderSuccess,
+  // loadOrderSuccess,
   getWallet,
   saveRzpOrder,
   cancelOrder,
@@ -1179,5 +1203,6 @@ module.exports = {
   requestReturnProduct,
   resendOtp,
   getCoupons,
-  applyCoupon 
+  applyCoupon,
+  loadInvoice
 };

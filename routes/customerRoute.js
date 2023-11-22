@@ -30,7 +30,7 @@ const{
    getOrders,
    getSingleProduct,
    changeDefaultAddress,
-   loadOrderSuccess,
+//    loadOrderSuccess,
    getWallet ,
    saveRzpOrder,
    cancelOrder,
@@ -38,7 +38,8 @@ const{
    requestReturnProduct,
    resendOtp,
    getCoupons,
-   applyCoupon
+   applyCoupon,
+   loadInvoice
 }=require('../controllers/customerController')
 
 
@@ -98,7 +99,7 @@ Customer_Route.post('/user/profile/edit-address',Auth.checkToBlock,Auth.logged,E
 Customer_Route.get("/user/checkout",Auth.checkToBlock,Auth.logged,loadCheckout)
 Customer_Route.post("/user/checkout",Auth.checkToBlock,Auth.logged,placeOrder)
 Customer_Route.post("/save-rzporder",Auth.checkToBlock,Auth.logged, saveRzpOrder)
-Customer_Route.get("/order-successfull",Auth.logged,Auth.checkToBlock,loadOrderSuccess )
+// Customer_Route.get("/order-successfull",Auth.logged,Auth.checkToBlock,loadOrderSuccess )
                                                                 
 Customer_Route.get("/orders",Auth.checkToBlock,Auth.logged,getOrders)
               .get("/wallet",Auth.checkToBlock,Auth.logged,getWallet)
@@ -109,5 +110,6 @@ Customer_Route.post("/cancel-order",Auth.checkToBlock,Auth.logged,cancelOrder)
 
 Customer_Route.get("/return-product",Auth.checkToBlock,Auth.logged,getReturnProductForm )
 Customer_Route.post("/return-product",Auth.checkToBlock,Auth.logged,requestReturnProduct)
+Customer_Route.get("/invoice/:id",Auth.checkToBlock,Auth.logged,loadInvoice)
 
 module.exports=Customer_Route

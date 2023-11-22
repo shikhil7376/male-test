@@ -1,7 +1,7 @@
 const express=require('express')
 const admin_route = express.Router()
 const Auth=require('../middleware/Auth')
-const{loadAdminLogin, loginValidation, adminValid,loadDash,displayCustomers,loadCategory, loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate, productDeactivate, UnblockTheUser, blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests,returnRequsetActions,loadCoupons,getAddNewCoupon,addNewCoupon,couponAction}=require("../controllers/adminController")
+const{loadAdminLogin, loginValidation, adminValid,loadDash,displayCustomers,loadCategory, loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate, productDeactivate, UnblockTheUser, blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests,returnRequsetActions,loadCoupons,getAddNewCoupon,addNewCoupon,couponAction,deleteImgDelete}=require("../controllers/adminController")
 const multer = require("multer")
 const storage = multer.memoryStorage()
 const upload = multer({storage:storage})
@@ -30,7 +30,8 @@ admin_route.get('/product/:id/Deactive',productDeactivate)
 
 
 admin_route.get('/product/:id/Edit',loadProductEditPage)
-admin_route.post('/product/Edit/:id',upload.array('images',3),editProduct)
+admin_route.post('/product/:id/Edit',upload.array('images',3),editProduct)
+admin_route.get("/product/:imageId/:id/deleteImg", deleteImgDelete)
 
 
 admin_route.get("/order",Auth.adminAuth,loadOrder)
