@@ -32,9 +32,12 @@
               <p>Image not available</p>
             <% } %>
           </div>
+          
           <div class="col-md-6">
             <span class="d-block text-info h6 text-uppercase">
-              <%= order.orderedProducts[0]. product_name %>
+              
+              <%= order.orderedProducts[0].product_name %>
+              
             </span>
             <p>
               Price: ₹<%= order.orderedProducts[0].price.toFixed(2) %>,<br>

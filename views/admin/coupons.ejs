@@ -106,7 +106,8 @@
                       <%= coupon.usedCount %>
                     </td>
                     <td>
-                      <form action="/admin/coupons/action/<%= coupon._id %>?_method=PATCH" method="post">
+                      <form action="/admin/coupons/action/<%= coupon._id %>?_method=PATCH" method="POST">
+                        <input type="hidden" name="_method" value="PATCH">
                         <input type="hidden" name="coupon" value="<%= coupon._id %>">
                         <% if (coupon.isActive) { %>
                         <input type="hidden" name="state" value="1">

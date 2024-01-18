@@ -19,23 +19,25 @@
             Balance: <strong>₹<%= currentUser.wallet?.balance.toFixed(2) %></strong>
           </span>
           <span class="d-block text-primary mt-4 text-uppercase">Transaction History</span>
-         
+         <% if(!currentUser.wallet.transactions.length){ %>
           <p class="mb-0">No data found.</p>
-         
-          
+         <% }else{ %>
+          <% currentUser.wallet.transactions.forEach((transaction)=> { %>
           <div class="d-flex">
             <p class="mb-0">
-              <span class="text-dark">fsdf</span>
-              <span>gfsd</span>
+              <span class="text-dark"><%= transaction.timestamp %></span>
+              <span><%= transaction.description %></span>
             </p>
       
-            <span class="text-success ml-3">₹sfgd</span>
-           
-            <span class="text-dark ml-3">₹45</span>
-        
+            <% if (transaction.type === 'Credit') { %>
+              <span class="text-success ml-3">₹<%= transaction.amount %></span>
+              <% } else { %>
+              <span class="text-dark ml-3">₹<%= transaction.amount %></span>
+              <% } %>
+            </div>
+            <% }) %>
+            <% } %>
           </div>
-      
-        </div>
 
       </div>
     </div>

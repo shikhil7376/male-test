@@ -249,9 +249,11 @@
                 <button type="submit" class="btn btn-dark btn-sm">Apply Coupon</button>
               </div>
             </div>
-            <p class="text-danger">
-        
-            </p>
+            <% if (error && error != undefined) { %>
+              <p class="text-danger">
+          <%= error %> 
+              </p>
+            <% } %>
             <a href="/coupons" class="btn btn-outline-dark btn-sm mt-4">View Available
               Coupons</a>
           </div>

@@ -6,7 +6,7 @@ const product = require('../models/productModel')
 const Order = require('../models/orderModel')
 const Return = require("../models/returnProductModel")
 const Coupon = require("../models/couponModel")
-
+const Offer = require("../models/offerModel")
 
 const loadAdminLogin=async(req,res)=>{
     try{
@@ -368,7 +368,7 @@ const deleteImgDelete = async(req,res)=>{
     }
 }
 
-const loadOrder = async(req,res) =>{
+const  loadOrder = async(req,res) =>{
     const perPage = 8; // Number of order per page 
     const page = req.query.page || 1 // Get the current page from the query parameters (default to page !) 
     const {customer , status} = req.query
@@ -413,9 +413,12 @@ const updateActionOrder = async(req,res) =>{
             if(foundCoupon){
                 const couponExists = userData.earnedCoupons.some((coupon)=>coupon.coupon.equals(foundCoupon._id))
                 console.log(couponExists);
-                if(!couponExists){
-                   userData.earnedCoupons.push({coupon: foundCoupon._id})
-                }
+                // if(!couponExists){
+                    // for(let i of foundCoupon){
+                        
+                        userData.earnedCoupons.push({coupon: foundCoupon._id})
+                    // }
+                
             }
             await userData.save()
           }
@@ -442,7 +445,7 @@ const updateOrderCancel = async(req,res)=>{
     }
 }
 
- const getreturnRequests = async(req,res)=>{
+const getreturnRequests = async(req,res)=>{
     try{
         const ITEM_PER_PAGE = 4; // no of item to display per page 
         const page = parseInt(req.query.page) || 1
@@ -470,9 +473,10 @@ const updateOrderCancel = async(req,res)=>{
  const returnRequsetActions = async(req,res)=>{
     try{
         
-           const foundRequest =  await Return.findById(req.body.request)
+           const foundRequest =  await Return.findById(req.body.request).populate('product')
            const foundOrder = await Order.findById(req.body.order)
            const currentProduct = foundOrder.products.find((product)=>product.product.toString()=== req.body.product.toString())
+           const totalAmount = foundRequest.quantity*foundRequest.product.price
            console.log(currentProduct);
            if(req.body.action ==="approve"){
             foundRequest.status = "Approved";
@@ -488,7 +492,9 @@ const updateOrderCancel = async(req,res)=>{
             };
             // currentUser.wallet.transactions.push(transactionData);
             console.log(foundOrder.user);
-               const currentUser = await Customer.updateOne({_id:foundOrder.user},{$inc:{"wallet.":foundOrder.totalAmount },$push:{"wallet.transactions":transactionData}})
+            console.log("wallet updating ",foundOrder.totalAmount);
+               const currentUser = await Customer.updateOne({_id:foundOrder.user},{$inc:{"wallet.balance":totalAmount },$push:{"wallet.transactions":transactionData}})
+
             console.log(currentUser);
                const EditProduct = await product.findOne({_id:req.body.product})
 
@@ -511,7 +517,7 @@ const updateOrderCancel = async(req,res)=>{
 
  const loadCoupons = async (req, res) => {
     try {
-        console.log("here");
+       ;
         // pagination
         const page = req.query.page || 1;
         const pageSize = 8;
@@ -603,15 +609,77 @@ const addNewCoupon = async(req,res)=>{
 
 const couponAction = async(req,res)=>{
     try{
+        
+        console.log(">>>>here");
        const state = req.body.state ===""
+      console.log(state);
        const couponId = req.params.id;
-       await Coupon.findOneAndUpdate(couponId,{$set:{isActive:state}})
+       await Coupon.findByIdAndUpdate(couponId, { $set: { isActive: state } });
        res.redirect('/admin/coupons')
     }catch(error){
-        res.render("error/internalError", { error })
+       console.log(error.message);
     }
 }
 
-module.exports={
-    loadAdminLogin,loginValidation,adminValid,loadDash,displayCustomers,loadCategory,loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate,productDeactivate,UnblockTheUser,blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests,returnRequsetActions,loadCoupons,getAddNewCoupon,addNewCoupon,couponAction,deleteImgDelete
+const loadOffer = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1; // Get page number from query parameters, default to 1
+        const itemsPerPage = 10; // Set the number of items per page
+
+        const totalOffers = await Offer.countDocuments();
+        const totalPages = Math.ceil(totalOffers / itemsPerPage);
+
+        const offers = await Offer.find()
+            .skip((page - 1) * itemsPerPage)
+            .limit(itemsPerPage)
+            .exec();
+
+        return res.render('admin/offer', { offers, totalPages, currentPage: page });
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+
+const addOffer = async(req,res)=>{
+    try{
+        console.log("here");
+        const formData = req.body;
+        console.log(formData);
+        const newOffer = new Offer(formData);
+        console.log(newOffer);
+       await newOffer.save()
+    }catch(error){
+        console.log(error.message);
+    }
 }
+const updateOffer = async (req, res) => {
+    try {
+        const offerId = req.body.offerId;
+        const updatedData = {
+            offerName: req.body.offerName,
+            description: req.body.description,
+            discount: req.body.discount,
+            startingDate: req.body.startingDate,
+            endingDate: req.body.endingDate
+        };
+
+        // Update the offer in the database
+        await Offer.findByIdAndUpdate(offerId, { $set: updatedData });
+
+        // Redirect to the offer page or send a success response
+        return res.redirect('/admin/offer');
+    } catch (error) {
+        console.log(error.message);
+        // Handle error
+        return res.redirect('/admin/offer');
+    }
+};
+
+
+module.exports={
+  
+    loadAdminLogin,loginValidation,adminValid,loadDash,displayCustomers,loadCategory,loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate,productDeactivate,UnblockTheUser,blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests,returnRequsetActions,loadCoupons,getAddNewCoupon,addNewCoupon,couponAction,deleteImgDelete,loadOffer,addOffer,updateOffer 
+}
+

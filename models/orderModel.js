@@ -69,10 +69,7 @@ const orderSchema = new mongoose.Schema({
   transactionId: {
     type: String,
   },
-  discount:{
-    type:Number,
-    default:0
-  }
+ 
 });
 
   

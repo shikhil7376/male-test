@@ -37,7 +37,8 @@
               </tr>
             </thead>
             <tbody>
-              <% if (!cartProducts.length){ %>
+              <p class="error"><%= locals.stockError %></p>
+              <% if (!locals.cartProducts){ %>
               <tr>
                 <td>Your cart is empty</td>
               </tr>
@@ -126,11 +127,13 @@
         <div class="cart__total">
           <h6>Cart total</h6>
           <ul>
+            <% if(locals.grandTotal){ %>
             <li>Subtotal <span id="subTotal"><%= grandTotal %></span></li>
             <li>Total <span id="total"><%= grandTotal %></span></li>
+            <% } %>
           </ul>
 
-          <% if (!cartProducts.length){ %>
+          <% if (!locals.cartProducts){ %>
           <div class="primary-btn">
             Your cart is empty
           </div>

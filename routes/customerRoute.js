@@ -54,7 +54,7 @@ Customer_Route.get('/user-Login',Auth.userAuth,loadLogin)
 Customer_Route.post('/user-Login',checkUserValid)
 Customer_Route.post('/user-LogOut',userLogouting)
 
-//signup validation
+//signup validation 
 Customer_Route.get("/register",Auth.userAuth,loadRegister)
 Customer_Route.post("/register",insertUser)
 

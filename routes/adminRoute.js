@@ -1,7 +1,7 @@
 const express=require('express')
 const admin_route = express.Router()
 const Auth=require('../middleware/Auth')
-const{loadAdminLogin, loginValidation, adminValid,loadDash,displayCustomers,loadCategory, loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate, productDeactivate, UnblockTheUser, blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests,returnRequsetActions,loadCoupons,getAddNewCoupon,addNewCoupon,couponAction,deleteImgDelete}=require("../controllers/adminController")
+const{loadAdminLogin, loginValidation, adminValid,loadDash,displayCustomers,loadCategory, loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate, productDeactivate, UnblockTheUser, blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests,returnRequsetActions,loadCoupons,getAddNewCoupon,addNewCoupon,couponAction,deleteImgDelete,loadOffer,addOffer,updateOffer }=require("../controllers/adminController")
 const multer = require("multer")
 const storage = multer.memoryStorage()
 const upload = multer({storage:storage})
@@ -44,4 +44,9 @@ admin_route.get("/coupons",Auth.adminAuth,loadCoupons)
            .get('/new-coupon',Auth.adminAuth,getAddNewCoupon) 
            .post('/new-coupon',Auth.adminAuth,addNewCoupon)
            .patch('/coupons/action/:id',Auth.adminAuth,couponAction)
+
+admin_route.get('/offer',Auth.adminAuth,loadOffer)
+admin_route.post('/addOffer',Auth.adminAuth,addOffer)
+admin_route.post('/editOffer', Auth.adminAuth, updateOffer);
+
 module.exports=admin_route

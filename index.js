@@ -9,11 +9,13 @@ const customerRoute=require('./routes/customerRoute')
 const adminRoute=require('./routes/adminRoute')
 const mongoose=require('mongoose')
 const socketio = require('./middleware/SocketAuth')
+const methodOverride = require('method-override');
 const socketIo = require('socket.io');
 
 const app=express()
 const server = http.createServer(app);
 
+app.use(methodOverride('_method'));
 app.set('view engine','ejs')
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -38,6 +40,6 @@ mongoose
 // const { io, socketMiddleware } = socketio(server, session);
 // app.use(socketMiddleware);
 
-const PORT=3008
+const PORT=8000
 app.listen(PORT,()=>console.log("server running..."))
 

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Skydash Admin</title>
+  <!-- plugins:css -->
+  <link rel="stylesheet" href="/admin/vendors/feather/feather.css">
+  <link rel="stylesheet" href="/admin/vendors/ti-icons/css/themify-icons.css">
+  <link rel="stylesheet" href="/admin/vendors/css/vendor.bundle.base.css">
+  <!-- endinject -->
+  <!-- Plugin css for this page -->
+  <!-- End plugin css for this page -->
+  <!-- inject:css -->
+  <link rel="stylesheet" href="/admin/css/vertical-layout-light/style.css">
+  <!-- endinject -->
+  <link rel="shortcut icon" href="/admin/images/favicon.png" />
+</head>
+
+<body>
+  <div class="container-scroller">
+    <!-- partial:../../partials/_navbar.html -->
+    <%- include("../layout/adminside/navbar") %>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:../../partials/_settings-panel.html -->
+      <%- include("../layout/adminside/navbar") %>
+      <!-- partial -->
+      <!-- partial:../../partials/_sidebar.html -->
+      <%- include("../layout/adminside/sidebar") %>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="row">
+           
+            
+            <div class="col-lg-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="card-title">OFFERS</h4>
+                   
+                    <!-- Add Product Button -->
+      <!-- Add Product Button -->
+<div class="mb-4">
+    <button class="btn btn-primary" data-toggle="modal" data-target="#addOfferModal">Add Offer</button>
+  </div>
+  
+                  <div class="table-responsive">
+                    <table class="table table-striped">
+                      <thead>
+                        <tr>
+                       <th>Offer Name</th>
+                       <th>description</th>
+                       <th>Discount</th>
+                       <th>Starting Date</th>
+                       <th>Ending Date</th>
+                       <th>Status</th>
+                       <th>edit/delete</th> 
+                        </tr>
+                      </thead>
+                      <tbody>
+                     <% for(let i=0;i<offers.length;i++){ %>
+                     <tr>
+                         <td><%= offers[i].offerName %></td>
+                         <td><%= offers[i].description %></td>
+                         <td><%= offers[i].discount %></td>
+                         <td><%= new Date(offers[i].startingDate).toLocaleDateString() %></td>
+                         <td><%= new Date(offers[i].endingDate).toLocaleDateString() %></td>
+                        <% if(offers.is_delete===true){ %>
+                                <td>
+                                    <label class="text-danger">Deactive</label>
+                                </td>
+                                <td>
+                                  <a href="#" class="btn btn-primary edit-offer" data-toggle="modal" data-target="#editOfferModal"
+                                  data-offerid="<%= offers[i]._id %>"
+                                  data-offername="<%= offers[i].offerName %>"
+                                  data-description="<%= offers[i].description %>"
+                                  data-discount="<%= offers[i].discount %>"
+                                  data-startingdate="<%= new Date(offers[i].startingDate).toISOString().split('T')[0] %>"
+                                  data-endingdate="<%= new Date(offers[i].endingDate).toISOString().split('T')[0] %>">
+                                  Edit
+                               </a>
+                                  <a href="" class="btn btn-success">Active</a>
+                                </td>
+                            <% }else{ %>
+                              <td>
+                                <label class="text-success">Active</label>
+                            </td>
+                              <td>
+                                <a href="#" class="btn btn-primary edit-offer" data-toggle="modal" data-target="#editOfferModal"
+                                data-offerid="<%= offers[i]._id %>"
+                                data-offername="<%= offers[i].offerName %>"
+                                data-description="<%= offers[i].description %>"
+                                data-discount="<%= offers[i].discount %>"
+                                data-startingdate="<%= new Date(offers[i].startingDate).toISOString().split('T')[0] %>"
+                                data-endingdate="<%= new Date(offers[i].endingDate).toISOString().split('T')[0] %>">
+                                Edit
+                             </a>
+                              <a href="" class="btn btn-danger">Deactive</a>
+                                <% } %>
+                              </td>
+                     </tr>
+                        <% } %>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+  <!---pagination start-->
+    <!-- Add pagination links or buttons below your table -->
+<nav aria-label="Page navigation">
+  <ul class="pagination">
+      <% for (let i = 1; i <= totalPages; i++) { %>
+          <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+              <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+          </li>
+      <% } %>
+  </ul>
+</nav>
+
+
+  <!---pagination end-->
+            <!-- Modal for Adding Offer -->
+<div class="modal fade" id="addOfferModal" tabindex="-1" role="dialog" aria-labelledby="addOfferModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addOfferModalLabel">Add Offer</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Form for adding offer details -->
+          <form id="addOfferForm">
+            <div class="form-group">
+              <label for="offerName">Offer Name</label>
+              <input type="text" class="form-control" id="offerName" required>
+            </div>
+            <div class="form-group">
+              <label for="description">Description</label>
+              <textarea class="form-control" id="description" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="discount">Discount</label>
+              <input type="number" class="form-control" id="discount" required>
+            </div>
+            <div class="form-group">
+              <label for="startingDate">Starting Date</label>
+              <input type="date" class="form-control" id="startingDate" required>
+            </div>
+            <div class="form-group">
+              <label for="endingDate">Ending Date</label>
+              <input type="date" class="form-control" id="endingDate" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Offer</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+ <!-- Inside the editOfferModal -->
+     <!-- Inside the editOfferModal -->
+
+<!-- Inside the editOfferModal -->
+<div class="modal fade" id="editOfferModal" tabindex="-1" role="dialog" aria-labelledby="editOfferModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="editOfferModalLabel">Edit Offer</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <!-- Inside the editOfferModal, move the form here -->
+              <form id="editOfferForm" action="/admin/editOffer" method="POST">
+                  <input type="hidden" id="offerId" name="offerId">
+
+                  <div class="form-group">
+                      <label for="offerNameEdit">Offer Name</label>
+                      <input type="text" class="form-control" id="offerNameEdit" name="offerName" required>
+                  </div>
+                  <div class="form-group">
+                      <label for="descriptionEdit">Description</label>
+                      <textarea class="form-control" id="descriptionEdit" name="description" rows="3" required></textarea>
+                  </div>
+                  <div class="form-group">
+                      <label for="discountEdit">Discount</label>
+                      <input type="number" class="form-control" id="discountEdit" name="discount" required>
+                  </div>
+                  <div class="form-group">
+                      <label for="startingDateEdit">Starting Date</label>
+                      <input type="date" class="form-control" id="startingDateEdit" name="startingDate" required>
+                  </div>
+                  <div class="form-group">
+                      <label for="endingDateEdit">Ending Date</label>
+                      <input type="date" class="form-control" id="endingDateEdit" name="endingDate" required>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Update Offer</button>
+              </form>
+              <!-- ... (end edit offer) -->
+          </div>
+      </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+  <!-- ... (end edit offer) -->
+          
+        <!-- content-wrapper ends -->
+        <!-- partial:../../partials/_footer.html -->
+        <footer class="footer">
+          <div class="d-sm-flex justify-content-center justify-content-sm-between">
+            <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2021.  Premium <a href="https://www.bootstrapdash.com/" target="_blank">Bootstrap admin template</a> from BootstrapDash. All rights reserved.</span>
+            <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Hand-crafted & made with <i class="ti-heart text-danger ml-1"></i></span>
+          </div>
+        </footer>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+  <!-- plugins:js -->
+  <script src="/admin/vendors/js/vendor.bundle.base.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page -->
+  <!-- End plugin js for this page -->
+  <!-- inject:js -->
+  <script src="/admin/js/off-canvas.js"></script>
+  <script src="/admin/js/hoverable-collapse.js"></script>
+  <script src="/admin/js/template.js"></script>
+  <script src="/admin/js/settings.js"></script>
+  <script src="/admin/js/todolist.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <!-- End custom js for this page-->
+
+  <!-- Custom js for this page-->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Submit form data
+      document.getElementById('addOfferForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        // Add logic to handle form submission (e.g., send data to the server)
+        // Close the modal after successful submission
+        $('#addOfferModal').modal('hide');
+      });
+    });
+  </script>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script>
+        document.addEventListener('DOMContentLoaded', function () {
+    // Submit form data
+    document.getElementById('addOfferForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      
+      // Collect form data
+      var formData = {
+        offerName: document.getElementById('offerName').value,
+        description: document.getElementById('description').value,
+        discount: document.getElementById('discount').value,
+        startingDate: document.getElementById('startingDate').value,
+        endingDate: document.getElementById('endingDate').value
+      };
+
+      // Send data to server using AJAX
+      $.ajax({
+        type: 'POST',
+        url: '/admin/addOffer', // Replace with your server-side endpoint
+        data: formData,
+        success: function (response) {
+          console.log('Offer added successfully:', response);
+          // Close the modal after successful submission
+          $('#addOfferModal').modal('hide');
+        },
+        error: function (error) {
+          console.error('Error adding offer:', error);
+          // Handle error, if needed
+        }
+      });
+    });
+  });
+
+</script>
+
+// edit offer modal
+<script>
+$(document).on('click', '.edit-offer', function () {
+    const offerId = $(this).data('offerid');
+    const offerName = $(this).data('offername');
+    const description = $(this).data('description');
+    const discount = $(this).data('discount');
+    const startingDate = $(this).data('startingdate');
+    const endingDate = $(this).data('endingdate');
+
+    // Populate the fields in the edit modal
+    $('#editOfferModal #offerId').val(offerId);
+    $('#editOfferModal #offerName').val(offerName);
+    $('#editOfferModal #description').val(description);
+    $('#editOfferModal #discount').val(discount);
+    $('#editOfferModal #startingDate').val(startingDate);
+    $('#editOfferModal #endingDate').val(endingDate);
+
+    // Show the modal
+    $('#editOfferModal').modal('show');
+});
+//edit offer modal end
+
+  </script>
+  
+</body>
+
+</html>

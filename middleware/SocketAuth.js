@@ -38,7 +38,7 @@ const initSocketMiddleware = (server) => {
     socket.on('blockUser', (blockedUserId) => {
         const blockedUserSocketId = connectedClients[blockedUserId];
         if (blockedUserSocketId) {
-            io.to(blockedUserSocketId).emit('userBlocked');
+            io.to(blockesadUserSocketId).emit('userBlocked');
         }
     });
 });
