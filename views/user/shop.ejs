@@ -21,15 +21,17 @@
 <!-- Breadcrumb Section End -->
 
 <!-- Shop Section Begin -->
-<section class="shop spad">
+<section class="shop spad" id="shopSection">
   <div class="container">
     <div class="row">
       <div class="col-lg-3">
         <div class="shop__sidebar">
           <div class="shop__sidebar__search">
-            <form action="#">
-              <input type="text" placeholder="Search...">
-              <button type="submit"><span class="icon_search"></span></button>
+            <form class="search-model-form" method="get" action="/shop">
+              <!-- Use the 'search' name for the input field -->
+              <input type="text" class="form-control" name="search" value="<%= typeof query !== 'undefined' ? query : '' %>"
+                placeholder="Search products">
+              <button type="submit"></button>
             </form>
           </div>
           <div class="shop__sidebar__accordion">
@@ -42,10 +44,10 @@
                   <div class="card-body">
 
                     <div class="shop__sidebar__categories">
-                      <% categoryDatas.forEach((element)=>{ %>
+                      <% categoryDatas.forEach((category)=>{ %>
                       <ul class="nice-scroll">
 
-                        <li><a href="#"><%= element.categoryName %></a></li>
+                        <li><a href="/shop?category=<%=category._id %>"><%= category.categoryName %></a></li>
                         <%    })  %>
                       </ul>
                     </div>
@@ -61,7 +63,7 @@
                     <div class="shop__sidebar__brand">
                       <% productDatas.forEach((element)=>{ %>
                       <ul>
-                        <li><a href="#"><%= element.brand_name %></a></li>
+                        <li><a href="/shop?brand=<%=element.brand_name %>"><%= element.brand_name %></a></li>
 
                         <%})  %>
                       </ul>
@@ -77,12 +79,12 @@
                   <div class="card-body">
                     <div class="shop__sidebar__price">
                       <ul>
-                        <li><a href="#">$0.00 - $50.00</a></li>
-                        <li><a href="#">$50.00 - $100.00</a></li>
-                        <li><a href="#">$100.00 - $150.00</a></li>
-                        <li><a href="#">$150.00 - $200.00</a></li>
-                        <li><a href="#">$200.00 - $250.00</a></li>
-                        <li><a href="#">250.00+</a></li>
+                        <li><a href="/shop?minPrice=0&maxPrice=500">₹0.00 - ₹500.00</a></li>
+                        <li><a href="/shop?minPrice=500&maxPrice=1000">₹500.00 - ₹1000.00</a></li>
+                        <li><a href="/shop?minPrice=1000&maxPrice=1500">₹1000.00 - ₹1500.00</a></li>
+                        <li><a href="/shop?minPrice=1500&maxPrice=2000">₹1500.00 - ₹2000.00</a></li>
+                        <li><a href="/shop?minPrice=2000&maxPrice=2500">₹2000.00 - ₹2500.00</a></li>
+                        <li><a href="/shop?minPrice=2500">₹2500.00+</a></li>
                       </ul>
                     </div>
                   </div>
@@ -265,8 +267,13 @@
         </div>
       </div>
     </div>
+
 </section>
 <!-- Shop Section End -->
 
+
+
+
 <!-- Footer Section Begin -->
 <%- include("../layout/customerside/footer") %>
+

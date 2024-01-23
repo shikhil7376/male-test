@@ -22,8 +22,8 @@ const productSchema = new mongoose.Schema({
     require: true,
   },
   category: {
-    type: String,
-    require: true,
+     type:mongoose.Schema.Types.ObjectId,
+     ref:'productCategory'
   },
   in_stock: {
     type: Boolean,
@@ -39,6 +39,22 @@ const productSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+   offer:{
+    type:mongoose.Schema.Types.ObjectId,
+     ref:"Offer"
+   },
+   offerPrice:{
+       type:Number,
+       default:0
+   },
+   categoryOfferPrice:{
+     type:Number,
+     default:0
+   },
+    
+   originalPrice:{
+    type:Number
+   }
 });
 
 const product = mongoose.model("product", productSchema);

@@ -34,7 +34,14 @@
       <div class="main-panel">
         <div class="content-wrapper">
           <div class="row">
-           
+            <ul class="navbar-nav w-100">
+              <li class="nav-item w-100">
+                <form class="nav-link mt-2 mt-md-0 d-none d-lg-flex search" action="" method="get">
+                  <input type="text" class="form-control" name="search" placeholder="Search category">
+                  <button class="btn-info">Search</button>
+                </form>
+              </li>
+            </ul>
             
             <div class="col-lg-12 grid-margin stretch-card">
               <div class="card">
@@ -58,6 +65,7 @@
                        <th>Stock</th> 
                        <th>Status</th>
                        <th>Action</th>
+                       <th>Offer</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -74,7 +82,7 @@
                           
                             <td><%= product.product_name %></td>
                             <td><%= product.brand_name %></td>
-                            <td><%= product.category %></td>
+                            <td><%= product.category ? product.category.categoryName : 'No Category' %></td>
                             <td><%= product.price %></td>
                             <td><%= product.stock_count %></td>
                             <% if (product.is_delete === true) { %>
@@ -97,14 +105,40 @@
                                 <a href="/admin/product/<%= product._id %>/Deactive" class="btn btn-danger">Deactive</a>
                                </td>
                            <% }%>
+                        
+                           <td>
+                            <% if (product.offerPrice > 0 ) { %>
+                              <p class="text-info">
+                                <%= product.offer.name %> <br>
+                                <% if (product.categoryOfferPrice > 0) { %>
+                                  and Category Offer
+                                <% } %>
+                              </p>
+                            <% } else if (product.categoryOfferPrice > 0 ) { %>
+                              <p class="text-info">Category Offer</p>
+                            <% } else { %>
+                              <p class="text-danger">No offers</p>
+                            <% } %>
                             
+                          </td>
+                
                         </tr>
                     <% }) %>
                       </tbody>
                     </table>
                   </div>
                 </div>
+                <nav aria-label="Page navigation">
+                  <ul class="pagination">
+                      <% for (let i = 1; i <= totalPages; i++) { %>
+                          <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                              <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                          </li>
+                      <% } %>
+                  </ul>
+                </nav>
               </div>
+
             </div>
           
         <!-- content-wrapper ends -->

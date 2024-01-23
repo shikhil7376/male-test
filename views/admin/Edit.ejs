@@ -46,9 +46,10 @@
                           <h4 class="card-title">Product Information</h4>
                           <p class="card-description text-info">Basic product info</p>
 
-                         <form action="/admin/product/<%= Product.id %>/Edit" method="post" class="forms-sample" enctype="multipart/form-data">
+                          <form action="/admin/product/Edit" id="productForm" method="post" class="forms-sample"
+                          enctype="multipart/form-data">
 
-                            <input type="hidden" name="id" value="<%= Product.id %>">
+                          <input type="hidden" value="<%= id %>" name="id">
                             <!-- Product Name -->
                             <div class="form-group">
                               <label for="productName">Product Name</label>
@@ -87,27 +88,49 @@
                             </div>
               
                             <!-- Product Categories and Tags -->
-                            <div class="col-md-12 grid-margin stretch-card">
-                              <div class="card">
-                                <div class="card-body">
-                                  <h4 class="card-title">Product Categories</h4>
-                                  <div class="form-group">
-                                    <label for="category">Category</label>
-                                    <select class="form-control form-control-lg" name="category" id="category">
+                            <div class="form-group">
+                              <label for="category">Category</label>
+                              <select class="form-control form-control-lg text-dark" name="category"
+                                id="category">
+                                
+                                <% if(Product.category){ %>
+                                  <option value="<%= Product.category._id %>" disabled selected><%= Product.category.categoryName %></option>
+                                  <% } else { %>
+                                    <option disabled selected>No Categories</option>
+                                    <% } %>
+                                    <% Categories.forEach(category => { %>
+                                      <% if (Product.category && Product.category.categoryName && Product.category.categoryName !== category.categoryName) { %>
 
-                                      <option value="<%= Product.category %>"><%= Product.category %></option>
-                                      <% Categories.forEach(category => { %>
-                                          <option value="<%= category.categoryName %>"><%= category.categoryName %></option>
-                                      <% }) %>
-
-                                  </select>
-                                  </div>
-                               
-                                </div>
-                              </div>
+                                          <option value="<%= category._id %>"><%= category.categoryName %></option>
+                                      <% } %>
+                                  <% }) %>
+                              </select>
                             </div>
                        
-                            
+                               <!-- Offer  -->
+                               <div class="form-group">
+                                <label for="price">Offer </label>
+                                <select class="form-control form-control-lg text-dark" name="offer" id="offer">
+                                  <% if (Product.offer) { %>
+                                    <option value="<%= Product.offer._id %>"  selected><%= Product.offer.name %></option>
+                                  <% } else {%>
+                                    <option value="" disabled selected>No offers</option>
+                                    <% } %>
+                               
+                                  <% offers.forEach(element => { %>
+                                    <% if (Product.offer) { %>
+                                      <% if (element.name !== Product.offer.name ) { %>
+                                        <option value="<%= element._id %>"><%= element.name %></option>
+                                       <% } %>
+                                    <% }else{ %>
+                                      <option value="<%= element._id %>"><%= element.name %></option>
+                                      <% } %> 
+                                  <% }) %>
+                                  <% if (Product.offer) { %>
+                                    <option value="Delete">Delete Offer</option>
+                                  <% } %>
+                                </select>
+                              </div>
                             <!-- Images Upload -->
                             <div class="form-group">
                               <label>Images Upload (Required: 3)</label>
@@ -150,17 +173,19 @@
                                 <div class="card-body">
                                   <h5 class="card-description text-white">Availability</h5>
                                   <div class="form-check">
-                                    <input type="radio" class="form-check-input" name="stockStatus" id="inStockRadio" value="inStock">
+                                    <input type="radio" class="form-check-input" name="availability" id="inStockRadio" value="true">
                                     <label class="form-check-label" for="inStockRadio">In Stock</label>
                                     
-                                    <input type="radio" class="form-check-input" name="stockStatus" id="outOfStockRadio" value="outOfStock">
+                                    <input type="radio" class="form-check-input" name="availability" id="outOfStockRadio" value="false">
                                     <label class="form-check-label" for="outOfStockRadio">Out Of Stock</label>
                                   </div>
                                 </div>
                               </div>
                             </div>
-              
+                          
                             
+                         <!-- Display Offer Status -->
+
                             <!-- Submit and Clear Buttons -->
                             <button type="submit" class="btn btn-primary mb-2" onclick="submitForm()">Submit</button>
 
@@ -192,6 +217,25 @@
       alert('Form submitted'); // or console.log('Form submitted') for debugging
     }
   </script>
+
+<script>
+  function updateOfferStatus(selectedOfferId) {
+    // Send an AJAX request to update the offer status in the product
+    fetch(`/admin/product/update-offer/${Product.id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ offerId: selectedOfferId }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data); // You can handle the response accordingly
+    })
+    .catch(error => console.error('Error:', error));
+  }
+</script>
+
   <!-- container-scroller -->
   <!-- plugins:js -->
   <script src="/admin/vendors/js/vendor.bundle.base.js"></script>
@@ -207,6 +251,7 @@
   <!-- endinject -->
   <!-- Custom js for this page-->
   <!-- End custom js for this page-->
+  
 </body>
 
 </html>

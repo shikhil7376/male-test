@@ -1,26 +1,35 @@
+const mongoose = require("mongoose");
 
-const mongoose = require('mongoose');
-
-const offerSchema = new mongoose.Schema({
-  productId: { type: mongoose.Schema.Types.ObjectId, ref: 'product' },
-  offerName: {
-    type: String,
-    require: true,
+const offerSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    discount: {
+      type: Number,
+      required: true,
+    },
+    startingDate: {
+      type: Date,
+    },
+    expiryDate: {
+      type: Date,
+      required: true,
+    },
+    status: {
+      type: String,
+      required: true,
+    },
+    is_deleted: {
+      type: Boolean,
+      default: false,
+    },
   },
-  description: {
-    type: String,
-    minLength: 4,
-    maxLength: 100,
-},
-  discount: Number,
-  startingDate: { type: Date, default: Date.now },
-  endingDate: Date,
-  is_delete: {
-    type: Boolean,
-    default: false,
-  },
-});
-
-const Offer = mongoose.model('Offer', offerSchema);
+  {
+    timestamps: true,
+  }
+);    
+const Offer = mongoose.model("Offer", offerSchema);
 
 module.exports = Offer;

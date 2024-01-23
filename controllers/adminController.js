@@ -140,17 +140,37 @@ const blockTheUser=async (req,res)=>{
 
 
  const loadCategory=async (req,res)=>{
-    try{
-        const categories=await productCategory.find().sort({_id:-1})
-        res.render("admin/productCategory",{categories})
-    }catch(error){
-        console.log(error.message);
-    }
+   try{
+    const page = parseInt(req.query.page) || 1; // Get page number from query parameters, default to 1
+    const itemsPerPage = 10; // Set the number of items per page
+
+    const totalOffers = await productCategory.countDocuments();
+    const totalPages = Math.ceil(totalOffers / itemsPerPage);
+
+    const offers = await productCategory.find()
+        .skip((page - 1) * itemsPerPage)
+        .limit(itemsPerPage)
+        .exec();
+           
+           let search = req.query.search
+       
+           if(search && search!==""){
+            categories = await productCategory.find({categoryName:{$regex:search,$options:'i'}}).sort({_id:-1}).populate("offer")
+            res.render("admin/productCategory",{categories,totalPages,currentPage: page})
+           }else{
+              categories = await productCategory.find().sort({_id:-1}).populate("offer")
+              res.render("admin/productCategory",{categories,totalPages,currentPage: page})
+           }
+         
+   }catch(error){
+    console.log(error.message);
+   }
  }
 
  const loadAddCategory= async (req,res)=>{
     try{
-        res.render('admin/addCategory',{message:''})
+        const offers = await Offer.find({is_deleted:false})
+        res.render('admin/addCategory',{message:'',offers:offers})
     }catch(error){
         console.log(error.message);
     }
@@ -158,63 +178,145 @@ const blockTheUser=async (req,res)=>{
 
  const   addProductcategory = async (req, res) => {
     try {
-        if (!req.body.categoryName || !req.file) {
-            return res.render("admin/addCategory", { message: "Fill all fields..." });
+        console.log(req.body);
+              if(!req.body.categoryName || !req.file){
+                return res.redirect("/admin/product/add-category")
+              }
+              const exist = await productCategory.findOne({ categoryName: { $regex: new RegExp(req.body.categoryName, 'i') } });
+              if (!exist) {
+                const category = new productCategory({
+                    categoryName: req.body.categoryName,
+                    description: req.body.description,
+                    image: {
+                        data: req.file.buffer,
+                        contentType: req.file.mimetype
+                    }
+                });
+            
+          if(req.body.offer){
+            const offer = Offer.findById(req.body.offer)
+            if (offer.is_deleted === false) {
+                category.offer = req.body.offer
+            }
+          }
+          await category.save()
+          
+      res.redirect("/admin/product/Category-management")
         }
 
-        const exist = await productCategory.findOne({ categoryName: { $regex: new RegExp(req.body.categoryName, 'i') } });
-
-
-        if (!exist) {
-            const category = new productCategory({
-                categoryName: req.body.categoryName,
-                description: req.body.description,
-                image: {
-                    data: req.file.buffer,
-                    contentType: req.file.mimetype
-                }
-            });
-
-            await category.save();
-            return res.redirect("/admin/product/Category-management");
-        } else {
-            return res.render('admin/addCategory', { message: "Category already exists" });
-        }
-    } catch (error) {
+    } catch(error) {
         console.error(error.message);
-        return res.status(500).send("Internal Server Error");
+        
     }
-};
+}
+
+const loadEditCategory = async(req,res)=>{
+    try{
+          const offers = await Offer.find({is_deleted :false})
+          const {id} = req.params
+          const EditCategory = await productCategory.findById({_id:id}).populate("offer")
+          if(EditCategory){
+            return res.render("admin/editCategory",{EditCategory,id,offers})
+          }
+    }catch(error){
+        console.log(error.message);
+    }
+}
+
+const EditCategory = async(req,res)=>{
+    const id = req.query.id
+    try{
+         const editedCategory = await productCategory.findById(id)
+         if(editedCategory){
+            editedCategory.categoryName = req.body.Categoryname
+            editedCategory.description = req.body.description
+          if(req.file){
+            editedCategory.image.data = req.file.buffer
+            editedCategory.image.contentType=req.file.mimetype
+          }
+          if(req.body.offer ==="Delete"){
+            await product.updateMany({category:id},{$set:{categoryOfferPrice:0}})
+            await productCategory.findByIdAndUpdate(id,{$unset:{offer:{}}})
+          }else if(req.body.offer!==undefined && req.body.offer){
+            const offer = await Offer.findById(req.body.offer)
+            if(offer.is_deleted ===false){
+                await productCategory.findByIdAndUpdate(id,{$set:{offer:req.body.offer}})
+                const products = await product.find({category:id})
+                for(let i=0;i<products.length;i++){
+                    let discountPercentage = offer.discount
+                    let regularPrice = products[i].price
+                    let offerPrice = regularPrice - Math.floor((discountPercentage / 100)* regularPrice)
+                    products[i].categoryOfferPrice = offerPrice
+                    await products[i].save()
+                }
+            }else{
+                await productCategory.findByIdAndUpdate(id,{$unset:{offer:{}}})
+                const products = await product.find({category:id})
+                for(let i=0;i<products.length;i++){
+                    products[i].categoryOfferPrice =0
+                    await products[i].save()
+                }
+            }
+          }
+          await editedCategory.save()
+          return res.redirect("/admin/product/Category-management")
+         }else{
+            return res.status(404)
+         }
+    }catch(error){
+        console.log(error.message);
+    }
+}
+
 
 const deletecategory = async (req, res) => {
     try {
-        console.log("Delete category function called");
         const { id } = req.params;
-        console.log("Category ID:", id);
-
-        const deleteCategory = await productCategory.findByIdAndDelete({ _id: id });
-        console.log("Deleted Category:", deleteCategory);
-
-        if (deleteCategory) {
-            console.log("Category deleted successfully");
-            res.redirect("/admin/product/Category-management");
-        } else {
-            console.log("Category not found");
-        }
+         const deleteCategory = await productCategory.findByIdAndDelete({_id:id})
+         if(deleteCategory.offer){
+            await product.updateMany({category:id},{$set:{categoryOfferPrice:0}})
+         }
+         if(deleteCategory){
+            res.redirect("/admin/product/Category-management")
+         }
     } catch (error) {
         console.log(error.message);
         res.status(500).send("Internal Server Error");
     }
 };
 
+  const deleteCategoryImg= async(req,res)=>{
+     try{
+          const categoryId = req.params.id
+          const category = await productCategory.findByIdAndDelete(categoryId,{$unset:{image:{}}})
+          console.log(categoryId);
+          console.log(category);
+          return res.redirect(`/admin/Category/${categoryId}/Edit-Category`)
+     }catch(error){
+        console.log(error.message);
+     }
+  }
+
+
 const loadProductPage=async (req,res)=>{
-    try{
-        const products=await product.find()
-        if(products){
-            return res.render("admin/products",{products})
-        }else{
-           console.log("products not get");
-        }
+        const page = parseInt(req.query.page) || 1; // Get page number from query parameters, default to 1
+        const itemsPerPage = 10; // Set the number of items per page
+        const totalProducts = await product.countDocuments();
+        const totalPages = Math.ceil(totalProducts / itemsPerPage);
+         const query = req.query.query ||''
+         try{
+            let products
+            let len
+            if(query){
+                products = await product.find({product_name:{$regex:query,$options:'i'}}).populate("offer").populate("category")
+                len = await product.find({product_name:{$regex:query,$options:'i'}})
+            }else{
+                products = await product.find().populate("offer").populate("category")
+                len = await product.find()
+            }
+            if(products){
+                return res.render('admin/products',{products,len,totalPages,currentPage: page})
+            }
     }catch(error){
         console.log(error.message);
     }
@@ -222,8 +324,8 @@ const loadProductPage=async (req,res)=>{
 const loadProductCreate= async (req,res)=>{
        try{
         const Categories= await productCategory.find()
-        console.log(Categories);
-        res.render("admin/addproduct",{message:"",Categories })
+        const offers = await Offer.find({is_deleted:false})
+        res.render("admin/addproduct",{message:"",Categories,offers })
        }catch(error){
         console.log(error.message);
        }
@@ -232,7 +334,7 @@ const createProduct = async (req, res) => {
     console.log("HAI");
     console.log(req.body);
     const Categories = await productCategory.find()
-    const { productName, brandName, price, description, stockCount, category,availability } = req.body;
+    const { productName, brandName, price, description, stockCount, category,availability,offer } = req.body;
     
     try {
         // Validate that required fields are provided
@@ -248,7 +350,7 @@ const createProduct = async (req, res) => {
         }
        
         // Create the product
-        const pro = new product({
+        const Product = new product({
             product_name: productName,
             brand_name: brandName,
             price: price,
@@ -260,15 +362,35 @@ const createProduct = async (req, res) => {
 
         // Assuming req.files is an array of uploaded image files
         req.files.forEach(file => {
-            pro.image.push({ data: file.buffer, contentType: file.mimetype });
-        });  console.log("here");
-        await pro.save();
-     console.log(pro);
-    
-        if (pro) {
-            console.log(" added successfully.");
-            return res.redirect("/admin/product")
+            Product.image.push({ data: file.buffer, contentType: file.mimetype });
+        });  
+       
+    if(req.body.offer){
+        Product.offer = req.body.offer
+        const offerm = await Offer.findById(req.body.offer)
+        if(offerm.is_deleted===false){
+            const regularPrice = req.body.price
+            const newPrice = regularPrice - Math.floor((offerm.discount/100)*regularPrice)
+            Product.offerPrice =newPrice
+        }else{
+            Product.offerPrice = 0
         }
+    }
+    
+    const CategoryOffer = await productCategory.findById(category)
+    if(CategoryOffer.offer){
+        const offerm = await Offer.findById(CategoryOffer.offer)
+        if(offerm.is_deleted ===false){
+            const discountPercentage = offerm.discount
+            const regularPrice = req.body.price 
+            const newprice = regularPrice - Math.floor((discountPercentage/100)*regularPrice)
+            Product.categoryOfferPrice =newprice
+        }else{
+            Product.categoryOfferPrice = 0
+        }
+    }
+      await Product.save()
+      return res.redirect("/admin/product")
 
     } catch (error) {
         //    console.error(error);
@@ -303,34 +425,74 @@ const productDeactivate=async (req,res)=>{
 const loadProductEditPage =async(req,res)=>{
     try{
         const id=req.params.id
-        const Product=await product.findOne({_id:id})
-        const Categories=await productCategory.find({ categoryName: { $ne: Product.category } })
-        res.render("admin/Edit",{message:"",Product,id,Categories})
+        const pro = await product.findOne({_id:id})
+        let Product
+        if(pro.offer){
+            Product = await product.findOne({_id:id}).populate("offer").populate("category")
+        }else{
+            Product = await product.findOne({_id:id}).populate("category")
+        }
+        const Categories = await productCategory.find({categoryName:{$ne:pro.category}}).populate("offer")
+        const offers = await Offer.find({is_deleted:false})
+        res.render("admin/Edit",{Product,id,Categories,offers})
     }catch(error){
         console.log(error.message);
     }
 }
 
 const editProduct = async (req, res) => {
-    console.log(">....here>,..");
-    console.log(req.body)
-    
-     const { productName, brandName, price, description, stockCount, category, id, images: requestImages } = req.body;
+    console.log(req.body);
+     const { productName, brandName, price, description, stockCount, category,availability, id, images: requestImages } = req.body;
      try {
+        let stock
+        
+        if (availability === 'true') {
+            stock = true;
+        } else {
+            stock = false;
+        }
          // ...
          const images = req.files;
          const productId = id;
-         const data = {
+         const updateFields = {
              product_name: productName,
              brand_name: brandName,
              price: price,
              stock_count: stockCount,
              description: description,
-             category: category,
          }
  
-         const updatedProduct = await product.findByIdAndUpdate(productId, { $set: data }, { new: true })
- 
+      if(req.body.category&& req.body.category !==""){
+        const CategoresOffer = await productCategory.findById(req.body.category)
+          if(CategoresOffer.offer){
+            const caOffer = await Offer.findById(CategoresOffer.offer)
+            if(caOffer.is_deleted ===false){
+                updateFields.category=req.body.category
+                updateFields.categoryOfferPrice = req.body.price - Math.floor((caOffer.discount/100)*req.body.price)
+            }
+          }else{
+            updateFields.categoryOfferPrice =0
+            updateFields.category = req.body.category
+          }
+      }
+    if(req.body.offer && req.body.offer.length>10){
+        updateFields.offer = req.body.offer
+        const proOffer = await Offer.findById(req.body.offer)
+        if(proOffer.is_deleted === false){
+            updateFields.offerPrice = req.body.price - Math.floor((proOffer.discount/100)* req.body.price)
+        }
+    }
+    if(req.body.offer ==="Delete"){
+        await product.findByIdAndUpdate(productId,{
+            $unset:{offer:1},
+            $set:{offerPrice:0}
+        })
+    }
+    const updatedProduct = await product.findByIdAndUpdate(productId,
+           {$set:updateFields},
+           {new:true}
+        )
+
          if (req.files && req.files.length > 0) {
              // Assuming 'req.files' contains the uploaded image files
              req.files.forEach((file) => {
@@ -621,65 +783,177 @@ const couponAction = async(req,res)=>{
     }
 }
 
-const loadOffer = async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1; // Get page number from query parameters, default to 1
-        const itemsPerPage = 10; // Set the number of items per page
-
-        const totalOffers = await Offer.countDocuments();
-        const totalPages = Math.ceil(totalOffers / itemsPerPage);
-
-        const offers = await Offer.find()
-            .skip((page - 1) * itemsPerPage)
-            .limit(itemsPerPage)
-            .exec();
-
-        return res.render('admin/offer', { offers, totalPages, currentPage: page });
-    } catch (error) {
-        console.log(error.message);
-        res.status(500).send('Internal Server Error');
-    }
-};
-
-
-const addOffer = async(req,res)=>{
+const loadOfferPage = async(req,res)=>{
     try{
-        console.log("here");
-        const formData = req.body;
-        console.log(formData);
-        const newOffer = new Offer(formData);
-        console.log(newOffer);
-       await newOffer.save()
+        let query = req.query.query|| ""
+        let Offers
+        let len
+        if(query !==""){
+        Offers = await Offer.find({ name: { $regex: query, $options: 'i' } }).sort({ is_deleted: -1 });
+        len = await Offer.find({ name: { $regex: query, $options: 'i' } }).sort({ is_deleted: -1 });
+         return res.render("admin/offer",{Offers,query})
+        }else{
+            Offers = await Offer.find().sort({ is_deleted: -1 })
+            len = await Offer.find().sort({ is_deleted: -1 })
+            return res.render("admin/offer",{Offers,query})
+        }
     }catch(error){
         console.log(error.message);
     }
 }
-const updateOffer = async (req, res) => {
-    try {
-        const offerId = req.body.offerId;
-        const updatedData = {
-            offerName: req.body.offerName,
-            description: req.body.description,
-            discount: req.body.discount,
-            startingDate: req.body.startingDate,
-            endingDate: req.body.endingDate
-        };
-
-        // Update the offer in the database
-        await Offer.findByIdAndUpdate(offerId, { $set: updatedData });
-
-        // Redirect to the offer page or send a success response
-        return res.redirect('/admin/offer');
-    } catch (error) {
+const loadAddOfferPage = async(req,res)=>{
+    try{
+        return res.render("admin/addOffer")
+    }catch(error){
         console.log(error.message);
-        // Handle error
-        return res.redirect('/admin/offer');
+    }
+}
+
+const createOffer = async(req,res)=>{
+    const { name, discount, startingDate, expiryDate, status } = req.body
+    try{
+       const existOffer = await Offer.findOne({name})
+       if(existOffer !==null && existOffer){
+         return res.redirect("/admin/offer/create")
+       }
+       const newOffer = new Offer({
+        name,
+        discount,
+        startingDate,
+        expiryDate,
+        status
+       })
+       await newOffer.save()
+       return res.redirect("/admin/Offer")
+    }catch(error){
+        console.log(error.message);
+    }
+}
+
+const loadOfferEdit = async(req,res)=>{
+    try{
+        const offerID = req.params.id
+        const findOffer = await Offer.findById(offerID)
+        if (findOffer) {
+            findOffer.startingDateFormatted = findOffer.startingDate.toISOString().split('T')[0];
+            findOffer.expDateFormatted = findOffer.expiryDate.toISOString().split('T')[0];
+           res.render("admin/editOffer",{findOffer})
+        }
+    }catch(error){
+      console.log(error.message);
+    }
+}
+
+const saveEditOffer = async (req, res) => {
+    console.log(req.body);
+    const updateData = req.body;
+
+    if (updateData) {
+        try {
+            // Find the offer by its ID
+            const findOffer = await Offer.findOne({ _id: updateData.offerID });
+             
+            if (!findOffer) {
+                return res.status(404).send('Offer not found');
+            }
+
+            // Update offer details
+            findOffer.name = updateData.name;
+            findOffer.discount = updateData.discount;
+            findOffer.startingDate = updateData.startingDate;
+            findOffer.expiryDate = updateData.expiryDate;
+            findOffer.status = updateData.status;
+
+            // Save the updated offer
+            await findOffer.save();
+
+            // Find related categories using the offer ID
+            const categories = await productCategory.find({ offer: updateData.offerID }, { _id: 1 });
+
+            // Update products with the new prices
+            const products = await product.find({ offer: updateData.offerID });
+
+            for (let i = 0; i < products.length; i++) {
+                const price = products[i].price;
+                const newPrice = price - Math.floor((updateData.discount / 100) * price);
+                products[i].offerPrice = newPrice;
+
+                // Check if the product's category is in the related categories
+                if (categories.some(category => category._id.equals(products[i].category))) {
+                    products[i].categoryOfferPrice = newPrice;
+                }
+
+                // Save the updated product
+                await products[i].save();
+            }
+
+            // Update category-related products
+            for (let i = 0; i < categories.length; i++) {
+                const categoryProducts = await product.find({ category: categories[i] });
+
+                for (let j = 0; j < categoryProducts.length; j++) {
+                    const product = categoryProducts[j];
+                    const newPrice = product.price - Math.floor((updateData.discount / 100) * product.price);
+                    product.categoryOfferPrice = newPrice;
+
+                    // Save the updated product
+                    await product.save();
+                }
+            }
+
+            // Save the offer once more
+            await findOffer.save();
+            
+            // Redirect to the Offer page
+            return res.redirect("/admin/Offer/");
+        } catch (error) {
+            console.error(error);
+        }
     }
 };
+
+const deleteOffer= async (req,res)=>{
+    try{
+       const offerId = req.params.id
+       const findExpiredOffers = await Offer.findById(offerId)
+       if(findExpiredOffers){
+        findExpiredOffers.is_deleted = true
+        const offerId = findExpiredOffers._id
+        await product.updateMany({offer:offerId},{
+            $unset:{offer:1},
+            $set:{offerPrice:0}
+        })
+        let categoryIds = await productCategory.find({offer: offerId})
+        const OfferCategory = await productCategory.updateMany({offer:offerId},{$unset:{offer:1}})
+        if(OfferCategory.modifiedCount>0){
+             await product.updateMany(
+                {category:{$in: categoryIds}},
+                {$set:{categoryOfferPrice:0}}
+             )
+        }
+        await findExpiredOffers.save()
+        return res.redirect("/admin/Offer/")
+       }
+    }catch(error){
+        console.log(error.message);
+    }
+}
+
+const activeOffer = async(req,res)=>{
+    try{
+       const id = req.params.id
+       const updateOffer = await Offer.findByIdAndUpdate(id,{is_deleted:false})
+       if(updateOffer){
+           return res.redirect("/admin/Offer")
+       }
+    }catch(error){
+        console.log(error.message);
+    }
+}
 
 
 module.exports={
   
-    loadAdminLogin,loginValidation,adminValid,loadDash,displayCustomers,loadCategory,loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate,productDeactivate,UnblockTheUser,blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests,returnRequsetActions,loadCoupons,getAddNewCoupon,addNewCoupon,couponAction,deleteImgDelete,loadOffer,addOffer,updateOffer 
+    loadAdminLogin,loginValidation,adminValid,loadDash,displayCustomers,loadCategory,loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate,productDeactivate,UnblockTheUser,blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests,returnRequsetActions,loadCoupons,getAddNewCoupon,addNewCoupon,couponAction,deleteImgDelete,loadEditCategory,loadOfferPage,loadAddOfferPage,createOffer,loadOfferEdit,saveEditOffer,deleteOffer,activeOffer,EditCategory,deleteCategoryImg
 }
 

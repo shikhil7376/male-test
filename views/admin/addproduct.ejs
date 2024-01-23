@@ -93,20 +93,31 @@
                                   <h4 class="card-title">Product Categories</h4>
                                   <div class="form-group">
                                     <label for="category">Category</label>
-                                    <select class="form-control form-control-lg " name="category" id="category">
-                                      <option></option>
-                                      <% Categories.forEach((category) => { %>
-                                        <option><%= category.categoryName %></option>
-                                      <% }) %>
+                                    <select class="form-control form-control-lg text-dark" name="category" id="category" >
+                                      <option value="" disabled selected>Select a Category </option>
+                                      <% Categories.forEach(category => { %>
                                      
-                                    
+                                          <% if (category._id) { %>
+                                              <option value="<%= category._id %>"><%= category.categoryName %></option>
+                                          <% } %>
+                                      <% }) %>
                                     </select>
                                   </div>
                                
                                 </div>
                               </div>
                             </div>
-              
+                    <!--offers  -->
+                            <div class="form-group">
+                              <label for="price">Offer</label>
+                              <select class="form-control form-control-lg text-dark" name="offer" id="category" >
+                                <option value="-1" disabled selected>Select an offer</option>
+                                <% offers.forEach(offer => { %>
+                                  <option value="<%= offer._id %>"> <%= offer.name %> </option>
+                                <% }) %>
+                              </select>
+                            </div>
+
                             <!-- Availability -->
                             <div class="col-md-12 grid-margin stretch-card">
                               <div class="card">

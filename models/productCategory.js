@@ -16,6 +16,10 @@ const productCategorySchema = new mongoose.Schema({
      removed :  {
       type: Boolean,
       default:false
+     },
+     offer:{
+         type:mongoose.Schema.Types.ObjectId,
+         ref:'Offer'
      }
 });
 

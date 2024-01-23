@@ -68,6 +68,7 @@ const totalSum = async function (id) {
 // load Home
 const loadHome = async (req, res) => {
   try {
+    const newPro = await product.find({is_delete:false}).sort({_id:1}).limit(3)
     res.render("user/index");
   } catch (error) {
     console.log(error.message);
@@ -308,6 +309,7 @@ const resendOtp = async (req, res) => {
 
 const loadShop = async (req, res) => {
   try {
+    console.log(req.query.search);
     const page = parseInt(req.params.page) || 1;
     const pageSize = 3;
     const skip = (page - 1) * pageSize;
@@ -321,6 +323,7 @@ const loadShop = async (req, res) => {
       .populate("category")
       .skip(skip)
       .limit(pageSize)
+      .populate("offer")
     const foundCategories = await productCategory.find({ removed: false });
     res.render("user/shop", {
       productDatas: foundProducts,
@@ -336,6 +339,91 @@ const loadShop = async (req, res) => {
     console.log(error.message);
   }
 };
+
+const   loadShopWithCriteria = async(req,res)=>{
+    try{
+      const minPrice = parseFloat(req.query.minPrice) ||0
+      const maxPrice = parseFloat(req.query.maxPrice) || Number.MAX_VALUE
+      let priceFilter={}
+      if(maxPrice<Number.MAX_VALUE){
+        priceFilter ={$gte:minPrice,$lte:maxPrice}
+      }else{
+        priceFilter = { $gte: minPrice }
+      }
+       const searchBrand = req.query.brand
+      const searchProduct = req.query.search;
+        const selectedCategory = req.query.category;
+        if(selectedCategory){
+          const foundProducts =  await product.find({is_delete:false,category:selectedCategory}).populate("category")
+          const foundCategories = await productCategory.find({ removed: false });
+
+          res.render("user/shop", {
+            productDatas: foundProducts,
+            currentUser: await Customer.findById(req.session.user),
+            categoryBased: true,
+            categoryDatas: foundCategories,
+            category: { name: "Filtered Category", id: selectedCategory },
+            activePage: "Shop",
+            currentPage: 1, // Assuming you want to reset to the first page
+            totalPages: 1, // Assuming only one page for filtered results
+          });
+        }else if(searchProduct){
+          const foundProducts = await product.find({is_delete:false, product_name: { $regex: new RegExp(req.query.search, 'i') } })
+        
+          const foundCategories = await productCategory.find({ removed: false });
+
+          res.render("user/shop", {
+            productDatas: foundProducts,
+            currentUser: await Customer.findById(req.session.user),
+            categoryBased: false,
+            categoryDatas: foundCategories,
+            category: { name: "shop All", id: "" },
+            activePage: "Shop",
+            currentPage: 1,
+            totalPages: 1,
+          });
+         }else if(searchBrand){
+          const foundProducts = await product.find({is_delete:false,brand_name:{$regex:new RegExp(searchBrand,'i')}} )
+        
+          const foundCategories = await productCategory.find({ removed: false });
+
+          res.render("user/shop", {
+            productDatas: foundProducts,
+            currentUser: await Customer.findById(req.session.user),
+            categoryBased: false,
+            categoryDatas: foundCategories,
+            category: { name: "shop All", id: "" },
+            activePage: "Shop",
+            currentPage: 1,
+            totalPages: 1,
+          });
+         }else if(minPrice || maxPrice){
+          const foundProducts = await product
+          .find({
+            is_delete: false,
+            price: priceFilter,
+          })
+          const foundCategories = await productCategory.find({ removed: false });
+          res.render("user/shop", {
+            productDatas: foundProducts,
+            currentUser: await Customer.findById(req.session.user),
+            categoryBased: false,
+            categoryDatas: foundCategories,
+            category: { name: "shop All", id: "" },
+            activePage: "Shop",
+            currentPage: 1,
+            totalPages: 1,
+          });
+         }else {
+          // Handle the case when no category is selected
+          res.redirect('/shop/1'); // Redirect to the default shop page
+        }
+        
+    }catch(error){
+      console.log(error.message);
+    }
+
+}
 
 const getSingleProduct = async (req, res) => {
   try {
@@ -1285,4 +1373,5 @@ module.exports = {
   getCoupons,
   applyCoupon,
   loadInvoice,
+  loadShopWithCriteria 
 };

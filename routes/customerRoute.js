@@ -39,7 +39,8 @@ const{
    resendOtp,
    getCoupons,
    applyCoupon,
-   loadInvoice
+   loadInvoice,
+   loadShopWithCriteria
 }=require('../controllers/customerController')
 
 
@@ -64,7 +65,8 @@ Customer_Route.get('/user/otpVerification',Auth.userAuth,loadOTPpage)
               .post('/resend-otp',resendOtp)
 
 // render the shop page
-Customer_Route.get('/shop/:page',Auth.logged,Auth.checkToBlock, loadShop);
+Customer_Route.get('/shop/:page',Auth.logged,Auth.checkToBlock, express.json(), loadShop);
+Customer_Route.get('/shop/',Auth.logged,Auth.checkToBlock,express.json(),loadShopWithCriteria )
 
 Customer_Route.get("/single/:id",Auth.logged,Auth.checkToBlock,getSingleProduct)
 

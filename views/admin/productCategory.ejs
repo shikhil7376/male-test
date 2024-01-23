@@ -36,7 +36,14 @@
       <div class="main-panel">
         <div class="content-wrapper">
           <div class="row">
-           
+            <ul class="navbar-nav w-100">
+              <li class="nav-item w-100">
+                <form class="nav-link mt-2 mt-md-0 d-none d-lg-flex search" action="/admin/product/Category-management" method="get">
+                  <input type="text" class="form-control" name="search" placeholder="Search category">
+                  <button class="btn-info">Search</button>
+                </form>
+              </li>
+            </ul>
             
             <div class="col-lg-12 grid-margin stretch-card">
               <div class="card">
@@ -58,6 +65,7 @@
                           <th>Category Name</th>
                           <th>Description</th>
                           <th>Action</th>
+                          <th>offer</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -74,9 +82,18 @@
                                   <td><%= category.description%></td>
                                   <td>
                                     <a href="/admin/Category/<%= category._id %>/Delete" class="btn btn-danger">Delete</i></a>   
-                                    
-                                    
+                                    <a href="/admin/Category/<%= category._id %>/Edit-Category" class="btn btn-primary">Edit</i></a>  
                                   </td>
+                                           
+                                    <td>
+                                      <% if(category.offer){ %>
+                                        <p class="text-success"><%= category.offer.name %></p>
+                                        <% }else{ %>
+                                         <p class="text-danger"> No offer</p>
+                                          <% } %>
+                                    </td>
+
+                                                            
                                 </tr>
                        <%  })  %>
                       </tbody>
@@ -88,7 +105,20 @@
                   </div>
                 </div>
               </div>
+      
+              <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        </li>
+                    <% } %>
+                </ul>
+              </nav>
+
+
             </div>
+            
           
         <!-- content-wrapper ends -->
         <!-- partial:../../partials/_footer.html -->
@@ -119,6 +149,17 @@
   <!-- endinject -->
   <!-- Custom js for this page-->
   <!-- End custom js for this page-->
+<!-- Add this section for pagination -->
+<div class="pagination-container">
+  <ul class="pagination" id="pagination"></ul>
+</div>
+
+<!-- ... your existing content ... -->
+
+<!-- Update your script section to include pagination logic -->
+
+
+
 </body>
 
 </html>
