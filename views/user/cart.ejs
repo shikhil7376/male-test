@@ -53,9 +53,36 @@
                   </div>
                   <div class="product__cart__item__text">
                     <h6><%= cartItem.product.product_name %></h6>
-                    <h5><%= cartItem.product.price %></h5>
+                    <% if (cartItem.product.offerPrice> 0 && cartItem.product.categoryOfferPrice > 0) { %>
+                      <% if(cartItem.product.offerPrice < cartItem.product.categoryOfferPrice){  %>
+                        <span>&#8377;<%= cartItem.product.offerPrice %></span> <span><del class="text-danger"> <%=cartItem.product.price %> </del></span>
+                 <% }else{  %>
+                   
+
+                  <span>&#8377;<%= cartItem.product.categoryOfferPrice%></span>
+               <span class="text-danger"><del class="text-danger">&#8377;<%=cartItem.product.price %></del></span>
+                  <% }%>
+
+                <%}else if(cartItem.product.offerPrice>0){ %>
+                  <!-- Display offer price -->
+                    <span>&#8377;<%= cartItem.product.offerPrice %></span>
+                <span class="text-danger"><del class="text-danger">&#8377; <%=cartItem.product.price %> </del></span>
+
+               <% }else if(cartItem.product.categoryOfferPrice>0){  %>
+                <!-- Display category offer price -->
+              <span>&#8377;<%=cartItem.product.categoryOfferPrice%></span>
+             <span class="text-danger"><del class="text-danger">&#8377;<%=cartItem.product.price %></del></span>
+
+                <% }else{%>
+                  <!-- Display original price -->
+                 <span>&#8377;<%= cartItem.product.price%></span>
+                  <% }%>
+
+
+
+
                     <p style="display: none" id="stock_<%= cartItem._id %>">
-                      <%= cartItem.product.stock_count %>
+                      <%= cartItem.product.stock_count %> 
                     </p>
                   </div>
                 </td>

@@ -76,7 +76,35 @@
             <div>
               <div class="input-group">
                 <div>
-                  <p><strong class="text-dark h4">₹<%= productData.price.toFixed(2) %></strong></p>
+               
+                  <% if (productData.offerPrice> 0 && productData.categoryOfferPrice > 0) { %>
+                    <% if(productData.offerPrice < productData.categoryOfferPrice){  %>
+                      <span>&#8377;<%= productData.offerPrice %></span> <span><del class="text-danger"> <%=productData.price %> </del></span>
+               <% }else{  %>
+                 
+
+                <span>&#8377;<%= productData.categoryOfferPrice%></span>
+             <span class="text-danger"><del class="text-danger">&#8377;<%=productData.price %></del></span>
+                <% }%>
+
+              <%}else if(productData.offerPrice>0){ %>
+                <!-- Display offer price -->
+                  <span>&#8377;<%= productData.offerPrice %></span>
+              <span class="text-danger"><del class="text-danger">&#8377; <%=productData.price %> </del></span>
+
+             <% }else if(productData.categoryOfferPrice>0){  %>
+              <!-- Display category offer price -->
+            <span>&#8377;<%=productData.categoryOfferPrice%></span>
+           <span class="text-danger"><del class="text-danger">&#8377;<%=productData.price %></del></span>
+
+              <% }else{%>
+                <!-- Display original price -->
+               <span>&#8377;<%= productData.price%></span>
+                <% }%>
+
+
+
+
                   <% if(productData.stock_count){  %>
                   <p><strong class="text-dark h6" id="stock">Stock: <%= productData.stock_count %></strong></p>
                   <% } %>

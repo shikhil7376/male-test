@@ -387,16 +387,18 @@ const   loadShopWithCriteria = async(req,res)=>{
         
           const foundCategories = await productCategory.find({ removed: false });
 
-          res.render("user/shop", {
-            productDatas: foundProducts,
-            currentUser: await Customer.findById(req.session.user),
-            categoryBased: false,
-            categoryDatas: foundCategories,
-            category: { name: "shop All", id: "" },
-            activePage: "Shop",
-            currentPage: 1,
-            totalPages: 1,
-          });
+          // res.render("user/shop", {
+          //   productDatas: foundProducts,
+          //   currentUser: await Customer.findById(req.session.user),
+          //   categoryBased: false,
+          //   categoryDatas: foundCategories,
+          //   category: { name: "shop All", id: "" },
+          //   activePage: "Shop",
+          //   currentPage: 1,
+          //   totalPages: 1,
+          // });
+          
+          return res.json({prod : foundProducts,Cate : foundCategories })
          }else if(minPrice || maxPrice){
           const foundProducts = await product
           .find({
@@ -447,7 +449,7 @@ const loadcart = async (req, res) => {
       delete req.session.stockError
     
     const currentUser = await Customer.findById(req.session.user);
-    console.log(currentUser);
+  
     if (currentUser.is_varified) {
       await currentUser.populate("cart.product");
       await currentUser.populate("cart.product.category");
@@ -463,8 +465,21 @@ const loadcart = async (req, res) => {
       );
 
       const cartProducts = currentUser.cart;
+     
       const grandTotal = cartProducts.reduce((total, element) => {
-        return total + element.quantity * element.product.price;
+        if(element.product.offerPrice>0 && element.product.categoryOfferPrice){
+          if(element.product.offerPrice<element.product.categoryOfferPrice){
+            return total + element.quantity * element.product.offerPrice
+          }else{
+            return total + element.quantity * element.product.categoryOfferPrice
+          }
+        }else if(element.product.offerPrice>0){
+           return total + element.quantity * element.product.offerPrice
+        }else if(element.product.categoryOfferPrice>0){
+            return total + element.quantity * element.product.categoryOfferPrice
+        }else{
+          return total + element.quantity * element.product.price
+        }
       }, 0);
 
       res.render("user/cart", {
@@ -488,14 +503,28 @@ const addToCart = async (req, res) => {
     const existingCartItem = currentUser.cart.find((item) => {
       return item.product && item.product.toString() === Product;
     });
-
+    let priceSetting = await product.findById(req.body.Product)
+    let proPrice
+    if(priceSetting.offerPrice>0 && priceSetting.categoryOfferPrice>0){
+        if(priceSetting.offerPrice<priceSetting.categoryOfferPrice){
+          proPrice = priceSetting.offerPrice
+        }else{
+          proPrice = priceSetting.categoryOfferPrice
+        }
+    }else if(priceSetting.offerPrice>0){
+        proPrice= priceSetting.offerPrice
+    }else if(priceSetting.categoryOfferPrice>0){
+      proPrice = priceSetting.categoryOfferPrice
+    }else{
+      proPrice = priceSetting.price
+    }
     if (existingCartItem) {
       existingCartItem.quantity += parseInt(hiddenQuantity);
     } else {
       const cartItem = {
         product: Product,
         quantity: parseInt(hiddenQuantity),
-        total: parseInt(ProductPrice),
+        total: proPrice,
       };
       currentUser.cart.push(cartItem);
     }

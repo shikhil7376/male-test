@@ -1,6 +1,5 @@
-<%- include("../layout/customerside/header") %>
-
-<%- include("../layout/customerside/navbar") %>
+<%- include("../layout/customerside/header") %> <%-
+include("../layout/customerside/navbar") %>
 <!-- Header Section End -->
 <!-- Breadcrumb Section Begin -->
 <section class="breadcrumb-option">
@@ -29,8 +28,13 @@
           <div class="shop__sidebar__search">
             <form class="search-model-form" method="get" action="/shop">
               <!-- Use the 'search' name for the input field -->
-              <input type="text" class="form-control" name="search" value="<%= typeof query !== 'undefined' ? query : '' %>"
-                placeholder="Search products">
+              <input
+                type="text"
+                class="form-control"
+                name="search"
+                value="<%= typeof query !== 'undefined' ? query : '' %>"
+                placeholder="Search products"
+              />
               <button type="submit"></button>
             </form>
           </div>
@@ -38,17 +42,25 @@
             <div class="accordion" id="accordionExample">
               <div class="card">
                 <div class="card-heading">
-                  <a data-toggle="collapse" data-target="#collapseOne">Categories</a>
+                  <a data-toggle="collapse" data-target="#collapseOne"
+                    >Categories</a
+                  >
                 </div>
-                <div id="collapseOne" class="collapse show" data-parent="#accordionExample">
+                <div
+                  id="collapseOne"
+                  class="collapse show"
+                  data-parent="#accordionExample"
+                >
                   <div class="card-body">
-
                     <div class="shop__sidebar__categories">
                       <% categoryDatas.forEach((category)=>{ %>
                       <ul class="nice-scroll">
-
-                        <li><a href="/shop?category=<%=category._id %>"><%= category.categoryName %></a></li>
-                        <%    })  %>
+                        <li>
+                          <a href="/shop?category=<%=category._id %>"
+                            ><%= category.categoryName %></a
+                          >
+                        </li>
+                        <% }) %>
                       </ul>
                     </div>
                   </div>
@@ -56,16 +68,27 @@
               </div>
               <div class="card">
                 <div class="card-heading">
-                  <a data-toggle="collapse" data-target="#collapseTwo">Branding</a>
+                  <a data-toggle="collapse" data-target="#collapseTwo"
+                    >Branding</a
+                  >
                 </div>
-                <div id="collapseTwo" class="collapse show" data-parent="#accordionExample">
+                <div
+                  id="collapseTwo"
+                  class="collapse show"
+                  data-parent="#accordionExample"
+                >
                   <div class="card-body">
                     <div class="shop__sidebar__brand">
                       <% productDatas.forEach((element)=>{ %>
                       <ul>
-                        <li><a href="/shop?brand=<%=element.brand_name %>"><%= element.brand_name %></a></li>
-
-                        <%})  %>
+                        <li>
+                          <p
+                            onclick="fetchProduct('<%= element.brand_name %>')"
+                          >
+                            <%= element.brand_name %>
+                          </p>
+                        </li>
+                        <%}) %>
                       </ul>
                     </div>
                   </div>
@@ -73,17 +96,43 @@
               </div>
               <div class="card">
                 <div class="card-heading">
-                  <a data-toggle="collapse" data-target="#collapseThree">Filter Price</a>
+                  <a data-toggle="collapse" data-target="#collapseThree"
+                    >Filter Price</a
+                  >
                 </div>
-                <div id="collapseThree" class="collapse show" data-parent="#accordionExample">
+                <div
+                  id="collapseThree"
+                  class="collapse show"
+                  data-parent="#accordionExample"
+                >
                   <div class="card-body">
                     <div class="shop__sidebar__price">
                       <ul>
-                        <li><a href="/shop?minPrice=0&maxPrice=500">₹0.00 - ₹500.00</a></li>
-                        <li><a href="/shop?minPrice=500&maxPrice=1000">₹500.00 - ₹1000.00</a></li>
-                        <li><a href="/shop?minPrice=1000&maxPrice=1500">₹1000.00 - ₹1500.00</a></li>
-                        <li><a href="/shop?minPrice=1500&maxPrice=2000">₹1500.00 - ₹2000.00</a></li>
-                        <li><a href="/shop?minPrice=2000&maxPrice=2500">₹2000.00 - ₹2500.00</a></li>
+                        <li>
+                          <a href="/shop?minPrice=0&maxPrice=500"
+                            >₹0.00 - ₹500.00</a
+                          >
+                        </li>
+                        <li>
+                          <a href="/shop?minPrice=500&maxPrice=1000"
+                            >₹500.00 - ₹1000.00</a
+                          >
+                        </li>
+                        <li>
+                          <a href="/shop?minPrice=1000&maxPrice=1500"
+                            >₹1000.00 - ₹1500.00</a
+                          >
+                        </li>
+                        <li>
+                          <a href="/shop?minPrice=1500&maxPrice=2000"
+                            >₹1500.00 - ₹2000.00</a
+                          >
+                        </li>
+                        <li>
+                          <a href="/shop?minPrice=2000&maxPrice=2500"
+                            >₹2000.00 - ₹2500.00</a
+                          >
+                        </li>
                         <li><a href="/shop?minPrice=2500">₹2500.00+</a></li>
                       </ul>
                     </div>
@@ -94,32 +143,44 @@
                 <div class="card-heading">
                   <a data-toggle="collapse" data-target="#collapseFour">Size</a>
                 </div>
-                <div id="collapseFour" class="collapse show" data-parent="#accordionExample">
+                <div
+                  id="collapseFour"
+                  class="collapse show"
+                  data-parent="#accordionExample"
+                >
                   <div class="card-body">
                     <div class="shop__sidebar__size">
-                      <label for="xs">xs
-                        <input type="radio" id="xs">
+                      <label for="xs"
+                        >xs
+                        <input type="radio" id="xs" />
                       </label>
-                      <label for="sm">s
-                        <input type="radio" id="sm">
+                      <label for="sm"
+                        >s
+                        <input type="radio" id="sm" />
                       </label>
-                      <label for="md">m
-                        <input type="radio" id="md">
+                      <label for="md"
+                        >m
+                        <input type="radio" id="md" />
                       </label>
-                      <label for="xl">xl
-                        <input type="radio" id="xl">
+                      <label for="xl"
+                        >xl
+                        <input type="radio" id="xl" />
                       </label>
-                      <label for="2xl">2xl
-                        <input type="radio" id="2xl">
+                      <label for="2xl"
+                        >2xl
+                        <input type="radio" id="2xl" />
                       </label>
-                      <label for="xxl">xxl
-                        <input type="radio" id="xxl">
+                      <label for="xxl"
+                        >xxl
+                        <input type="radio" id="xxl" />
                       </label>
-                      <label for="3xl">3xl
-                        <input type="radio" id="3xl">
+                      <label for="3xl"
+                        >3xl
+                        <input type="radio" id="3xl" />
                       </label>
-                      <label for="4xl">4xl
-                        <input type="radio" id="4xl">
+                      <label for="4xl"
+                        >4xl
+                        <input type="radio" id="4xl" />
                       </label>
                     </div>
                   </div>
@@ -127,37 +188,43 @@
               </div>
               <div class="card">
                 <div class="card-heading">
-                  <a data-toggle="collapse" data-target="#collapseFive">Colors</a>
+                  <a data-toggle="collapse" data-target="#collapseFive"
+                    >Colors</a
+                  >
                 </div>
-                <div id="collapseFive" class="collapse show" data-parent="#accordionExample">
+                <div
+                  id="collapseFive"
+                  class="collapse show"
+                  data-parent="#accordionExample"
+                >
                   <div class="card-body">
                     <div class="shop__sidebar__color">
                       <label class="c-1" for="sp-1">
-                        <input type="radio" id="sp-1">
+                        <input type="radio" id="sp-1" />
                       </label>
                       <label class="c-2" for="sp-2">
-                        <input type="radio" id="sp-2">
+                        <input type="radio" id="sp-2" />
                       </label>
                       <label class="c-3" for="sp-3">
-                        <input type="radio" id="sp-3">
+                        <input type="radio" id="sp-3" />
                       </label>
                       <label class="c-4" for="sp-4">
-                        <input type="radio" id="sp-4">
+                        <input type="radio" id="sp-4" />
                       </label>
                       <label class="c-5" for="sp-5">
-                        <input type="radio" id="sp-5">
+                        <input type="radio" id="sp-5" />
                       </label>
                       <label class="c-6" for="sp-6">
-                        <input type="radio" id="sp-6">
+                        <input type="radio" id="sp-6" />
                       </label>
                       <label class="c-7" for="sp-7">
-                        <input type="radio" id="sp-7">
+                        <input type="radio" id="sp-7" />
                       </label>
                       <label class="c-8" for="sp-8">
-                        <input type="radio" id="sp-8">
+                        <input type="radio" id="sp-8" />
                       </label>
                       <label class="c-9" for="sp-9">
-                        <input type="radio" id="sp-9">
+                        <input type="radio" id="sp-9" />
                       </label>
                     </div>
                   </div>
@@ -167,7 +234,11 @@
                 <div class="card-heading">
                   <a data-toggle="collapse" data-target="#collapseSix">Tags</a>
                 </div>
-                <div id="collapseSix" class="collapse show" data-parent="#accordionExample">
+                <div
+                  id="collapseSix"
+                  class="collapse show"
+                  data-parent="#accordionExample"
+                >
                   <div class="card-body">
                     <div class="shop__sidebar__tags">
                       <a href="#">Product</a>
@@ -205,21 +276,34 @@
             </div>
           </div>
         </div>
-
-        <div class="row">
+        <div class="row" id="product_div">
           <!-- <div class="col-md-12 d-flex"> -->
-          <% if(!productDatas.length){ %>
-          No products found
-          <% }else{ %>
-          <% productDatas.forEach((element)=>{ %>
+          <% if(!productDatas.length){ %> No products found <% }else{ %> <%
+          productDatas.forEach((element)=>{ %>
           <div class="col-lg-4 col-md-6 col-12 product__item">
             <div class="product__item__pic set-bg">
-          <a href="/single/<%= element._id %>">  <img src="data:<%= element.image[0].contentType %>;base64,<%= element.image[0].data.toString('base64') %>"> </a>
+              <a href="/single/<%= element._id %>">
+                <img
+                  src="data:<%= element.image[0].contentType %>;base64,<%= element.image[0].data.toString('base64') %>"
+                />
+              </a>
               <ul class="product__hover">
-                <li><a href="#"><img src="/customer/img/icon/heart.png" alt=""></a></li>
-                <li><a href="#"><img src="/customer/img/icon/compare.png" alt=""> <span>Compare</span></a>
+                <li>
+                  <a href="#"
+                    ><img src="/customer/img/icon/heart.png" alt=""
+                  /></a>
                 </li>
-                <li><a href="#"><img src="/customer/img/icon/search.png" alt=""></a></li>
+                <li>
+                  <a href="#"
+                    ><img src="/customer/img/icon/compare.png" alt="" />
+                    <span>Compare</span></a>
+                  
+                </li>
+                <li>
+                  <a href="#"
+                    ><img src="/customer/img/icon/search.png" alt=""
+                  /></a>
+                </li>
               </ul>
             </div>
             <div class="product__item__text">
@@ -233,9 +317,31 @@
                 <i class="fa fa-star-o"></i>
                 <i class="fa fa-star-o"></i>
               </div>
-              <h5>₹<%= element.price %></h5>
-            </div>
+              <% if (element.offerPrice> 0 && element.categoryOfferPrice > 0) { %>
+                      <% if(element.offerPrice < element.categoryOfferPrice){  %>
+                        <span>&#8377;<%= element.offerPrice %></span> <span><del class="text-danger"> <%=element.price %> </del></span>
+                 <% }else{  %>
+                   
 
+                  <span>&#8377;<%= element.categoryOfferPrice%></span>
+               <span class="text-danger"><del class="text-danger">&#8377;<%=element.price %></del></span>
+                  <% }%>
+
+                <%}else if(element.offerPrice>0){ %>
+                  <!-- Display offer price -->
+                    <span>&#8377;<%= element.offerPrice %></span>
+                <span class="text-danger"><del class="text-danger">&#8377; <%=element.price %> </del></span>
+
+               <% }else if(element.categoryOfferPrice>0){  %>
+                <!-- Display category offer price -->
+              <span>&#8377;<%=element.categoryOfferPrice%></span>
+             <span class="text-danger"><del class="text-danger">&#8377;<%=element.price %></del></span>
+
+                <% }else{%>
+                  <!-- Display original price -->
+                 <span>&#8377;<%= element.price%></span>
+                  <% }%>
+            </div>
           </div>
 
           <% }) %>
@@ -244,36 +350,102 @@
 
         <div class="row">
           <div class="col-lg-12">
-            <div class=n                                                                                                                                                                                                                                                                                                                                                                                                                       "product__pagination">
-              <% if(!categoryBased){ %>
-              <% if(currentPage>1){ %>
-              <a class="active" href="/shop/<%= currentPage - 1 %>">&lt;</a>
-              <% } %>
-              <% for(let i=1;i<= totalPages;i++){ %>
-              <% if(i=== currentPage){ %>
-              <a href="/shop/<%= i %>">
-                <%= i %>
-              </a>
-              <% } %>
-              <% } %>
-              <% if(currentPage < totalPages){ %>
-              <a href="/shop/<%= currentPage + 1 %>">&gt;</a>
-             
-              <% } %>
-              <% } %>
-            </div>
+            <div class=n "product__pagination"> <% if(!categoryBased){ %> <%
+            if(currentPage>1){ %>
+            <a class="active" href="/shop/<%= currentPage - 1 %>">&lt;</a>
+            <% } %> <% for(let i=1;i<= totalPages;i++){ %> <% if(i===
+            currentPage){ %>
+            <a href="/shop/<%= i %>"> <%= i %> </a>
+            <% } %> <% } %> <% if(currentPage < totalPages){ %>
+            <a href="/shop/<%= currentPage + 1 %>">&gt;</a>
+
+            <% } %> <% } %>
           </div>
-          <!-- </div> -->
         </div>
+        <!-- </div> -->
       </div>
     </div>
-
+  </div>
 </section>
 <!-- Shop Section End -->
+<script>
+  function fetchProduct(brand) {
+    fetch(`http://localhost:8000/shop?brand=${encodeURIComponent(brand)}`, {
+      method: "GET",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        const products = data.prod;
 
+        const container = document.getElementById("product_div");
+        container.innerHTML = "";
 
+        products.forEach((element) => {
+          const productContainer = document.createElement("div");
+          productContainer.classList.add(
+            "col-lg-4",
+            "col-md-6",
+            "col-12",
+            "product__item"
+          );
 
+          const productImage = document.createElement("div");
+          productImage.classList.add("product__item__pic", "set-bg");
+          const imageLink = document.createElement("a");
+          imageLink.href = `/single/${element._id}`;
+          const image = document.createElement("img");
+
+          // Convert Buffer to base64 and set as src
+          const bufferData = new Uint8Array(element.image[0].data.data);
+          const blob = new Blob([bufferData], {
+            type: element.image[0].contentType,
+          });
+          const reader = new FileReader();
+
+          reader.onloadend = function () {
+            const imageDataBase64 = reader.result.split(",")[1];
+            const imageData = `data:${element.image[0].contentType};base64,${imageDataBase64}`;
+            image.src = imageData;
+            console.log(image.src);
+          };
+
+          reader.readAsDataURL(blob);
+
+          imageLink.appendChild(image);
+          productImage.appendChild(imageLink);
+          productContainer.appendChild(productImage);
+
+          const productText = document.createElement("div");
+          productText.classList.add("product__item__text");
+          const productName = document.createElement("h6");
+          productName.textContent = element.product_name;
+          const addToCartLink = document.createElement("a");
+          addToCartLink.href = "#";
+          addToCartLink.classList.add("add-cart");
+          addToCartLink.textContent = "+ Add To Cart";
+          const productRating = document.createElement("div");
+          productRating.classList.add("rating");
+          const productPrice = document.createElement("h5");
+          productPrice.textContent = `₹${element.price}`;
+
+          productText.appendChild(productName);
+          productText.appendChild(addToCartLink);
+          productText.appendChild(productRating);
+          productText.appendChild(productPrice);
+
+          productContainer.appendChild(productText);
+          container.appendChild(productContainer);
+        });
+      })
+      
+      .catch((error) => console.error("Fetch error:", error));
+  }
+</script>
 
 <!-- Footer Section Begin -->
 <%- include("../layout/customerside/footer") %>
-
