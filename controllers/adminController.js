@@ -7,7 +7,7 @@ const Order = require('../models/orderModel')
 const Return = require("../models/returnProductModel")
 const Coupon = require("../models/couponModel")
 const Offer = require("../models/offerModel")
-
+const Banner = require("../models/bannerModel")
 const loadAdminLogin=async(req,res)=>{
     try{
         if(!req.session.admin){
@@ -951,9 +951,44 @@ const activeOffer = async(req,res)=>{
     }
 }
 
+const getBanner = async(req,res)=>{
+    try{
+        const banners = await Banner.find().sort({createdAt:-1})
+        res.render('admin/banners',{banners})
+    }catch(error){
+        console.log(error.message);
+    }
+}
+
+const getAddBanner = (req,res)=>{
+    try{
+        res.render("admin/addBanner")
+    }catch(error){
+        console.log(error.message);
+    }
+}
+ const addBanner = async(req,res)=>{
+    try{
+        console.log("...here......");
+        const {name,description , banner} = req.body;
+        const newBanner = await Banner.create({
+            name,
+            banner,
+            description
+        })
+        if(!newBanner){
+         
+            res.redirect('/admin/banner/banner');
+        }
+      
+        res.redirect('/admin/banner');
+    }catch(error){
+        console.log(error.messsage);
+    }
+ }
 
 module.exports={
   
-    loadAdminLogin,loginValidation,adminValid,loadDash,displayCustomers,loadCategory,loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate,productDeactivate,UnblockTheUser,blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests,returnRequsetActions,loadCoupons,getAddNewCoupon,addNewCoupon,couponAction,deleteImgDelete,loadEditCategory,loadOfferPage,loadAddOfferPage,createOffer,loadOfferEdit,saveEditOffer,deleteOffer,activeOffer,EditCategory,deleteCategoryImg
+    loadAdminLogin,loginValidation,adminValid,loadDash,displayCustomers,loadCategory,loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate,productDeactivate,UnblockTheUser,blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests,returnRequsetActions,loadCoupons,getAddNewCoupon,addNewCoupon,couponAction,deleteImgDelete,loadEditCategory,loadOfferPage,loadAddOfferPage,createOffer,loadOfferEdit,saveEditOffer,deleteOffer,activeOffer,EditCategory,deleteCategoryImg,getBanner,getAddBanner,addBanner
 }
 

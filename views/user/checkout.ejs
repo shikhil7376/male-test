@@ -46,9 +46,35 @@
               </span>
               <p>
                    <%= cartItem.product.description %> <br>
-                   Category: <%= cartItem.product.category %> <br>
-                <strong class="text-black">₹<%= cartItem.product.price %>.00</strong>
+                   Category: <%= cartItem.product.category.categoryName %> <br>
+                
               </p>
+              <% if (cartItem.product.offerPrice> 0 && cartItem.product.categoryOfferPrice > 0) { %>
+                <% if(cartItem.product.offerPrice < cartItem.product.categoryOfferPrice){  %>
+                  <span>&#8377;<%= cartItem.product.offerPrice %></span> <span><del class="text-danger"> <%=cartItem.product.price %> </del></span>
+           <% }else{  %>
+             
+
+            <span>&#8377;<%= cartItem.product.categoryOfferPrice%></span>
+         <span class="text-danger"><del class="text-danger">&#8377;<%=cartItem.product.price %></del></span>
+            <% }%>
+
+          <%}else if(cartItem.product.offerPrice>0){ %>
+            <!-- Display offer price -->
+              <span>&#8377;<%= cartItem.product.offerPrice %></span>
+          <span class="text-danger"><del class="text-danger">&#8377; <%=cartItem.product.price %> </del></span>
+
+         <% }else if(cartItem.product.categoryOfferPrice>0){  %>
+          <!-- Display category offer price -->
+        <span>&#8377;<%=cartItem.product.categoryOfferPrice%></span>
+       <span class="text-danger"><del class="text-danger">&#8377;<%=cartItem.product.price %></del></span>
+
+          <% }else{%>
+            <!-- Display original price -->
+           <span>&#8377;<%= cartItem.product.price%></span>
+            <% }%>
+
+
               <p>
                 Stock: <%= cartItem.product.stock_count %>
               </p>
@@ -56,8 +82,27 @@
             <div class="col-md-4">
               <span class="text-black">
                 Quantity: <%= cartItem.quantity %><br>
-                Total Price: ₹<span id="totalPrice_<%= cartItem._id %>" class="text-black">
-                <%= cartItem.product.price * cartItem.quantity %> .00
+                Total Price: <span id="totalPrice_<%= cartItem._id %>" class="text-black">
+                  <% if (cartItem.product.offerPrice > 0 && cartItem.product.categoryOfferPrice > 0) { %>
+                    <% if(cartItem.product.offerPrice < cartItem.product.categoryOfferPrice){  %>
+                      <span>&#8377;<%= cartItem.product.offerPrice * cartItem.quantity %></span> <span><del class="text-danger"> <%=cartItem.product.price*cartItem.quantity %> </del></span>
+                    <% }else{  %>
+                      <span>&#8377;<%= cartItem.product.categoryOfferPrice%></span>
+                      <span class="text-danger"><del class="text-danger">&#8377;<%=cartItem.product.price * cartItem.quantity %></del></span>
+                    <% } %>
+                  <% } else if(cartItem.product.offerPrice>0){ %>
+                    <!-- Display offer price -->
+                    <span>&#8377;<%= cartItem.product.offerPrice * cartItem.quantity %></span>
+                    <span class="text-danger"><del class="text-danger">&#8377; <%=cartItem.product.price * cartItem.quantity  %> </del></span>
+                  <% } else if(cartItem.product.categoryOfferPrice>0){  %>
+                    <!-- Display category offer price -->
+                    <span>&#8377;<%=cartItem.product.categoryOfferPrice * cartItem.quantity%></span>
+                    <span class="text-danger"><del class="text-danger">&#8377;<%=cartItem.product.price * cartItem.quantity%></del></span>
+                  <% } else { %>
+                    <!-- Display original price -->
+                    <span>&#8377;<%= cartItem.product.price * cartItem.quantity%></span>
+                  <% } %>
+                  
                 </span>
               </span>
             </div>
@@ -84,7 +129,7 @@
           <div class="col-md-12 address border p-3" id="checkoutAddressContainer">
             <div class="d-flex justify-content-between">
               <h3>Shipping Address</h3>
-                      <% if(!addresses){ %>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+                      <% if(noOfaddress===0){ %>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
   
               <a href="/user/profile/add-address" class="btn btn-outline-secondary">
                 Add New Address
@@ -249,9 +294,9 @@
                 <button type="submit" class="btn btn-dark btn-sm">Apply Coupon</button>
               </div>
             </div>
-            <% if (error && error != undefined) { %>
+            <% if (couponError && couponError != undefined) { %>
               <p class="text-danger">
-          <%= error %> 
+          <%= couponError %> 
               </p>
             <% } %>
             <a href="/coupons" class="btn btn-outline-dark btn-sm mt-4">View Available

@@ -1,6 +1,43 @@
 const session=require("express-session")
 const Customer = require("../models/customerModel");
+const multer = require('multer')
+const sharp = require('sharp')
 //user authenticated or not
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req,file,cb)=>{
+  if(file.mimetype.startsWith('image')){
+    cb(null, true);
+  }else{
+    cb(err,false)
+  }
+}
+
+const upload = multer({
+  storage :multerStorage,
+  fileFilter:multerFilter,
+}); 
+
+const uploadBannerImage =  upload.single('banner');
+
+const resizeBannerImages = async(req,res,next)=>{
+    try{
+        console.log("...any chance...");
+        if(!req.file) return next();
+        req.file.originalname = `Banner-${Date.now()}.jpeg`;
+        req.body.banner = req.file.originalname
+        await sharp(req.file.buffer)
+        .resize(1920,801)
+        .toFormat('jpeg')
+        .jpeg({quality:90}).toFile(`public/banners/${req.file.originalname}`);
+        next();
+    }catch(error){
+        console.log(error.message);
+    }
+}
+
+
+
 const userAuth=(req,res,next)=>{
     try{
         if(!req.session.user){
@@ -52,6 +89,7 @@ const adminAuth=(req,res,next)=>{
 
 
 
+
 module.exports={
-    userAuth,adminAuth,logged,checkToBlock
+    userAuth,adminAuth,logged,checkToBlock,resizeBannerImages,uploadBannerImage
 }

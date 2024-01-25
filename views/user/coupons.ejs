@@ -12,76 +12,88 @@
         </div>
       </div>
   
-      <div class="container">
-        <div class="coupon-container">
-          <div class="pt-5 pb-3">
-            <span class="text-primary h5 text-uppercase">
-              All New Coupons
-            </span>
-            <% if (!allCoupons.length) { %>
-            <div class="p-4 border mt-2 mb-3">
-              No new coupons found.
-            </div>
-            <% } else { %>
-            <div class="mt-2">
-              <% allCoupons.forEach((coupon)=> { %>
-              <div class="card mr-2 mb-3">
-                <div class="card-body">
-                  <h5 class="card-title"></h5>
-                  <h6 class="card-subtitle mb-2 text-muted">
-                    Expires At: <%= coupon.expirationDate.toLocaleDateString() %>
-                  </h6>
-                  <p class="card-text">
-                    <%= coupon.description %>
-                  </p>
-                  <p>
-                    Discount Type: <%= coupon.discountType %>
-                  </p>
-                  <p>
-                    Min. Purchase Amount: <%= coupon.minimumPurchaseAmount %>
-                  </p>
-                  <a href="/shop/1" class="btn btn-primary">Get Coupon</a>
+      <section class="bg0 p-t-100 p-b-120 mainSec">
+        <div class="container">
+          <div class="coupon-container">
+              <div class="pt-5 pb-3">
+                <span class="text-primary h5 text-uppercase">
+                  All New Coupons
+                </span>
+                <% if (!allCoupons.length) { %>
+                <div class="p-4 border mt-2 mb-3">
+                  No new coupons found.
                 </div>
+                <% } else { %>
+                <div class="mt-2">
+                  <% allCoupons.forEach((coupon)=> { %>
+                  <div class="card mr-2 mb-3">
+                    <div class="card-body">
+                      <h5 class="card-title"></h5>
+                      <h6 class="card-subtitle mb-2 text-muted">
+                        Expires At: <%= coupon.expirationDate.toLocaleDateString() %>
+                      </h6>
+                      <p class="card-text">
+                        <%= coupon.description %>
+                      </p>
+                      <p>
+                        Discount Type: <%= coupon.discountType %>
+                      </p>
+                      <p>
+                        Discount Amount: <%= coupon.discountAmount %>
+                      </p>
+                      <p>
+                        Min. Purchase Amount: <%= coupon.minimumPurchaseAmount %>
+                      </p>
+                      <a href="/shop" class="btn btn-primary">Get Coupon</a>
+                    </div>
+                  </div>
+                  <% }) %>
+                </div>
+                <% } %>
               </div>
-              <% }) %>
-            </div>
-            <% } %>
-          </div>
-  
-          <div class="pt-5 pb-3">
-            <span class="text-primary h5 text-uppercase">
-              Coupons Earned
-            </span>
-            <% if (!earnedCoupons.length) { %>
-            <div class="p-4 border mt-2 mb-3">
-              You haven't earned any coupons yet.
-            </div>
-            <% } else { %>
-            <div class="mt-2">
-              <% earnedCoupons.forEach((coupon)=> { %>
-              <div class="p-4 border mb-3">
-                <p class="mb-0 text-black">
-                  <% if (coupon.isUsed) { %>
-                  Code: Already used.<br>
-                  <% } else { %>
-                  Code: <span class="coupon-code"><%= coupon.coupon.code %></span>
-                  <button class="copy-button btn btn-primary">
-                    copy
-                    <i class="bi bi-clipboard"></i>
-                  </button>
-                  <br>
-                  <% } %>
-                  <%= coupon.coupon.description %>,
-                  Discount Type: <%= coupon.coupon.discountType %>,
-                  Valid Upto: <%= coupon.coupon.expirationDate.toLocaleDateString() %>
-                </p>
+      
+              <div class="pt-5 pb-3">
+                <span class="text-primary h5 text-uppercase">
+                  Coupons Earned
+                </span>
+                <% if (!earnedCoupons.length) { %>
+                <div class="p-4 border mt-2 mb-3">
+                  You haven't earned any coupons yet.
+                </div>
+                <% } else { %>
+                <div class="mt-2">
+                  <% earnedCoupons.forEach((coupon)=> { %>
+                    <div class="p-4 border mb-3">
+                      <p class="mb-0 text-black">
+                        <% if (coupon.isUsed) { %>
+                          Code: Already used.<br>
+                        <% } else if (coupon.coupon && coupon.coupon.discountType) { %>
+                          Code: <span class="coupon-code"><%= coupon.coupon.code %></span>
+                          <button class="copy-button btn btn-sm btn-primary">
+                            copy
+                          </button>
+                          <br>
+                          <% if(coupon.coupon.discountType === "percentage" && coupon.coupon.discountAmount) { %>
+                            Discount Percentage: <%= coupon.coupon.discountAmount %>%, 
+                          <% } else if (coupon.coupon.discountAmount) { %>
+                            Discount Amount: <%= coupon.coupon.discountAmount %>₹, 
+                          <% } %>
+                          Discount Type: <%= coupon.coupon.discountType %>,
+                          Valid Upto: <%= coupon.coupon.expirationDate && coupon.coupon.expirationDate.toLocaleDateString() %>
+                        <% } else { %>
+                          <p class="text-danger">Coupon data is not available.</p>
+                          <!-- You can customize the message or take other actions here -->
+                        <% } %>
+                      </p>
+                    </div>
+                  <% }) %>
+                  
+                </div>
+                <% } %>
               </div>
-              <% }) %>
             </div>
-            <% } %>
-          </div>
         </div>
-      </div>
+      </section>
   
   
       <script>

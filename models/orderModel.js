@@ -21,6 +21,10 @@ const orderSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
       },
+      Price:{
+        type:Number,
+        required:true
+      },
       returnRequested: {
         type: String,
         enum: ["Nil", "Pending", "Approved", "Rejected", "Completed"],

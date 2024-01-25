@@ -135,8 +135,8 @@
             <tr>
               <td><%= element.product.product_name %></td>
               <td><%= element.quantity %></td>
-              <td><%= element.product.price %></td>
-              <td><%= element.product.price * element.quantity%></td>
+              <td><%= element.Price %></td>
+              <td><%= element.Price * element.quantity%></td>
               <% }) %>
               <td></td>
             </tr>
@@ -150,9 +150,9 @@
               <div><strong>Total HT </strong> : &nbsp; <span>₹ <%= totalHt %></span></div>
               <br>
 
-              <div><strong>Discount </strong> : &nbsp; <span>₹ <%= order.discount %></span> </div>
+              <div><strong>Discount </strong> : &nbsp; <span>₹ <%= discount %></span> </div>
               <br>
-              <div><strong>TotalAmount </strong> : &nbsp; <span>₹ <%= totalAmount %></span> </div>
+              <div><strong>TotalAmount </strong> : &nbsp; <span>₹ <%= totalAmount - discount %></span> </div>
             </div>
 
           </div>

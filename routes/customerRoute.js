@@ -94,8 +94,6 @@ Customer_Route.get('/user/profile/delete-address',Auth.checkToBlock,Auth.logged,
 Customer_Route.get('/user/profile/edit-address',Auth.checkToBlock,Auth.logged,loadEditAddress)
 Customer_Route.post('/user/profile/edit-address',Auth.checkToBlock,Auth.logged,EditAddress)
 
-// Customer_Route.get('/change-address',Auth.logged,Auth.checkToBlock,getAddresses)
-// Customer_Route.post('/change-address',Auth.logged,Auth.checkToBlock, changeDefaultAddress)
 
 //checkout
 Customer_Route.get("/user/checkout",Auth.checkToBlock,Auth.logged,loadCheckout)

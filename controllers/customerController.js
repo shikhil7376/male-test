@@ -12,6 +12,7 @@ const productCategory = require("../models/productCategory");
 const Return = require("../models/returnProductModel");
 const mongoose = require("mongoose");
 const Razorpay = require("razorpay");
+const Banner = require("../models/bannerModel")
 const razorpayConfig = require("./utils/razorpayConfig");
 const sharp = require("sharp");
 const { log } = require("console");
@@ -69,7 +70,8 @@ const totalSum = async function (id) {
 const loadHome = async (req, res) => {
   try {
     const newPro = await product.find({is_delete:false}).sort({_id:1}).limit(3)
-    res.render("user/index");
+    const banners = await Banner.find()
+    res.render("user/index",{banners});
   } catch (error) {
     console.log(error.message);
   }
@@ -465,7 +467,7 @@ const loadcart = async (req, res) => {
       );
 
       const cartProducts = currentUser.cart;
-     
+       const noOfItems = cartProducts.length
       const grandTotal = cartProducts.reduce((total, element) => {
         if(element.product.offerPrice>0 && element.product.categoryOfferPrice){
           if(element.product.offerPrice<element.product.categoryOfferPrice){
@@ -488,7 +490,8 @@ const loadcart = async (req, res) => {
         grandTotal,
         insufficientStockProduct: "",
         activePage: "Cart",
-        stockError:stockError?stockError:""
+        stockError:stockError?stockError:"",
+        noOfItems
       });
     }
   } catch (error) {
@@ -571,7 +574,19 @@ const updateCartItem = async (req, res) => {
       }
     }
 
-    cartItem.total = cartItem.product.price * cartItem.quantity;
+    if(cartItem.product.offerPrice>0 && cartItem.product.categoryOfferPrice>0){
+      if(cartItem.product.offerPrice<cartItem.product.categoryOfferPrice){
+         cartItem.total = cartItem.product.offerPrice * cartItem.quantity
+      }else{
+        cartItem.total = cartItem.product.categoryOfferPrice * cartItem.quantity
+      }
+    }else if(cartItem.product.offerPrice>0){
+        cartItem.total = cartItem.product.offerPrice * cartItem.quantity
+    }else if(cartItem.product.categoryOfferPrice>0){
+      cartItem.total = cartItem.product.categoryOfferPrice * cartItem.quantity
+    }else{
+      cartItem.quantity = cartItem.product.price * cartItem.quantity
+    }
 
     await currentUser.save();
     const totSum = await totalSum(id);
@@ -785,7 +800,8 @@ const loadCheckout = async (req, res) => {
     const currentUser = await Customer.findById(req.session.user);
 
     const addresses = await Address.find({ User: req.session.user });
-
+    const noOfaddress = addresses.length
+   
     const currentCoupon = req.body.currentCoupon;
 
     if (currentUser.is_varified) {
@@ -794,14 +810,33 @@ const loadCheckout = async (req, res) => {
         default: true,
       });
 
-      await currentUser.populate("cart.product");
-      await currentUser.populate("cart.product.category");
+      await currentUser.populate({
+        path: "cart.product",
+        model: "product",
+        populate: {
+          path: "category",
+          model: "productCategory",
+        },
+      });
+
       const cartProducts = currentUser.cart;
-
+     console.log("jst for check"+cartProducts);
       const noOfItems = cartProducts.length;
-
+  
       let grandTotal = cartProducts.reduce((total, element) => {
-        return total + element.quantity * element.product.price;
+        if(element.product.offerPrice>0 && element.product.categoryOfferPrice){
+          if(element.product.offerPrice<element.product.categoryOfferPrice){
+            return total + element.quantity * element.product.offerPrice
+          }else{
+            return total + element.quantity * element.product.categoryOfferPrice
+          }
+        }else if(element.product.offerPrice>0){
+           return total + element.quantity * element.product.offerPrice
+        }else if(element.product.categoryOfferPrice>0){
+            return total + element.quantity * element.product.categoryOfferPrice
+        }else{
+          return total + element.quantity * element.product.price
+        }
       }, 0);
 
       // grandTotal = grandTotal - discountAmount
@@ -824,7 +859,11 @@ const loadCheckout = async (req, res) => {
           discount: discountAmount,
           addresses,
           error,
-          currentCoupon,
+          currentCoupon:'',
+          noOfaddress,
+          couponError:'',
+          error: "",
+
         });
       } else {
         req.session.stockError = "insufficient stock"
@@ -838,10 +877,8 @@ const loadCheckout = async (req, res) => {
 
 const placeOrder = async (req, res) => {
   try {
-    console.log("body content of place order to find cuurect coupon id",req.body);
-
-    const couponId = req.session.currentCoupon;
-    console.log("coupon id using session variable",couponId);
+    const final = req.body.discount
+   
     const currentUser = await Customer.findById(req.session.user);
     await currentUser.populate("cart.product");
     let shippingAddress = req.body.shippingAddress;
@@ -857,13 +894,42 @@ const placeOrder = async (req, res) => {
     );
 
     const grandTotal = currentUser.cart.reduce((total, element) => {
-      return total + element.quantity * element.product.price;
+      if(element.product.offerPrice>0 && element.product.categoryOfferPrice){
+        if(element.product.offerPrice<element.product.categoryOfferPrice){
+          return total + element.quantity * element.product.offerPrice
+        }else{
+          return total + element.quantity * element.product.categoryOfferPrice
+        }
+      }else if(element.product.offerPrice>0){
+         return total + element.quantity * element.product.offerPrice
+      }else if(element.product.categoryOfferPrice>0){
+          return total + element.quantity * element.product.categoryOfferPrice
+      }else{
+        return total + element.quantity * element.product.price
+      }
     }, 0);
 
     const orderedProducts = currentUser.cart.map((item) => {
+      let price
+     if(item.product.offerPrice>0 && item.product.categoryOfferPrice>0){
+         if(item.product.offerPrice< item.product.categoryOfferPrice){
+            price = item.product.offerPrice
+         }else{
+          price = item.product.categoryOfferPrice
+         }
+     }else if(item.product.offerPrice>0){
+      price = item.product.offerPrice
+     }else if (item.product.categoryOfferPrice>0){
+      price = item.product.categoryOfferPrice
+     }else{
+      price = item.product.price
+     }
+
+
       return {
         product: item.product._id,
         quantity: item.quantity,
+        Price:price
       };
     });
 
@@ -881,7 +947,7 @@ const placeOrder = async (req, res) => {
       const order = await Order.findById(newOrder._id);
 
       // res.redirect("/order-successfull");
-      res.render("user/orderSuccesful", { order });
+      res.render("user/orderSuccesful", { order,final });
     } else if (req.body.method === "rzp") {
       const razorpay = new Razorpay({
         key_id: razorpayConfig.RAZORPAY_ID_KEY,
@@ -933,37 +999,34 @@ const placeOrder = async (req, res) => {
     }
 
     // stock update
-    console.log("stockmanagement");
+
     currentUser.cart.forEach(async (item) => {
       const foundProduct = await product.findById(item.product._id);
       foundProduct.stock_count -= item.quantity;
       await foundProduct.save();
     });
- console.log(">>here");
-    currentUser.cart = [];
-console.log(currentUser.cart);
-console.log("currentUser",currentUser);
-await currentUser.save();
-    // coupons
-    console.log("couponmanagement", couponId);
-    const couponUpdated = await Coupon.findByIdAndUpdate(
-      { _id: couponId },
-      { $inc: { usedCount: 1 } },
-      { new: true }
-    );
-    delete req.session.currentCoupon;
 
-    if (couponUpdated) {
-      console.log(couponUpdated);
-    } else {
-      console.log("Coupon not found or error while updating coupon");
-    }
-    // const currentUsedCoupon = currentUser.earnedCoupons.find((coupon)=>coupon.coupon.equals(req.body.currentCoupon))
-    //      if(currentUsedCoupon){
-    //       currentUsedCoupon.isUsed = true
-    // await Coupon.findByIdAndUpdate(req.body.currentCoupon,{$inc:{usedCount:1}})
-    //  }
-  
+    currentUser.cart = [];
+   
+    // coupons
+    
+     const foundCoupon = await Coupon.findOne({
+      isActive:true,minimumPurchaseAmount:{$lte:grandTotal}
+     }).sort({minimumPurchaseAmount:-1})
+   
+   if(foundCoupon){
+    const couponExists = currentUser.earnedCoupons.some((coupon)=>coupon.coupon.equals(foundCoupon._id))
+      if(!couponExists){
+        currentUser.earnedCoupons.push({coupon:foundCoupon._id})
+      }
+   }
+   const currentUsedCoupon = await currentUser.earnedCoupons.find((coupon)=>coupon.coupon.equals(req.body.currentCoupon))
+     if(currentUsedCoupon){
+      currentUsedCoupon.isUsed = true
+      await Coupon.findByIdAndUpdate(req.body.currentCoupon,{$inc:{usedCount:1}})
+     }
+     await currentUser.save()
+     res.redirect('/orders')
   } catch (error) {
     console.log(error.message);
   }
@@ -975,9 +1038,7 @@ const saveRzpOrder = async (req, res) => {
     const amount = parseInt(req.body.amount / 100);
 
     const currentUser = await Customer.findById(req.session.user);
-
     await currentUser.populate("cart.product");
-    console.log(currentUser);
     const deliveryAddress = await Address.findOne({
       User: req.session.user,
       default: true,
@@ -990,7 +1051,19 @@ const saveRzpOrder = async (req, res) => {
         await foundProduct.save();
       });
       const grandTotal = currentUser.cart.reduce((total, element) => {
-        return total + element.quantity * element.product.price;
+        if(element.product.offerPrice>0 && element.product.categoryOfferPrice){
+          if(element.product.offerPrice<element.product.categoryOfferPrice){
+            return total + element.quantity * element.product.offerPrice
+          }else{
+            return total + element.quantity * element.product.categoryOfferPrice
+          }
+        }else if(element.product.offerPrice>0){
+           return total + element.quantity * element.product.offerPrice
+        }else if(element.product.categoryOfferPrice>0){
+            return total + element.quantity * element.product.categoryOfferPrice
+        }else{
+          return total + element.quantity * element.product.price
+        }
       }, 0);
       console.log("currentUserCart", currentUser.cart);
       const orderedProducts = currentUser.cart.map((item) => {
@@ -1011,7 +1084,26 @@ const saveRzpOrder = async (req, res) => {
       console.log("newOrder:", newOrder);
       await newOrder.save();
       currentUser.cart = [];
-      console.log(newOrder);
+      
+  // coupons
+  const foundCoupon = await Coupon.findOne({
+    isActive: true, minimumPurchaseAmount: { $lte: grandTotal }
+}).sort({ minimumPurchaseAmount: -1 });
+
+if (foundCoupon) {
+  const couponExists = currentUser.earnedCoupons.some((coupon) => coupon.coupon.equals(foundCoupon._id));
+  if (!couponExists) {
+      currentUser.earnedCoupons.push({ coupon: foundCoupon._id });
+  }
+}
+
+const currentUsedCoupon = await currentUser.earnedCoupons.find((coupon) => coupon.coupon.equals(req.body.currentCoupon));
+if (currentUsedCoupon) {
+  currentUsedCoupon.isUsed = true;
+  await Coupon.findByIdAndUpdate(req.body.currentCoupon, { $inc: { usedCount: 1 } });
+}
+
+await currentUser.save();    
       await currentUser.save();
     }
     // res.redirect('/order-successfull')
@@ -1023,34 +1115,18 @@ const saveRzpOrder = async (req, res) => {
 
 const getCoupons = async (req, res) => {
   try {
-    const currentUser = await Customer.findById(req.session.user).populate(
-      "earnedCoupons.coupon"
-    );
-      console.log(currentUser);
-    const earnedCouponId = currentUser.earnedCoupons
-      .filter((value) => value.isUsed)
-      .map((value) => value.coupon);
+         const currentUser = await Customer.findById(req.session.user).populate('earnedCoupons.coupon')
+         const allCoupons = await Coupon.find({isActive:true})
+         const earnedCoupons = currentUser.earnedCoupons
 
-    const allCoupons = await Coupon.find({
-      _id: { $nin: earnedCouponId },
-      isActive: { $ne: false },
-    });
-    console.log(allCoupons);
-    const earnedCoupons = currentUser.earnedCoupons;
+         // convert list of earned coupon ids to an array
+         const earnedCouponIds = earnedCoupons.map((coupon)=>coupon._id.toString())
+         // Filter out earned coupons from the active coupons list
+         const remainingCoupons = allCoupons.filter((coupon)=>!earnedCouponIds.includes(coupon._id.toString()))
+         res.render("user/coupons",{
+          currentUser,allCoupons:remainingCoupons,earnedCoupons
 
-    // convert the list of earned coupon IDs to an array
-    const earnedCouponIds = earnedCoupons.map((coupon) =>
-      coupon.coupon._id.toString()
-    );
-    // Filter out earned coupons from the active coupons list
-    const remainingCoupons = allCoupons.filter(
-      (coupon) => !earnedCouponIds.includes(coupon._id.toString())
-    );
-    res.render("user/coupons", {
-      currentUser,
-      allCoupons: remainingCoupons,
-      earnedCoupons,
-    });
+         })
   } catch (error) {
     console.log(error.message);
   }
@@ -1064,12 +1140,21 @@ const applyCoupon = async (req, res) => {
     await currentUser.populate("cart.product");
     await currentUser.populate("cart.product.category");
     const cartProducts = currentUser.cart;
-    const addresses = await Address.find({ User: req.session.user });
     const currentCoupon = await Coupon.findOne({ code: req.body.coupon });
-      console.log("body for coupon apply to check coupon id",req.body," current coupon found",currentCoupon);
-      req.session.currentCoupon = currentCoupon._id;
     const grandTotal = cartProducts.reduce((total, element) => {
-      return total + element.quantity * element.product.price;
+      if(element.product.offerPrice>0 && element.product.categoryOfferPrice){
+        if(element.product.offerPrice<element.product.categoryOfferPrice){
+          return total + element.quantity * element.product.offerPrice
+        }else{
+          return total + element.quantity * element.product.categoryOfferPrice
+        }
+      }else if(element.product.offerPrice>0){
+         return total + element.quantity * element.product.offerPrice
+      }else if(element.product.categoryOfferPrice>0){
+          return total + element.quantity * element.product.categoryOfferPrice
+      }else{
+        return total + element.quantity * element.product.price
+      }
     }, 0);
     let couponError = "";
     let discount = 0;
@@ -1077,39 +1162,36 @@ const applyCoupon = async (req, res) => {
       const foundCoupon = currentUser.earnedCoupons.find((coupon) =>
         coupon.coupon._id.equals(currentCoupon._id)
       );
-      if (foundCoupon) {
+      if(foundCoupon){
         if (foundCoupon.coupon.isActive) {
           if (!foundCoupon.isUsed) {
-            if (foundCoupon.coupon.discountType === "fixedAmount") {
-              if(currentCoupon.usageLimit > currentCoupon.usedCount){
-                discount = foundCoupon.coupon.discountAmount;
-              }else{
-                couponError = "coupon limit exeded"; 
+              if (foundCoupon.coupon.discountType === 'fixedAmount') {
+                  discount = foundCoupon.coupon.discountAmount;
+              } else {
+                  discount = (foundCoupon.coupon.discountAmount / 100) * grandTotal;
               }
-            } else {
-              console.log("discountAmount", foundCoupon.coupon.discountAmount);
-              console.log("grantotal", grandTotal);
-              discount = (foundCoupon.coupon.discountAmount / 100) * grandTotal;
-              console.log("discount", discount);
-              
-            }
           } else {
-            couponError = foundCoupon.isUsed
-              ? "Coupon already used"
-              : "Coupon is inactive";
+              couponError = foundCoupon.isUsed ? "Coupon already used." : "Coupon is inactive.";
           }
-        } else {
-          couponError = foundCoupon.isUsed
-            ? "Coupon already used"
-            : "Coupon is inactive";
-        }
       } else {
-        couponError = "invalid coupon code";
+          couponError = foundCoupon.isUsed ? "Coupon already used." : "Coupon is inactive.";
       }
-    } else {
-      couponError = "invalid coupon code";
+  } else {
+      couponError = "Invalid coupon code.";
+  }
+    }else{
+      couponError = "Invalid coupon code.";
     }
-    res.redirect(`/user/checkout?discount=${discount}&&error=${couponError}`);
+    res.render("user/checkout", {
+      currentUser,
+      cartProducts,
+      addresses:'',
+      discount,
+      grandTotal,
+      currentCoupon: couponError ? '' : currentCoupon._id,
+      couponError,
+      error: "",
+  });
 
   } catch (error) {
     console.log(error.message);
@@ -1135,7 +1217,7 @@ const getOrders = async (req, res) => {
       },
       { $sort: { orderDate: -1 } },
     ]);
-
+   console.log(orders);
     res.render("user/orders", {
       currentUser,
       orders,
@@ -1175,14 +1257,6 @@ const updateOrderStatus = async () => {
   }
 };
 
-// const loadOrderSuccess = async (req, res) => {
-//   const order = await Order.findOne()
-//   try {
-//     res.render("user/orderSuccesful");
-//   } catch (error) {
-//     console.log(error.message);
-//   }
-// };
 
 const getWallet = async (req, res) => {
   try {
@@ -1203,6 +1277,7 @@ const getWallet = async (req, res) => {
 
 const cancelOrder = async (req, res) => {
   try {
+    let  refundAmount;
     const foundOrder = await Order.findById(req.body.orderId).populate(
       "products.product"
     );
@@ -1212,14 +1287,36 @@ const cancelOrder = async (req, res) => {
 
     if (foundOrder.paymentMethod !== "cod") {
       const currentUser = await Customer.findById(req.session.user);
+         if(foundProduct.product.offerPrice>0 && foundProduct.product.categoryOfferPrice>0){
+            if(foundProduct.product.offerPrice< foundProduct.product.categoryOfferPrice){
+              refundAmount= foundProduct.product.offerPrice * foundProduct.quantity
+            }else{
+              refundAmount = foundProduct.product.categoryOfferPrice * foundProduct.quantity
+            }
+         }else if(foundProduct.product.offerPrice>0){
+             refundAmount = foundProduct.product.offerPrice * foundProduct.quantity
+         }else if(foundProduct.product.categoryOfferPrice>0){
+          refundAmount = foundProduct.product.categoryOfferPrice * foundProduct.quantity
+         }else{
+          refundAmount = foundProduct.product.price * foundProduct.quantity
+         }
+     currentUser.wallet += refundAmount
 
-      const refundAmount =
-        foundProduct.product.price * foundProduct.quantity + 5;
+      if(foundProduct.product.offerPrice>0 && foundProduct.product.categoryOfferPrice>0){
+           if(foundProduct.product.offerPrice<foundProduct.product.categoryOfferPrice){
+              foundOrder.totalAmount -= foundProduct.offerPrice * foundProduct.quantity
+           }else{
+            foundOrder.totalAmount -= foundProduct.categoryOfferPrice * foundProduct.quantity
+           }
+      }else if(foundProduct.product.offerPrice>0){
+        foundOrder.totalAmount -= foundProduct.product.offerPrice * foundProduct.quantity
+      }else if(foundProduct.product.categoryOfferPrice>0){
+        foundOrder.totalAmount -= foundProduct.product.categoryOfferPrice * foundProduct.quantity
+      }else{
+        foundOrder.totalAmount -= foundProduct.product.price * foundProduct.quantity
+      }
 
-      currentUser.wallet.balance += refundAmount;
 
-      foundOrder.totalAmount -=
-        foundProduct.product.price * foundProduct.quantity;
       if (foundOrder.totalAmount === 5) {
         foundOrder.totalAmount = 0;
       }
@@ -1240,7 +1337,23 @@ const cancelOrder = async (req, res) => {
       await currentUser.save();
       await foundCurrentProduct.save();
     } else {
-      let amount = foundProduct.product.price * foundProduct.quantity;
+      let amount 
+      if(foundProduct.product.offerPrice>0 && foundProduct.product.categoryOfferPrice>0){
+        if(foundProduct.product.offerPrice<foundProduct.product.categoryOfferPrice){
+           amount = foundProduct.offerPrice * foundProduct.quantity
+        }else{
+          amount = foundProduct.categoryOfferPrice * foundProduct.quantity
+        }
+   }else if(foundProduct.product.offerPrice>0){
+          amount = foundProduct.product.offerPrice * foundProduct.quantity
+   }else if(foundProduct.product.categoryOfferPrice>0){
+           amount = foundProduct.product.categoryOfferPrice * foundProduct.quantity
+   }else{
+            amount = foundProduct.product.price * foundProduct.quantity
+   }
+
+
+
       foundOrder.totalAmount -= amount;
 
       if (foundOrder.totalAmount === 5) {
@@ -1337,16 +1450,12 @@ const requestReturnProduct = async (req, res) => {
 
 const loadInvoice = async (req, res) => {
   const id = req.params.id;
+  let discount = req.query.discount || 0;
+  console.log(req.query.discount);
   const order = await Order.findById(id).populate("products.product");
-
-console.log("orders>>>",order)
   const totalHt = order.totalAmount - 5;
- 
-  const totalAmount = order.totalAmount - order.discount;
-
-
+  const totalAmount = order.totalAmount -5;
   const user = await Customer.findById(req.session.user);
-  
   const deliveryAddress = await Address.findOne({
     User: req.session.user,
     default: true,
@@ -1358,6 +1467,7 @@ console.log("orders>>>",order)
       totalHt,
       totalAmount,
       deliveryAddress,
+      discount
     });
   } catch (error) {
     console.log(error.message);

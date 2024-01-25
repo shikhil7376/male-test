@@ -160,12 +160,12 @@
             <% } %>
           </ul>
 
-          <% if (!locals.cartProducts){ %>
+          <% if (noOfItems>0){ %>
           <div class="primary-btn">
-            Your cart is empty
+            <a href="/user/checkout" class="primary-btn">Proceed to checkout</a>
           </div>
           <% }else{ %>
-          <a href="/user/checkout" class="primary-btn">Proceed to checkout</a>
+          <a href="/cart" class="primary-btn">no products</a>
           <% } %>
         </div>
       </div>
