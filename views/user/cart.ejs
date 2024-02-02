@@ -37,7 +37,7 @@
               </tr>
             </thead>
             <tbody>
-              <p class="error"><%= locals.stockError %></p>
+              <p style="color: red;font-size: larger;" class="error"><%= locals.stockError %></p>
               <% if (!locals.cartProducts){ %>
               <tr>
                 <td>Your cart is empty</td>
@@ -77,10 +77,6 @@
                   <!-- Display original price -->
                  <span>&#8377;<%= cartItem.product.price%></span>
                   <% }%>
-
-
-
-
                     <p style="display: none" id="stock_<%= cartItem._id %>">
                       <%= cartItem.product.stock_count %> 
                     </p>
@@ -160,12 +156,12 @@
             <% } %>
           </ul>
 
-          <% if (noOfItems>0){ %>
+          <% if (!locals.cartProducts){ %>
           <div class="primary-btn">
-            <a href="/user/checkout" class="primary-btn">Proceed to checkout</a>
+            Your cart is empty
           </div>
           <% }else{ %>
-          <a href="/cart" class="primary-btn">no products</a>
+          <a href="/user/checkout" class="primary-btn">Proceed to checkout</a>
           <% } %>
         </div>
       </div>

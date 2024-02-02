@@ -321,7 +321,7 @@ ol {
 
 .header__top {
 	background: #111111;
-	padding: 10px 0;
+	padding: 0px 0;
 }
 
 .header__top__left p {
@@ -3856,4 +3856,20 @@ ol {
     color:blue;
     text-decoration: underline;
     cursor: pointer;
+}
+
+
+
+.mobile-menu ul {
+    display: flex;
+    align-items: center;
+}
+
+.mobile-menu li {
+    margin-right: 15px; /* Adjust as needed */
+}
+
+.logout-form {
+    margin-bottom: 0; /* Remove margin for the form */
+	
 }

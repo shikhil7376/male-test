@@ -36,7 +36,7 @@
           <div class="row">
             <ul class="navbar-nav w-100">
               <li class="nav-item w-100">
-                <form class="nav-link mt-2 mt-md-0 d-none d-lg-flex search" action="" method="get">
+                <form class="nav-link mt-2 mt-md-0 d-none d-lg-flex search" action="/admin/product" method="get">
                   <input type="text" class="form-control" name="search" placeholder="Search category">
                   <button class="btn-info">Search</button>
                 </form>
@@ -55,7 +55,7 @@
                   <div class="table-responsive">
                     <table class="table table-striped">
                       <thead>
-                        <tr>
+                        <tr style="font-size: large;font-family:'Times New Roman', Times, serif;font-weight: bold;">
                        <th>NO</th>
                        <th>images</th>
                        <th>Product Name</th>
@@ -80,13 +80,13 @@
                             <% }) %>
                           </td>
                           
-                            <td><%= product.product_name %></td>
-                            <td><%= product.brand_name %></td>
-                            <td><%= product.category ? product.category.categoryName : 'No Category' %></td>
-                            <td><%= product.price %></td>
-                            <td><%= product.stock_count %></td>
+                            <td style="font-size: medium;font-family:'Times New Roman', Times, serif"><%= product.product_name %></td>
+                            <td style="font-size: medium;font-family:'Times New Roman', Times, serif"><%= product.brand_name %></td>
+                            <td style="font-size: medium;font-family:'Times New Roman', Times, serif"><%= product.category ? product.category.categoryName : 'No Category' %></td>
+                            <td style="font-size: medium;font-family:'Times New Roman', Times, serif"><%= product.price %></td>
+                            <td style="font-size: medium;font-family:'Times New Roman', Times, serif"><%= product.stock_count %></td>
                             <% if (product.is_delete === true) { %>
-                             <td>
+                             <td style="font-size: medium;font-family:'Times New Roman', Times, serif">
                               <label class="text-danger">Deactive</label>
                             </td>
                              <td>
@@ -94,7 +94,7 @@
                               <a href="/admin/product/<%= product._id %>/Active" class="btn btn-success">Active</a>
                              </td>
                             <%} else {%>
-                              <td>
+                              <td style="font-size: medium;font-family:'Times New Roman', Times, serif">
                                
                                   <label class="text-success">Active</label>
                                  
@@ -106,7 +106,7 @@
                                </td>
                            <% }%>
                         
-                           <td>
+                           <td style="font-size: medium;font-family:'Times New Roman', Times, serif">
                             <% if (product.offerPrice > 0 ) { %>
                               <p class="text-info">
                                 <%= product.offer.name %> <br>

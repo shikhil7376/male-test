@@ -56,9 +56,9 @@ include("../layout/customerside/navbar") %>
                       <% categoryDatas.forEach((category)=>{ %>
                       <ul class="nice-scroll">
                         <li>
-                          <a href="/shop?category=<%=category._id %>"
-                            ><%= category.categoryName %></a
-                          >
+                     <a style="font-size:medium;color: black;font-family: 'Times New Roman', Times, serif;" href="/shop?category=<%=category._id %>"
+                            ><%= category.categoryName %></a>
+                          
                         </li>
                         <% }) %>
                       </ul>
@@ -82,11 +82,11 @@ include("../layout/customerside/navbar") %>
                       <% productDatas.forEach((element)=>{ %>
                       <ul>
                         <li>
-                          <p
+                          <h5 style="font-size: medium;font-family: 'Times New Roman', Times, serif;"
                             onclick="fetchProduct('<%= element.brand_name %>')"
                           >
                             <%= element.brand_name %>
-                          </p>
+                        </h5>
                         </li>
                         <%}) %>
                       </ul>
@@ -307,8 +307,8 @@ include("../layout/customerside/navbar") %>
               </ul>
             </div>
             <div class="product__item__text">
-              <h6><%= element.product_name %></h6>
-              <a href="#" class="add-cart">+ Add To Cart</a>
+         <h5><%= element.product_name %></h5> 
+            
 
               <div class="rating">
                 <i class="fa fa-star-o"></i>
@@ -352,12 +352,12 @@ include("../layout/customerside/navbar") %>
           <div class="col-lg-12">
             <div class=n "product__pagination"> <% if(!categoryBased){ %> <%
             if(currentPage>1){ %>
-            <a class="active" href="/shop/<%= currentPage - 1 %>">&lt;</a>
+            <a class="active" href="/shop/<%= currentPage - 1 %>">&lt---</a>
             <% } %> <% for(let i=1;i<= totalPages;i++){ %> <% if(i===
             currentPage){ %>
             <a href="/shop/<%= i %>"> <%= i %> </a>
             <% } %> <% } %> <% if(currentPage < totalPages){ %>
-            <a href="/shop/<%= currentPage + 1 %>">&gt;</a>
+            <a href="/shop/<%= currentPage + 1 %>">---&gt;</a>
 
             <% } %> <% } %>
           </div>

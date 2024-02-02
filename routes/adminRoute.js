@@ -1,7 +1,7 @@
 const express=require('express')
 const admin_route = express.Router()
 const Auth=require('../middleware/Auth')
-const{loadAdminLogin, loginValidation, adminValid,loadDash,displayCustomers,loadCategory, loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate, productDeactivate, UnblockTheUser, blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests,returnRequsetActions,loadCoupons,getAddNewCoupon,addNewCoupon,couponAction,deleteImgDelete,loadEditCategory,loadOfferPage,loadAddOfferPage,createOffer,loadOfferEdit,saveEditOffer,deleteOffer,activeOffer,EditCategory,deleteCategoryImg,getBanner,getAddBanner,addBanner}=require("../controllers/adminController")
+const{loadAdminLogin, loginValidation, adminValid,loadDash,displayCustomers,loadCategory, loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate, productDeactivate, UnblockTheUser, blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests,returnRequsetActions,loadCoupons,getAddNewCoupon,addNewCoupon,couponAction,deleteImgDelete,loadEditCategory,loadOfferPage,loadAddOfferPage,createOffer,loadOfferEdit,saveEditOffer,deleteOffer,activeOffer,EditCategory,deleteCategoryImg,getBanner,getAddBanner,addBanner,getSalesReport,loadEditBanner,editBanner,deleteBanner}=require("../controllers/adminController")
 const multer = require("multer")
 const storage = multer.memoryStorage()
 const upload = multer({storage:storage})
@@ -61,12 +61,18 @@ admin_route.get("/coupons",Auth.adminAuth,loadCoupons)
              .post("/offer/create",Auth.adminAuth,createOffer)
              .get("/offer/:id/Edit-offer/",Auth.adminAuth,loadOfferEdit)
              .post('/offer/edit-save/',Auth.adminAuth,saveEditOffer)
-              .get('/offer/:id/Delete-Offer/',Auth.adminAuth,deleteOffer)
-              .get("/offer/:id/active-offer",Auth.adminAuth,activeOffer)
+             .get('/offer/:id/Delete-Offer/',Auth.adminAuth,deleteOffer)
+             .get("/offer/:id/active-offer",Auth.adminAuth,activeOffer)
 
 // BANNER MANAGEMENT
 admin_route.get('/banner',getBanner)
             .get('/banner/addBanner',getAddBanner)
             .post('/banner/addBanner',Auth.uploadBannerImage,Auth.resizeBannerImages,addBanner)
-           
+            .get('/banner/editBanner/:id',Auth.adminAuth,loadEditBanner)
+            .post('/banner/editBanner/:id',Auth.adminAuth,editBanner)
+            .get('/banner/deleteBanner/:id',Auth.adminAuth,deleteBanner)
+ // SALES REPORT
+ admin_route.get("/sales-report",getSalesReport)
+            .post("/sales-report",getSalesReport)
+          
 module.exports=admin_route

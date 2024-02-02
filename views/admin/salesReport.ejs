@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Skydash Admin</title>
+  <!-- plugins:css -->
+  <link rel="stylesheet" href="/admin/vendors/feather/feather.css">
+  <link rel="stylesheet" href="/admin/vendors/ti-icons/css/themify-icons.css">
+  <link rel="stylesheet" href="/admin/vendors/css/vendor.bundle.base.css">
+  <!-- endinject -->
+  <!-- Plugin css for this page -->
+  <!-- End plugin css for this page -->
+  <!-- inject:css -->
+  <link rel="stylesheet" href="/admin/css/vertical-layout-light/style.css">
+  <!-- endinject -->
+  <link rel="shortcut icon" href="/admin/images/favicon.png" />
+</head>
+
+<body>
+  <div class="container-scroller">
+    <!-- partial:../../partials/_navbar.html -->
+    <%- include("../layout/adminside/navbar") %>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:../../partials/_settings-panel.html -->
+      <%- include("../layout/adminside/navbar") %>
+      <!-- partial -->
+      <!-- partial:../../partials/_sidebar.html -->
+      <%- include("../layout/adminside/sidebar") %>
+      <!-- partial -->
+      <div class="main-panel" id="pdfContent">
+        <div class="content-wrapper my-custom-wrapper">
+          <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card">
+              <div class="card-body">
+                <h4 class="card-title">Sales Report</h4>
+                <form action="/admin/sales-report?filtered=true" method="post">
+                  <input class="m-1" type="date" name="from">
+                  <input class="m-1" type="date" name="upto">
+                  <button class="btn btn-outline-primary btn-sm m-1" type="submit">Apply</button>
+                </form>
+                <div class="table-responsive">
+                  <% let productsCount = 0 %>
+                  <% let totalRevenue = 0 %>
+                  <table class="table table-striped" id="salesReportTable">
+                    <thead  style="font-size:larger;font-family:'Times New Roman', Times, serif;font-weight: bold;">
+                      <tr>
+                        <th>
+                          User
+                        </th>
+                        <th>
+                          Delivery Address
+                        </th>
+                        <th>
+                          Order Details
+                        </th>
+                        <th>
+                          Order Date
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody style="font-size:medium;font-family:'Times New Roman', Times, serif">
+                      <% if (!salesReport.length) { %>
+                      <tr>
+                        <td colspan="6">
+                          No data found.
+                        </td>
+                      </tr>
+                      <% } else { %>
+                      <% salesReport.forEach((report) => { %>
+                      <tr class=" border-bottom">
+                        <td>
+                          <%= report.userInfo.username %><br>
+                          <p class="text-dark"><%= report.userInfo.email %></p><br>
+                          <%= report.userInfo.phone %>
+                        </td>
+                        <td>
+                          <%= report.deliveryAddress.state %>,
+                          <%= report.deliveryAddress.city %><br>
+                          <%= report.deliveryAddress.area %>,
+                          Pincode: <%= report.deliveryAddress.pincode %><br>
+                          House No.: <%= report.deliveryAddress.building %>
+                        </td>
+                        <td>
+                          <div>
+                            <% productsCount += 1 %>
+                            <div class="border-bottom mb-3">
+                              <span class="text-primary h6 text-uppercase">
+                                <%= report.products.productInfo.name %>
+                              </span><br>
+                              Price: <%= report.products.productInfo.price %>,
+                              Quantity: <%= report.products.quantity %>
+                              <% totalRevenue += (report.products.productInfo.price * report.products.quantity) %>
+                            </div>
+                            <span>
+                              <strong>
+                                Payment Method: <%= report.paymentMethod %>
+                              </strong>
+                            </span>
+                        </td>
+                        <td>
+                          Order Confirmed, <%= report.orderDate.toLocaleDateString() %><br>
+                          Delivery, <%= report.deliveryDate.toLocaleDateString() %>
+                        </td>
+                      </tr>
+                      <% }) %>
+                      <% } %>
+                    </tbody>
+                  </table>
+                  <div class="d-flex">
+                    <div class="col-md-9 col-12 pt-3" style="font-size: large;font-family:'Times New Roman', Times, serif;font-weight: bold;">
+                      <!-- Total orders done: <%= salesReport.length %><br> -->
+                      Total products sold: <%= productsCount %><br>
+                      <strong>Total Revenue: ₹<%= totalRevenue.toFixed(2) %></strong>
+                    </div>
+                    <% if (salesReport.length) { %>
+                      <div class="col-md-3 col-12 p-4">
+                        <button id="downloadButton">Download PDF</button>
+                        </a>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+           
+          
+        <!-- content-wrapper ends -->
+        <!-- partial:../../partials/_footer.html -->
+        <footer class="footer">
+          <div class="d-sm-flex justify-content-center justify-content-sm-between">
+            <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2021.  Premium <a href="https://www.bootstrapdash.com/" target="_blank">Bootstrap admin template</a> from BootstrapDash. All rights reserved.</span>
+            <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Hand-crafted & made with <i class="ti-heart text-danger ml-1"></i></span>
+          </div>
+        </footer>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+  <!-- plugins:js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
+  <script>
+    document.getElementById('downloadButton').addEventListener('click', function () {
+      // Select the element containing the content you want to convert to PDF
+      const element = document.getElementById('salesReportTable');
+  
+      // Set the options for html2pdf
+      const options = {
+        margin: 10,
+        filename: 'sales_report.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+      };
+  
+      // Use html2pdf to generate and download the PDF
+      html2pdf(element, options).then(function (pdf) {
+        const blob = new Blob([pdf.output('blob')], { type: 'application/pdf' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = 'sales_report.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+    });
+  </script>
+
+  <script src="/admin/vendors/js/vendor.bundle.base.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page -->
+  <!-- End plugin js for this page -->
+  <!-- inject:js -->
+  <script src="/admin/js/off-canvas.js"></script>
+  <script src="/admin/js/hoverable-collapse.js"></script>
+  <script src="/admin/js/template.js"></script>
+  <script src="/admin/js/settings.js"></script>
+  <script src="/admin/js/todolist.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <!-- End custom js for this page-->
+</body>
+
+</html>

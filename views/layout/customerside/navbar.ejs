@@ -40,24 +40,14 @@
             <div class="container">
                 <div class="row">
                     <div class="col-lg-6 col-md-7">
-                        <div class="header__top__left">
-                            <p>Free shipping, 30-day return or refund guarantee.</p>
-                        </div>
+                       
                     </div>
                     <div class="col-lg-6 col-md-5">
                         <div class="header__top__right">
                             <div class="header__top__links">
-                                <a href="user-Login">Login</a>
-                                <a href="#">FAQs</a>
+                           
                             </div>
-                            <div class="header__top__hover">
-                                <span>Settings <i class="arrow_carrot-down"></i></span>
-                                <ul>
-                                  <form action="/user-LogOut" method="post">
-                                    <button type="submit" class="btn btn-primary mb-2">LogOut</button>
-                                  </form>
-                                </ul>
-                            </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -84,13 +74,19 @@
                                     <li><a href="./blog-details.html">Blog Details</a></li>
                                 </ul>
                             </li>
-                            <li><a href="./blog.html">Blog</a></li>
-                            <li><a href="./contact.html">Contacts</a></li>
+                            <% if (currentUser){ %>
+                                <form action="/user-LogOut" method="post" class="logout-form">
+                                  <li> <button type="submit" class="btn btn-primary mb-2">LogOut</button> </li>
+                                  </form>
+                                <% }else{ %>
+                            <li><a href="user-Login">Login</a></li>
+                            <% } %>
                         </ul>
                     </nav>
                 </div>
                 <div class="col-lg-3 col-md-3">
                     <div class="header__nav__option">
+                       
                         <a href="/user/profile"><img src="/customer/img/icon/user.png" alt=""> </a>
                         <a href="#" class="search-switch"><img src="/customer/img/icon/search.png" alt=""></a>
                         <a href="#"><img src="/customer/img/icon/heart.png" alt=""></a>

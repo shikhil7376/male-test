@@ -60,14 +60,28 @@
 </head>
 <body>
 
-    <div id="addCategoryForm">
+    <div id="addCategoryForm" style="font-size:larger;font-family:'Times New Roman', Times, serif;font-weight: bold;">
+        <% if (messages.error && messages.error.length > 0) { %>
+            <div class="error-message">
+                <%= messages.error %>
+            </div>
+        <% } %>
+
+        <!-- Add this block to display success messages -->
+        <% if (messages.success && messages.success.length > 0) { %>
+            <div class="success-message">
+                <%= messages.success %>
+            </div>
+        <% } %>
+
+       
         <h2>Add Category</h2>
         <form action="/admin/product/add-category" method="post" enctype="multipart/form-data">
             <label for="categoryName">Category Name:</label>
-            <input type="text" id="categoryName" name="categoryName" required>
+            <input type="text" id="categoryName" name="categoryName" required maxlength="50">
 
             <label for="description">Description:</label>
-            <textarea id="description" name="description" rows="4" required></textarea>
+            <textarea id="description" name="description" rows="4" required maxlength="500"></textarea>
 
             <label for="image">Image Upload:</label>
             <input type="file" id="image" name="image" class="form-control file-upload-info" required>

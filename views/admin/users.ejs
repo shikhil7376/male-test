@@ -47,7 +47,7 @@
                     <% if (users.length) { %>
                     <table class="table table-striped">
                       <thead>
-                        <tr>
+                        <tr style="font-size: large;font-family:'Times New Roman', Times, serif;font-weight: bold;">
                           <th>No</th>
                           <th>images</th>
                           <th>Name</th>
@@ -62,9 +62,9 @@
                         <tr>
                           <th> <%= i+1 %></th>
                           <td> <img src="/admin/images/kisspng-computer-icons-user-profile-person-5abd85306ff7f7.0592226715223698404586.jpg" alt="image" /></td>
-                          <td><%= user.name %></td>
-                          <td><%= user.mobile %></td>
-                          <td><%= user.email %></td>
+                          <td style="font-size: medium;font-family:'Times New Roman', Times, serif"><%= user.name %></td>
+                          <td style="font-size: medium;font-family:'Times New Roman', Times, serif"><%= user.mobile %></td>
+                          <td style="font-size: medium;font-family:'Times New Roman', Times, serif"><%= user.email %></td>
                      <!--if User Block then this display -->
                         <% if (user.is_block === true) { %>
                           <td>

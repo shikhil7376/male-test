@@ -21,11 +21,6 @@ const transactionSchema = new mongoose.Schema({
 })
 
 
-
-// const walletSchema =
-
-
-
 const CustomerSchema=new mongoose.Schema({
    name:{
     type:String,

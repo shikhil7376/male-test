@@ -50,7 +50,6 @@ const totalSum = async function (id) {
 
     if (cart.length !== 0) {
       // Move the console.log(cart) here
-      console.log(cart);
 
       const totalSum = cart.reduce((acc, item) => {
         return acc + item.total;
@@ -69,9 +68,15 @@ const totalSum = async function (id) {
 // load Home
 const loadHome = async (req, res) => {
   try {
-    const newPro = await product.find({is_delete:false}).sort({_id:1}).limit(3)
     const banners = await Banner.find()
-    res.render("user/index",{banners});
+     let currentUser = await Customer.findById(req.session.user)
+     const foundProducts = await product
+     .find({ is_delete: false })
+     .populate("category")
+     .populate("offer")
+     .sort({_id:-1})
+     .limit(8)
+    res.render("user/index",{banners,currentUser,productDatas:foundProducts});
   } catch (error) {
     console.log(error.message);
   }
@@ -89,8 +94,12 @@ const loadLogin = async (req, res) => {
 // //user valid
 const checkUserValid = async (req, res) => {
   const { email, password } = req.body;
+  if(!email || !password){
+    return res.render("user/login", { message: "Empty information are not possible" });
+  }else if(!/^\S+@\S+\.\S+$/.test(email)){
+    return res.render("user/login", { message: "Invalid Email.." });
+  }else{
   const customer = await Customer.findOne({ email });
-  console.log(customer);
   if (!customer) {
     return res.render("user/login", { message: "invalid email,please Signup" });
   } else if (customer.is_block === true) {
@@ -116,6 +125,7 @@ const checkUserValid = async (req, res) => {
       user: req.session.user,
     });
   }
+}
 };
 
 //  session destroying User logouting
@@ -143,7 +153,6 @@ const loadRegister = async (req, res, next) => {
 // insert user
 const insertUser = async (req, res) => {
   const { name, email, password, mobile } = req.body;
-  console.log(req.body);
   try {
     if (!validateEmail(email)) {
       return res.render("user/register", { message: "invalid email..." });
@@ -159,10 +168,9 @@ const insertUser = async (req, res) => {
       password: hashedPassword,
       mobile,
     });
-    console.log(req.body);
-    console.log(customer);
+ 
     // save user into database
-    const userExist = await Customer.findOne({ email });
+    const userExist = await Customer.findOne({ email, is_varified: true });
     if (userExist) {
       res.render("user/register", {
         message: "this account already existed",
@@ -170,7 +178,6 @@ const insertUser = async (req, res) => {
       });
     } else {
       const userData = await customer.save();
-      console.log(userData);
       if (userData) {
         //send the verification email
         sendOTPVerificationEmail(userData, res);
@@ -210,12 +217,11 @@ let transporter = nodemailer.createTransport({
   },
 });
 
-console.log(process.env.AUTH_EMAIL, process.env.AUTH_PASS);
+// console.log(process.env.AUTH_EMAIL, process.env.AUTH_PASS);
 
 const sendOTPVerificationEmail = async ({ _id, email }, res) => {
   try {
     const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
-
     // Mail options
     const mailOption = {
       from: process.env.AUTH_EMAIL, // Use the correct environment variable
@@ -224,6 +230,8 @@ const sendOTPVerificationEmail = async ({ _id, email }, res) => {
       html: `<p>Enter <b>${otp}</b> in the app to verify your email address and complete the verification</p>
                    <p>This code <b>expires in 1 hour</b>.</p>`,
     };
+
+    console.log(otp);
 
     // Hash the OTP
     const saltRounds = 10;
@@ -279,17 +287,15 @@ const checkOTPValid = async (req, res) => {
         id: ID,
       });
     }
-    console.log(OTP, otp);
+  
     const isValid = await bcrypt.compare(OTP, otp);
 
     if (!isValid) {  
       return res.render("user/otppage", { message: "invalid otp", id: ID });
     }
-    console.log("userId:" + userId);
-    console.log(ID, typeof ID);
     await Customer.updateOne({ _id: ID }, { $set: { is_varified: true } });
+    await Customer.deleteMany({is_varified:false})
     await UserOTPVerification.deleteOne({ userId });
-    console.log("completed");
     return res.redirect("/user-Login");
   } catch (error) {
     console.log(error.message);
@@ -311,9 +317,9 @@ const resendOtp = async (req, res) => {
 
 const loadShop = async (req, res) => {
   try {
-    console.log(req.query.search);
+  
     const page = parseInt(req.params.page) || 1;
-    const pageSize = 3;
+    const pageSize = 6;
     const skip = (page - 1) * pageSize;
 
     const totalProducts = await product.countDocuments({
@@ -326,6 +332,7 @@ const loadShop = async (req, res) => {
       .skip(skip)
       .limit(pageSize)
       .populate("offer")
+     .sort({_id:-1})
     const foundCategories = await productCategory.find({ removed: false });
     res.render("user/shop", {
       productDatas: foundProducts,
@@ -444,6 +451,7 @@ const getSingleProduct = async (req, res) => {
   }
 };
 
+
 const loadcart = async (req, res) => {
   try {
 
@@ -455,6 +463,10 @@ const loadcart = async (req, res) => {
     if (currentUser.is_varified) {
       await currentUser.populate("cart.product");
       await currentUser.populate("cart.product.category");
+
+      currentUser.cart = currentUser.cart.filter((cartItem) => {
+        return cartItem.product && !cartItem.product.is_delete;
+      });
       // Use Promise.all to wait for all asynchronous operations
       await Promise.all(
         currentUser.cart.map(async (cartItem) => {
@@ -467,7 +479,7 @@ const loadcart = async (req, res) => {
       );
 
       const cartProducts = currentUser.cart;
-       const noOfItems = cartProducts.length
+
       const grandTotal = cartProducts.reduce((total, element) => {
         if(element.product.offerPrice>0 && element.product.categoryOfferPrice){
           if(element.product.offerPrice<element.product.categoryOfferPrice){
@@ -491,13 +503,14 @@ const loadcart = async (req, res) => {
         insufficientStockProduct: "",
         activePage: "Cart",
         stockError:stockError?stockError:"",
-        noOfItems
+  
       });
     }
   } catch (error) {
     console.log(error.message);
   }
 };
+
 
 const addToCart = async (req, res) => {
   try {
@@ -574,23 +587,11 @@ const updateCartItem = async (req, res) => {
       }
     }
 
-    if(cartItem.product.offerPrice>0 && cartItem.product.categoryOfferPrice>0){
-      if(cartItem.product.offerPrice<cartItem.product.categoryOfferPrice){
-         cartItem.total = cartItem.product.offerPrice * cartItem.quantity
-      }else{
-        cartItem.total = cartItem.product.categoryOfferPrice * cartItem.quantity
-      }
-    }else if(cartItem.product.offerPrice>0){
-        cartItem.total = cartItem.product.offerPrice * cartItem.quantity
-    }else if(cartItem.product.categoryOfferPrice>0){
-      cartItem.total = cartItem.product.categoryOfferPrice * cartItem.quantity
-    }else{
-      cartItem.quantity = cartItem.product.price * cartItem.quantity
-    }
+    cartItem.total = cartItem.product.price * cartItem.quantity;
 
     await currentUser.save();
     const totSum = await totalSum(id);
-    console.log(totSum);
+    // console.log(totSum);
     res
       .status(200)
       .json({
@@ -603,6 +604,7 @@ const updateCartItem = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
 
 const removeFromCart = async (req, res) => {
   try {
@@ -639,10 +641,11 @@ const loadprofile = async (req, res) => {
   try {
     const customer = await Customer.findById(req.session.user);
     const addresses = await Address.find({ User: req.session.user });
+    currentUser = await Customer.findById(req.session.user)
     if (!customer) {
       return res.status(404).send("customer not found");
     }
-    res.render("user/userprofile", { customer, addresses });
+    res.render("user/userprofile", { customer, addresses, currentUser });
   } catch (error) {
     console.log(error.message);
   }
@@ -820,7 +823,6 @@ const loadCheckout = async (req, res) => {
       });
 
       const cartProducts = currentUser.cart;
-     console.log("jst for check"+cartProducts);
       const noOfItems = cartProducts.length;
   
       let grandTotal = cartProducts.reduce((total, element) => {
@@ -844,11 +846,10 @@ const loadCheckout = async (req, res) => {
       // console.log("grandTotal",grandTotal)
       let insufficientStockProduct;
       cartProducts.forEach((cartProduct) => {
-        console.log("product stock count",cartProduct.product.stock_count,"cart quantity",cartProduct.quantity);
         if (cartProduct.product.stock_count < cartProduct.quantity) {
           insufficientStockProduct = cartProduct._id;
         }
-        console.log("insufficient product id",insufficientStockProduct);
+    
       });
       if (!insufficientStockProduct) {
         res.render("user/checkout", {
@@ -877,8 +878,8 @@ const loadCheckout = async (req, res) => {
 
 const placeOrder = async (req, res) => {
   try {
+    const addresses = await Address.find({ User: req.session.user });
     const final = req.body.discount
-   
     const currentUser = await Customer.findById(req.session.user);
     await currentUser.populate("cart.product");
     let shippingAddress = req.body.shippingAddress;
@@ -893,7 +894,7 @@ const placeOrder = async (req, res) => {
       { new: true }
     );
 
-    const grandTotal = currentUser.cart.reduce((total, element) => {
+    let grandTotal = currentUser.cart.reduce((total, element) => {
       if(element.product.offerPrice>0 && element.product.categoryOfferPrice){
         if(element.product.offerPrice<element.product.categoryOfferPrice){
           return total + element.quantity * element.product.offerPrice
@@ -910,7 +911,7 @@ const placeOrder = async (req, res) => {
     }, 0);
 
     const orderedProducts = currentUser.cart.map((item) => {
-      let price
+      var price;
      if(item.product.offerPrice>0 && item.product.categoryOfferPrice>0){
          if(item.product.offerPrice< item.product.categoryOfferPrice){
             price = item.product.offerPrice
@@ -924,7 +925,6 @@ const placeOrder = async (req, res) => {
      }else{
       price = item.product.price
      }
-
 
       return {
         product: item.product._id,
@@ -953,7 +953,7 @@ const placeOrder = async (req, res) => {
         key_id: razorpayConfig.RAZORPAY_ID_KEY,
         key_secret: razorpayConfig.RAZORPAY_SECRET_KEY,
       });
-
+      
       const amountR = grandTotal - req.body.discount + 5;
       const options = {
         amount: amountR * 100,
@@ -962,10 +962,8 @@ const placeOrder = async (req, res) => {
           .toString()
           .padStart(4, "0")}${Date.now()}`,
       };
-
       // create a razorpay order
       const razorpayOrder = await razorpay.orders.create(options);
-
       // save the order detail to your database
       newOrder.razorpayOrderId = razorpayOrder.id;
 
@@ -985,6 +983,10 @@ const placeOrder = async (req, res) => {
           error: "insufficient wallet balance",
           currentCoupon: "",
           couponError: "",
+          noOfaddress:'',
+          addresses,
+          noOfItems:'',
+          grandTotal
         });
       } else {
         await newOrder.save();
@@ -1046,7 +1048,7 @@ const saveRzpOrder = async (req, res) => {
     if (transactionId && orderId && signature) {
       currentUser.cart.forEach(async (item) => {
         const foundProduct = await product.findById(item.product._id);
-        console.log("foundProduct:", foundProduct);
+        // console.log("foundProduct:", foundProduct);
         foundProduct.stock_count -= item.quantity;
         await foundProduct.save();
       });
@@ -1065,14 +1067,29 @@ const saveRzpOrder = async (req, res) => {
           return total + element.quantity * element.product.price
         }
       }, 0);
-      console.log("currentUserCart", currentUser.cart);
       const orderedProducts = currentUser.cart.map((item) => {
-        return {
-          product: item.product._id,
-          quantity: item.quantity,
-        };
+        var price;
+     if(item.product.offerPrice>0 && item.product.categoryOfferPrice>0){
+         if(item.product.offerPrice< item.product.categoryOfferPrice){
+            price = item.product.offerPrice
+         }else{
+          price = item.product.categoryOfferPrice
+         }
+     }else if(item.product.offerPrice>0){
+      price = item.product.offerPrice
+     }else if (item.product.categoryOfferPrice>0){
+      price = item.product.categoryOfferPrice
+     }else{
+      price = item.product.price
+     }
+
+      return {
+        product: item.product._id,
+        quantity: item.quantity,
+        Price:price
+      };
       });
-      console.log("orderedProduct:", orderedProducts);
+
 
       let newOrder = new Order({
         user: req.session.user,
@@ -1081,11 +1098,11 @@ const saveRzpOrder = async (req, res) => {
         paymentMethod: "rzp",
         deliveryAddress,
       });
-      console.log("newOrder:", newOrder);
+
       await newOrder.save();
       currentUser.cart = [];
       
-  // coupons
+  // coupons 
   const foundCoupon = await Coupon.findOne({
     isActive: true, minimumPurchaseAmount: { $lte: grandTotal }
 }).sort({ minimumPurchaseAmount: -1 });
@@ -1137,6 +1154,7 @@ const applyCoupon = async (req, res) => {
     const currentUser = await Customer.findById(req.session.user).populate(
       "earnedCoupons.coupon"
     );
+    const addresses = await Address.find({ User: req.session.user });
     await currentUser.populate("cart.product");
     await currentUser.populate("cart.product.category");
     const cartProducts = currentUser.cart;
@@ -1185,12 +1203,14 @@ const applyCoupon = async (req, res) => {
     res.render("user/checkout", {
       currentUser,
       cartProducts,
-      addresses:'',
+      addresses,
       discount,
       grandTotal,
       currentCoupon: couponError ? '' : currentCoupon._id,
       couponError,
       error: "",
+      noOfaddress:'',
+      noOfItems:''
   });
 
   } catch (error) {
@@ -1217,7 +1237,7 @@ const getOrders = async (req, res) => {
       },
       { $sort: { orderDate: -1 } },
     ]);
-   console.log(orders);
+  //  console.log(orders);
     res.render("user/orders", {
       currentUser,
       orders,
@@ -1260,15 +1280,21 @@ const updateOrderStatus = async () => {
 
 const getWallet = async (req, res) => {
   try {
-    console.log("here......");
+    // console.log("here......");
     const currentUser = await Customer.findById(req.session.user).sort({
       "wallet.transactions.timestamp": -1,
     });
-    let cash = currentUser;
-    console.log("cash");
-    console.log(cash);
+   let balance = currentUser.wallet.balance
+    const total = currentUser.wallet.transactions.reduce((acc,value)=>{
+    return acc+ value.amount
+    },0);
+   
+    
+// console.log(total,"total amount");
     res.render("user/wallet", {
+      total,
       currentUser,
+      balance
     });
   } catch (error) {
     console.log(error.message);
@@ -1451,7 +1477,7 @@ const requestReturnProduct = async (req, res) => {
 const loadInvoice = async (req, res) => {
   const id = req.params.id;
   let discount = req.query.discount || 0;
-  console.log(req.query.discount);
+  // console.log(req.query.discount);
   const order = await Order.findById(id).populate("products.product");
   const totalHt = order.totalAmount - 5;
   const totalAmount = order.totalAmount -5;
@@ -1502,7 +1528,6 @@ module.exports = {
   getSingleProduct,
   getAddresses,
   changeDefaultAddress,
-  // loadOrderSuccess,
   getWallet,
   saveRzpOrder,
   cancelOrder,
