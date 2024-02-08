@@ -49,8 +49,9 @@
                         <div class="card-body">
                         
                             <form action="/admin/offer/create/" method="post" id="Offer-Form">
-
-
+                                <% if (message !== "") { %>
+                                    <p class="text-danger"><%= message %></p>
+                                  <% } %>
                                 <div class="form-group">
                                     <label for="exampleInputCity1">Offer Name :</label>
                                     <input type="text" class="form-control" name="name"

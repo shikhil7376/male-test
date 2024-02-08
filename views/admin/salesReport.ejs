@@ -119,9 +119,10 @@
                     <% if (salesReport.length) { %>
                       <div class="col-md-3 col-12 p-4">
                         <button id="downloadButton">Download PDF</button>
-                        </a>
+                        <a class="btn btn-success" id="downloadExcelButton">Download Excel</a>
                       </div>
                     <% } %>
+                    
                   </div>
                 </div>
               </div>
@@ -146,48 +147,74 @@
   </div>
   <!-- container-scroller -->
   <!-- plugins:js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+<!-- ... previous HTML code ... -->
 
-  <script>
-    document.getElementById('downloadButton').addEventListener('click', function () {
-      // Select the element containing the content you want to convert to PDF
-      const element = document.getElementById('salesReportTable');
-  
-      // Set the options for html2pdf
-      const options = {
-        margin: 10,
-        filename: 'sales_report.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
-      };
-  
-      // Use html2pdf to generate and download the PDF
-      html2pdf(element, options).then(function (pdf) {
-        const blob = new Blob([pdf.output('blob')], { type: 'application/pdf' });
-        const link = document.createElement('a');
-        link.href = window.URL.createObjectURL(blob);
-        link.download = 'sales_report.pdf';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      });
+<!-- Correct order of script tags: xlsx before html2pdf -->
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+
+
+
+<script>
+  function downloadExcel() {
+         const table = document.getElementById("table-1");
+         // Get the table data
+         const ws = XLSX.utils.table_to_sheet(table);
+         // Create a new workbook
+         const wb = XLSX.utils.book_new();
+         XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+ 
+         // Save the workbook to a file
+         XLSX.writeFile(wb, 'table_data.xlsx');
+     }
+     document.getElementById('downloadExcelButton').addEventListener('click', downloadExcel);
+     </script>
+
+<script>
+  document.getElementById('downloadButton').addEventListener('click', function () {
+    // Select the element containing the content you want to convert to PDF
+    const element = document.getElementById('salesReportTable');
+
+    // Set the options for html2pdf
+    const options = {
+      margin: 10,
+      filename: 'sales_report.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+    };
+
+    // Use html2pdf to generate and download the PDF
+    html2pdf(element, options).then(function (pdf) {
+      const blob = new Blob([pdf.output('blob')], { type: 'application/pdf' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = 'sales_report.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     });
-  </script>
+  });
+</script>
 
-  <script src="/admin/vendors/js/vendor.bundle.base.js"></script>
-  <!-- endinject -->
-  <!-- Plugin js for this page -->
-  <!-- End plugin js for this page -->
-  <!-- inject:js -->
-  <script src="/admin/js/off-canvas.js"></script>
-  <script src="/admin/js/hoverable-collapse.js"></script>
-  <script src="/admin/js/template.js"></script>
-  <script src="/admin/js/settings.js"></script>
-  <script src="/admin/js/todolist.js"></script>
-  <!-- endinject -->
-  <!-- Custom js for this page-->
-  <!-- End custom js for this page-->
+
+
+
+<script src="/admin/vendors/js/vendor.bundle.base.js"></script>
+<!-- endinject -->
+<!-- Plugin js for this page -->
+<!-- End plugin js for this page -->
+<!-- inject:js -->
+<script src="/admin/js/off-canvas.js"></script>
+<script src="/admin/js/hoverable-collapse.js"></script>
+<script src="/admin/js/template.js"></script>
+<script src="/admin/js/settings.js"></script>
+<script src="/admin/js/todolist.js"></script>
+<!-- endinject -->
+<!-- Custom js for this page-->
+<!-- End custom js for this page-->
 </body>
+
 
 </html>

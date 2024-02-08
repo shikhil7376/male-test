@@ -45,6 +45,7 @@
             </div>
           </div>
         </div>
+
         <div class="col-md-12 grid-margin stretch-card">
           <div class="card">
             <div class="card-body">
@@ -62,7 +63,7 @@
                 <% } %>
                   <br>
                   <form action="/admin/Category/Edit-Category?id=<%= id%>" id="CategoryForm" method="post"
-                    enctype="multipart/form-data" >
+                    enctype="multipart/form-data" onsubmit="submitForm(event)">
 
                     <div class="form-group">
                       <label>images upload :</label>
@@ -148,6 +149,13 @@
   </div>
   <!-- page-body-wrapper ends -->
 </div>
+
+<!-- ... Existing HTML code ... -->
+
+
+<!-- ... Existing HTML code ... -->
+
+
 <!-- container-scroller -->
 <!-- plugins:js -->
 <script src="/admin/vendors/js/vendor.bundle.base.js"></script>

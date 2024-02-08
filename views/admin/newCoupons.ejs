@@ -40,9 +40,9 @@
                           <h4 class="card-title">Add New Coupon</h4>
         
                           <form class="forms-sample" action="/admin/new-coupon" method="post">
-                            <p class="text-danger mb-3">
-                          
-                            </p>
+                            <% if (message !== "") { %>
+                              <p class="text-danger"><%= message %></p>
+                            <% } %>
                             <div>
                               <div class="form-group col-md-12">
                                 <label for="exampleInputName1">Description</label>

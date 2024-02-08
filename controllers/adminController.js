@@ -16,7 +16,7 @@ const loadAdminLogin = async (req, res) => {
       res.redirect("admin/dashboard");
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -31,7 +31,7 @@ const loginValidation = async (req, res, next) => {
       next();
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -64,7 +64,7 @@ const adminValid = async (req, res) => {
       }
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -216,7 +216,7 @@ const loadDash = async (req, res) => {
       Admin: admin,
     });
   } catch (error) {
-    console.log(error.message);
+    console.log("error/internalError", { error });
   }
 };
 
@@ -227,7 +227,7 @@ const adminLogout = (req, res) => {
       res.redirect("/admin/dashboard");
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -253,7 +253,7 @@ const displayCustomers = async (req, res) => {
       }
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -268,7 +268,7 @@ const UnblockTheUser = async (req, res) => {
       return res.redirect("/admin/customers");
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -283,7 +283,7 @@ const blockTheUser = async (req, res) => {
       return res.redirect("/admin/customers");
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -325,7 +325,7 @@ const loadCategory = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -334,45 +334,58 @@ const loadAddCategory = async (req, res) => {
     const offers = await Offer.find({ is_deleted: false });
     res.render("admin/addCategory", { message: "", offers: offers });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
 const addProductcategory = async (req, res) => {
   try {
-    console.log(req.body);
-    if (!req.body.categoryName || !req.file) {
-      req.flash("error", "Fill all fields.........");
-      return res.redirect("/admin/product/add-category");
+    const categoryName = req.body.categoryName.trim();
+    const description = req.body.description.trim();
+    const offers = await Offer.find({ is_deleted: false });
+    if (!categoryName || !req.file || !description) {
+      return res.render("admin/addCategory", {
+        message: "Fill all fields.........",
+        offers: offers,
+      });
     }
     // Validation for category name length
-    if (
-      !req.body.categoryName ||
-      req.body.categoryName.length < 3 ||
-      req.body.categoryName.length > 50
-    ) {
-      req.flash("error", "Category name must be between 3 and 50 characters.");
-      return res.redirect("/admin/product/add-category");
+    if (!categoryName || categoryName.length < 3 || categoryName.length > 50) {
+      return res.render("admin/addCategory", {
+        message: "Category name must be between 3 and 50 characters.",
+        offers: offers,
+      });
     }
 
     // Validation for description length
-    if (!req.body.description || req.body.description.length > 500) {
-      req.flash("error", "Description must be less than 500 characters.");
-      return res.redirect("/admin/product/add-category");
+    if (!description || description.length < 3 || description.length > 500) {
+      return res.render("admin/addCategory", {
+        message: "Description must be between 3 and 500 characters.",
+        offers: offers,
+      });
     }
 
     // Validation for image file type
     if (!req.file || !req.file.mimetype.startsWith("image/")) {
-      req.flash("error", "Please upload a valid image file.");
-      return res.redirect("/admin/product/add-category");
+      return res.render("admin/addCategory", {
+        message: "Please upload a valid image file.",
+        offers: offers,
+      });
     }
     const exist = await productCategory.findOne({
       categoryName: { $regex: new RegExp(req.body.categoryName, "i") },
     });
+    if (exist) {
+      return res.render("admin/addCategory", {
+        message: "category already exists..",
+        offers: offers,
+      });
+    }
+
     if (!exist) {
       const category = new productCategory({
-        categoryName: req.body.categoryName,
-        description: req.body.description,
+        categoryName: categoryName,
+        description: description,
         image: {
           data: req.file.buffer,
           contentType: req.file.mimetype,
@@ -386,11 +399,10 @@ const addProductcategory = async (req, res) => {
         }
       }
       await category.save();
-
       res.redirect("/admin/product/Category-management");
     }
   } catch (error) {
-    console.error(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -402,20 +414,48 @@ const loadEditCategory = async (req, res) => {
       .findById({ _id: id })
       .populate("offer");
     if (EditCategory) {
-      return res.render("admin/editCategory", { EditCategory, id, offers });
+      return res.render("admin/editCategory", { EditCategory, id, offers});
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
-
 const EditCategory = async (req, res) => {
   const id = req.query.id;
   try {
+    const trimmedCategoryName = req.body.Categoryname.trim();
+    const trimmedDescription = req.body.description.trim();
+
     const editedCategory = await productCategory.findById(id);
     if (editedCategory) {
-      editedCategory.categoryName = req.body.Categoryname;
-      editedCategory.description = req.body.description;
+      const regex = new RegExp(`^${trimmedCategoryName}$`, 'i');
+      const remainingCategories = await productCategory.find({
+        _id: { $ne: id }, // Exclude the current category being edited
+        categoryName: regex,
+      });
+      if (remainingCategories.length>0){
+        return res.status(400).send("Category name must be unique.");
+      }
+      if(trimmedDescription.length>500){
+        return res.status(400).send("Description must be less than 500 character.");
+      }
+      const categoryRegex = /^[a-zA-Z\s]+$/;
+      if (!categoryRegex.test(trimmedCategoryName)) {
+        return res.status(400).send("Category name should only contain characters.");
+      }
+  
+      if (trimmedCategoryName.length > 50) {
+        return res.status(400).send("Category name length should not exceed 50 characters.");
+      }
+
+      if (!req.file || !req.file.mimetype.startsWith("image/")) {
+        return res.status(400).send("Please upload valid image file");
+          
+      }
+  
+
+      editedCategory.categoryName =  trimmedCategoryName;
+      editedCategory.description = trimmedDescription;
       if (req.file) {
         editedCategory.image.data = req.file.buffer;
         editedCategory.image.contentType = req.file.mimetype;
@@ -477,7 +517,7 @@ const deletecategory = async (req, res) => {
       res.redirect("/admin/product/Category-management");
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
     res.status(500).send("Internal Server Error");
   }
 };
@@ -492,7 +532,7 @@ const deleteCategoryImg = async (req, res) => {
     console.log(category);
     return res.redirect(`/admin/Category/${categoryId}/Edit-Category`);
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -507,20 +547,22 @@ const loadProductPage = async (req, res) => {
     let products;
     let len;
 
-
     if (query) {
       products = await product
         .find({ product_name: { $regex: query, $options: "i" } })
         .populate("offer")
-        .populate("category")
+        .populate("category");
       len = await product.find({
         product_name: { $regex: query, $options: "i" },
       });
     } else {
-      products = await product.find().populate("offer").populate("category")
-      .skip((page - 1) * itemsPerPage)
-      .limit(itemsPerPage)
-      .exec();
+      products = await product
+        .find()
+        .populate("offer")
+        .populate("category")
+        .skip((page - 1) * itemsPerPage)
+        .limit(itemsPerPage)
+        .exec();
       len = await product.find();
     }
     if (products) {
@@ -532,7 +574,7 @@ const loadProductPage = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 const loadProductCreate = async (req, res) => {
@@ -541,12 +583,14 @@ const loadProductCreate = async (req, res) => {
     const offers = await Offer.find({ is_deleted: false });
     res.render("admin/addproduct", { message: "", Categories, offers });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
+
 const createProduct = async (req, res) => {
   console.log("HAI");
   console.log(req.body);
+  const offers = await Offer.find({ is_deleted: false });
   const Categories = await productCategory.find();
   const {
     productName,
@@ -560,13 +604,46 @@ const createProduct = async (req, res) => {
   } = req.body;
 
   try {
+    let productname =productName.trim()
+    let brandname = brandName.trim()
+    let Description = description.trim()
     // Validate that required fields are provided
-    if (!productName || !brandName) {
+    if (!productname || !brandname || !price ||!Description || !stockCount ||!category ||!availability ) {
       return res.render("admin/addproduct", {
         message: "All fields are required. Please fill in all fields.",
-        Categories,
+        Categories,offers
+      }); 
+    }
+
+    const productRegex = /^[a-zA-Z\s]+$/;
+    if (!productRegex.test( productname,brandname)) {
+      return res.render("admin/addproduct", {
+        message: "product name and brandname should only contains characters.",
+        Categories,offers
       });
     }
+  
+  if(productname.length<3 && productname.length>50){
+    return res.render("admin/addproduct", {
+      message: "product name should be in between 3 and 50 character.",
+      Categories,offers
+    });
+  }
+
+  if(stockCount < 0 || price < 0){
+    return res.render("admin/addproduct", {
+      message: "price and stockCount should be positive.",
+      Categories,offers
+    });
+ }
+
+ if(Description.length>500){
+  return res.render("admin/addproduct", {
+    message: "Description must be less than 500 character",
+    Categories,offers
+  });
+ }
+    
     let stock;
 
     if (availability === "true") {
@@ -577,11 +654,11 @@ const createProduct = async (req, res) => {
 
     // Create the product
     const Product = new product({
-      product_name: productName,
-      brand_name: brandName,
+      product_name: productname,
+      brand_name: brandname,
       price: price,
       stock_count: stockCount,
-      description: description,
+      description:Description,
       category: category,
       in_stock: stock,
     });
@@ -625,6 +702,7 @@ const createProduct = async (req, res) => {
     //    res.status(500).send("Error creating the product.");
   }
 };
+
 const productActivate = async (req, res) => {
   try {
     const id = req.params.id;
@@ -636,7 +714,7 @@ const productActivate = async (req, res) => {
       return res.redirect("/admin/product");
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -651,7 +729,7 @@ const productDeactivate = async (req, res) => {
       return res.redirect("/admin/product");
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -674,7 +752,7 @@ const loadProductEditPage = async (req, res) => {
     const offers = await Offer.find({ is_deleted: false });
     res.render("admin/Edit", { Product, id, Categories, offers });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -692,6 +770,9 @@ const editProduct = async (req, res) => {
     images: requestImages,
   } = req.body;
   try {
+    let productname = productName.trim()
+    let brandname= brandName.trim()
+    let Description = description.trim() 
     let stock;
 
     if (availability === "true") {
@@ -699,15 +780,32 @@ const editProduct = async (req, res) => {
     } else {
       stock = false;
     }
-    // ...
+   
+   if(productname.length<3 && productname.length>50){
+    return res.status(400).send("productname should be in between 3 and 50 character");
+   }
+
+   const productRegex = /^[a-zA-Z\s]+$/;
+    if (!productRegex.test( productname,brandname)) {
+      return res.status(400).send("productname and brandname should only contains character ");
+    }
+  
+    if(stockCount < 0 || price < 0){
+       return res.status(400).send("price and stockcount should be positive ");
+    }
+   
+    if(Description.length>500){
+      return res.status(400).send("Description doesnot exceed 500 character ");
+    }
+
     const images = req.files;
     const productId = id;
     const updateFields = {
-      product_name: productName,
-      brand_name: brandName,
+      product_name: productname,
+      brand_name: brandname,
       price: price,
       stock_count: stockCount,
-      description: description,
+      description: Description,
     };
 
     if (req.body.category && req.body.category !== "") {
@@ -760,7 +858,7 @@ const editProduct = async (req, res) => {
 
     res.redirect("/admin/product");
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -778,7 +876,7 @@ const deleteImgDelete = async (req, res) => {
       return res.redirect(`/admin/product/${req.params.id}/Edit`);
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -815,7 +913,7 @@ const loadOrder = async (req, res) => {
       currentPage: page,
     });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -850,7 +948,7 @@ const updateActionOrder = async (req, res) => {
 
     res.redirect("/admin/order");
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -864,7 +962,7 @@ const updateOrderCancel = async (req, res) => {
     await foundOrder.save();
     res.redirect("/admin/order");
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -889,7 +987,7 @@ const getreturnRequests = async (req, res) => {
       totalPages,
     });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -943,7 +1041,7 @@ const returnRequsetActions = async (req, res) => {
     await foundOrder.save();
     res.redirect("/admin/return-requests");
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -984,7 +1082,7 @@ const loadCoupons = async (req, res) => {
 const getAddNewCoupon = (req, res) => {
   try {
     console.log("nnn");
-    res.render("admin/newCoupons");
+    res.render("admin/newCoupons",{message:""});
   } catch (error) {
     res.render("error/internalError", { error: "" });
   }
@@ -1013,53 +1111,54 @@ const addNewCoupon = async (req, res) => {
       minimumPurchaseAmount,
       usageLimit,
     } = req.body;
-    if (
-      !description ||
-      !discountType ||
-      !discountAmount ||
-      !minimumPurchaseAmount ||
-      !usageLimit
-    ) {
-      res.render("admin/newCoupons", { error: "All fields are required" });
-    } else {
+
+    let Description = description.trim()
+
+    if (! Description ||!discountType ||!discountAmount ||!minimumPurchaseAmount ||!usageLimit) {
+      res.render("admin/newCoupons", { message: "All fields are required" });
+    }
       if (discountType === "percentage" && discountAmount > 100) {
         return res.render("admin/newCoupon", {
-          error: "Discount percentage is greater than 100",
+          message: "Discount percentage is greater than 100",
         });
       }
-      if (description.length < 4 || description.length > 100) {
+      if (Description.length < 4 ||  Description.length > 100) {
         return res.render("admin/newCoupons", {
-          error: "Description must be between 4 and 100 characters",
+          message: "Description must be between 4 and 100 characters",
         });
-      } else {
+      } 
+         if( discountAmount<0 ||minimumPurchaseAmount<0 ||usageLimit<0 ){
+          return res.render("admin/newCoupons", {
+            message: "entered no should be positive",
+          });
+         }
+
         const uniqueCode = await generateCouponCode();
         const newCoupon = new Coupon({
           code: uniqueCode,
           discountType,
-          description,
+          Description,
           discountAmount,
           minimumPurchaseAmount,
           usageLimit,
         });
         await newCoupon.save();
         res.redirect("/admin/coupons");
-      }
-    }
-  } catch (error) {
-    console.log(error.message);
+      
+    } catch (error) {
+    res.render("error/internalError", { error });
   }
 };
 
 const couponAction = async (req, res) => {
   try {
-    console.log(">>>>here");
     const state = req.body.state === "";
     console.log(state);
     const couponId = req.params.id;
     await Coupon.findByIdAndUpdate(couponId, { $set: { isActive: state } });
     res.redirect("/admin/coupons");
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -1082,35 +1181,51 @@ const loadOfferPage = async (req, res) => {
       return res.render("admin/offer", { Offers, query });
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 const loadAddOfferPage = async (req, res) => {
   try {
-    return res.render("admin/addOffer");
+    return res.render("admin/addOffer",{message:""});
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error});
   }
 };
 
 const createOffer = async (req, res) => {
   const { name, discount, startingDate, expiryDate, status } = req.body;
   try {
-    const existOffer = await Offer.findOne({ name });
-    if (existOffer !== null && existOffer) {
-      return res.redirect("/admin/offer/create");
+     let Name = name.trim()
+     let Status =status.trim()
+     let Discount=discount.trim() 
+
+      
+    if (!Name || !Status ||!Discount ||!startingDate ||!expiryDate) {
+      res.render("admin/addOffer", { message: "All fields are required" });
     }
+
+     const existOffer = await Offer.findOne({ name: { $regex: new RegExp("^" + Name + "$", "i") } });
+     if (existOffer !== null && existOffer) {
+       return res.render("admin/addOffer", { message: "Offer already exists" });
+     }
+     if (isNaN(Discount) || typeof Discount !== 'number'|| Discount<0) {
+      return res.render("admin/addOffer", { message: "Discount must be a valid positive number." });
+    }
+    if(Status.length>50){
+      return res.render("admin/addOffer", { message: "Status should not exceed 50 character" });
+    }
+
     const newOffer = new Offer({
-      name,
-      discount,
-      startingDate,
-      expiryDate,
-      status,
+       name:Name,
+       discount:Discount,
+       startingDate,
+       expiryDate,
+       status:Status,
     });
     await newOffer.save();
     return res.redirect("/admin/Offer");
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -1128,7 +1243,7 @@ const loadOfferEdit = async (req, res) => {
       res.render("admin/editOffer", { findOffer });
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -1207,7 +1322,7 @@ const saveEditOffer = async (req, res) => {
       // Redirect to the Offer page
       return res.redirect("/admin/Offer/");
     } catch (error) {
-      console.error(error);
+      res.render("error/internalError", { error });
     }
   }
 };
@@ -1241,7 +1356,7 @@ const deleteOffer = async (req, res) => {
       return res.redirect("/admin/Offer/");
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -1255,7 +1370,7 @@ const activeOffer = async (req, res) => {
       return res.redirect("/admin/Offer");
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -1264,7 +1379,7 @@ const getBanner = async (req, res) => {
     const banners = await Banner.find().sort({ createdAt: -1 });
     res.render("admin/banners", { banners });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -1272,7 +1387,7 @@ const getAddBanner = (req, res) => {
   try {
     res.render("admin/addBanner");
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 const addBanner = async (req, res) => {
@@ -1290,7 +1405,7 @@ const addBanner = async (req, res) => {
 
     res.redirect("/admin/banner");
   } catch (error) {
-    console.log(error.messsage);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -1301,7 +1416,7 @@ const loadEditBanner = async (req, res) => {
 
     res.render("admin/editBanner", { banner });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -1311,15 +1426,15 @@ const editBanner = async (req, res) => {
     console.log(req.body);
     const updatedBanner = await Banner.findByIdAndUpdate(bannerId, req.body);
     updatedBanner.name = req.body.name;
-    updatedBanner.description = req.body.description
-    updatedBanner.banner = req.body.banner
-     await updatedBanner.save();
+    updatedBanner.description = req.body.description;
+    updatedBanner.banner = req.body.banner;
+    await updatedBanner.save();
     if (!updatedBanner) {
       res.redirect("/admin/banner/banner");
     }
     res.redirect("/admin/banner");
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -1329,7 +1444,7 @@ const deleteBanner = async (req, res) => {
     await Banner.deleteOne({ _id: bannerId });
     res.redirect("/admin/banner");
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError", { error });
   }
 };
 
@@ -1422,7 +1537,7 @@ const getSalesReport = async (req, res) => {
         },
       },
     ]);
-    console.log(filteredOrders);
+
     res.render("admin/salesReport", {
       salesReport: filteredOrders,
     });
@@ -1430,6 +1545,8 @@ const getSalesReport = async (req, res) => {
     console.log(error.message);
   }
 };
+
+
 
 module.exports = {
   loadAdminLogin,

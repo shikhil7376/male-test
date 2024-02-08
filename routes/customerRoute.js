@@ -1,5 +1,5 @@
 const express=require('express')
-const Customer_Route=express.Router()
+const  Customer_Route=express.Router()
 const Auth=require("../middleware/Auth")
 
 const{
@@ -24,27 +24,22 @@ const{
     deleteAddAddress,
     loadEditAddress,
     EditAddress,
-    getAddresses,
     loadCheckout,
     placeOrder,
-   getOrders,
-   getSingleProduct,
-   changeDefaultAddress,
-//    loadOrderSuccess,
-   getWallet ,
-   saveRzpOrder,
-   cancelOrder,
-   getReturnProductForm ,
-   requestReturnProduct,
-   resendOtp,
-   getCoupons,
-   applyCoupon,
-   loadInvoice,
-   loadShopWithCriteria
+    getOrders,
+    getSingleProduct,
+    getWallet ,
+    saveRzpOrder,
+    cancelOrder,
+    getReturnProductForm ,
+    requestReturnProduct,
+    resendOtp,
+    getCoupons,
+    applyCoupon,
+    loadInvoice,
+    loadShopWithCriteria,
+
 }=require('../controllers/customerController')
-
-
-
 
 
 //homepage render
@@ -88,9 +83,7 @@ Customer_Route.post('/user/profile/changepassword',Auth.logged,Auth.checkToBlock
 // user Address
 Customer_Route.get('/user/profile/add-address',Auth.checkToBlock,Auth.logged,loadAddaddress)
 Customer_Route.post('/user/profile/add-address',Auth.checkToBlock,Auth.logged,addAddress)
-
 Customer_Route.get('/user/profile/delete-address',Auth.checkToBlock,Auth.logged,deleteAddAddress)
-
 Customer_Route.get('/user/profile/edit-address',Auth.checkToBlock,Auth.logged,loadEditAddress)
 Customer_Route.post('/user/profile/edit-address',Auth.checkToBlock,Auth.logged,EditAddress)
 
@@ -99,17 +92,21 @@ Customer_Route.post('/user/profile/edit-address',Auth.checkToBlock,Auth.logged,E
 Customer_Route.get("/user/checkout",Auth.checkToBlock,Auth.logged,loadCheckout)
 Customer_Route.post("/user/checkout",Auth.checkToBlock,Auth.logged,placeOrder)
 Customer_Route.post("/save-rzporder",Auth.checkToBlock,Auth.logged, saveRzpOrder)
-// Customer_Route.get("/order-successfull",Auth.logged,Auth.checkToBlock,loadOrderSuccess )
-                                                                
+
+ //orders                                                               
 Customer_Route.get("/orders",Auth.checkToBlock,Auth.logged,getOrders)
               .get("/wallet",Auth.checkToBlock,Auth.logged,getWallet)
               .get("/coupons",Auth.checkToBlock,Auth.logged, getCoupons )
               .post('/apply-coupon',Auth.checkToBlock,Auth.logged,applyCoupon)
 
+ // cancelOrder             
 Customer_Route.post("/cancel-order",Auth.checkToBlock,Auth.logged,cancelOrder)
 
+// return product
 Customer_Route.get("/return-product",Auth.checkToBlock,Auth.logged,getReturnProductForm )
 Customer_Route.post("/return-product",Auth.checkToBlock,Auth.logged,requestReturnProduct)
 Customer_Route.get("/invoice/:id",Auth.checkToBlock,Auth.logged,loadInvoice)
+
+
 
 module.exports=Customer_Route

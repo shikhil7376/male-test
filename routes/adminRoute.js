@@ -13,12 +13,12 @@ admin_route.get('/dashboard',Auth.adminAuth,loadDash)
 // LOGIN
 admin_route.get('/login',loadAdminLogin)
 admin_route.post('/login',loginValidation,adminValid)
-admin_route.post("/logout", adminLogout);
+admin_route.post("/logout",Auth.adminAuth, adminLogout);
 
 //CUSTOMER MANAGEMENT
-admin_route.get('/customers',displayCustomers)
-admin_route.get('/customers/Unblock-theUser',UnblockTheUser)
-admin_route.get('/customers/block-theUser',blockTheUser)
+admin_route.get('/customers',Auth.adminAuth,displayCustomers)
+admin_route.get('/customers/Unblock-theUser',Auth.adminAuth,UnblockTheUser)
+admin_route.get('/customers/block-theUser',Auth.adminAuth,blockTheUser)
 
 
 // CATEGORY MANAGEMENT
@@ -31,22 +31,22 @@ admin_route.post("/Category/Edit-Category",Auth.adminAuth,upload.single('image')
 admin_route.get("/category/:id/images-delete",Auth.adminAuth,deleteCategoryImg)
 
 // PRODUCT MANAGEMENT
-admin_route.get('/product',loadProductPage)
-admin_route.get('/product/create', loadProductCreate)
-admin_route.post('/product/create',upload.array('image',3), createProduct)
-admin_route.get('/product/:id/Active',productActivate)
-admin_route.get('/product/:id/Deactive',productDeactivate)
-admin_route.get('/product/:id/Edit',loadProductEditPage)
-admin_route.post('/product/Edit',Auth.adminAuth,upload.array('images',3),editProduct)
-admin_route.get("/product/:imageId/:id/deleteImg", deleteImgDelete)
+admin_route.get('/product',Auth.adminAuth,loadProductPage)
+           .get('/product/create',Auth.adminAuth, loadProductCreate)
+           .post('/product/create',Auth.adminAuth,upload.array('image',3), createProduct)
+           .get('/product/:id/Active',Auth.adminAuth,productActivate)
+           .get('/product/:id/Deactive',Auth.adminAuth,productDeactivate)
+           .get('/product/:id/Edit',Auth.adminAuth,loadProductEditPage)
+           .post('/product/Edit',Auth.adminAuth,upload.array('images',3),editProduct)
+           .get("/product/:imageId/:id/deleteImg",Auth.adminAuth,deleteImgDelete)
 
 
 // ORDER MANAGEMENT
 admin_route.get("/order",Auth.adminAuth,loadOrder)
-admin_route.get("/order/action-update",Auth.adminAuth,updateActionOrder)
-admin_route.get('/order-cancel',Auth.adminAuth,updateOrderCancel)
-admin_route.get('/return-requests',Auth.adminAuth,getreturnRequests)
-admin_route.post('/return-requests',Auth.adminAuth,returnRequsetActions)
+           .get("/order/action-update",Auth.adminAuth,updateActionOrder)
+           .get('/order-cancel',Auth.adminAuth,updateOrderCancel)
+           .get('/return-requests',Auth.adminAuth,getreturnRequests)
+           .post('/return-requests',Auth.adminAuth,returnRequsetActions)
 
 
 // COUPON MANAGEMENT
@@ -65,14 +65,16 @@ admin_route.get("/coupons",Auth.adminAuth,loadCoupons)
              .get("/offer/:id/active-offer",Auth.adminAuth,activeOffer)
 
 // BANNER MANAGEMENT
-admin_route.get('/banner',getBanner)
-            .get('/banner/addBanner',getAddBanner)
+admin_route.get('/banner',Auth.adminAuth,getBanner)
+            .get('/banner/addBanner',Auth.adminAuth,getAddBanner)
             .post('/banner/addBanner',Auth.uploadBannerImage,Auth.resizeBannerImages,addBanner)
             .get('/banner/editBanner/:id',Auth.adminAuth,loadEditBanner)
             .post('/banner/editBanner/:id',Auth.adminAuth,editBanner)
             .get('/banner/deleteBanner/:id',Auth.adminAuth,deleteBanner)
  // SALES REPORT
- admin_route.get("/sales-report",getSalesReport)
-            .post("/sales-report",getSalesReport)
+ admin_route.get("/sales-report",Auth.adminAuth,getSalesReport)
+            .post("/sales-report",Auth.adminAuth,getSalesReport)
+
+
           
 module.exports=admin_route

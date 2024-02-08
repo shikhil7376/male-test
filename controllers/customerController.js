@@ -1,5 +1,4 @@
 const express = require("express");
-const path = require("path");
 const Address = require("../models/userAddress");
 const Customer = require("../models/customerModel");
 const Coupon = require("../models/couponModel");
@@ -15,9 +14,7 @@ const Razorpay = require("razorpay");
 const Banner = require("../models/bannerModel")
 const razorpayConfig = require("./utils/razorpayConfig");
 const sharp = require("sharp");
-const { log } = require("console");
-const { ok } = require("assert");
-// const wallet =
+
 
 // Password hashing function
 async function hashPassword(password) {
@@ -87,13 +84,16 @@ const loadLogin = async (req, res) => {
   try {
     res.render("user/login");
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
 // //user valid
 const checkUserValid = async (req, res) => {
   const { email, password } = req.body;
+try{
+  const email = req.body.email.trim()
+  const password = req.body.password.trim()
   if(!email || !password){
     return res.render("user/login", { message: "Empty information are not possible" });
   }else if(!/^\S+@\S+\.\S+$/.test(email)){
@@ -126,6 +126,9 @@ const checkUserValid = async (req, res) => {
     });
   }
 }
+}catch(error){
+  res.render("error/internalError",{error})
+}
 };
 
 //  session destroying User logouting
@@ -138,7 +141,7 @@ const userLogouting = (req, res, next) => {
       return res.redirect("/");
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -147,13 +150,26 @@ const loadRegister = async (req, res, next) => {
   try {
     res.render("user/register");
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 // insert user
 const insertUser = async (req, res) => {
   const { name, email, password, mobile } = req.body;
   try {
+   
+
+    const name = req.body.name.trim();
+    const email = req.body.email.trim();
+    const password = req.body.password.trim();
+    const mobileNo = req.body.mobile.trim();
+    if (!name || !email || !password || !mobileNo) {
+      return res.render("user/register", { message: "All fields are required" });
+  }
+  if(mobileNo.length<10){
+    return res.render("user/register", { message: "mobileno must be atleast 10" });
+  }
+
     if (!validateEmail(email)) {
       return res.render("user/register", { message: "invalid email..." });
     }
@@ -191,7 +207,7 @@ const insertUser = async (req, res) => {
       }
     }
   } catch (error) {
-    console.log(error);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -201,7 +217,7 @@ const loadOTPpage = async (req, res) => {
   try {
     res.render("user/otppage", { id: req.query.userId });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 // send email models
@@ -254,7 +270,7 @@ const sendOTPVerificationEmail = async ({ _id, email }, res) => {
     // Send a single response at the end of the try block
   } catch (error) {
     // Handle errors and send an error response
-    console.error(error);
+    res.render("error/internalError",{error})
     res.status(500).json({
       status: "FAILED",
       message: error.message,
@@ -298,7 +314,7 @@ const checkOTPValid = async (req, res) => {
     await UserOTPVerification.deleteOne({ userId });
     return res.redirect("/user-Login");
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -311,7 +327,7 @@ const resendOtp = async (req, res) => {
       return res.redirect(`/user/otpVerification?userId=${userId}`);
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -345,7 +361,7 @@ const loadShop = async (req, res) => {
       totalPages: totalPages,
     });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -393,20 +409,7 @@ const   loadShopWithCriteria = async(req,res)=>{
           });
          }else if(searchBrand){
           const foundProducts = await product.find({is_delete:false,brand_name:{$regex:new RegExp(searchBrand,'i')}} )
-        
-          const foundCategories = await productCategory.find({ removed: false });
-
-          // res.render("user/shop", {
-          //   productDatas: foundProducts,
-          //   currentUser: await Customer.findById(req.session.user),
-          //   categoryBased: false,
-          //   categoryDatas: foundCategories,
-          //   category: { name: "shop All", id: "" },
-          //   activePage: "Shop",
-          //   currentPage: 1,
-          //   totalPages: 1,
-          // });
-          
+          const foundCategories = await productCategory.find({ removed: false })
           return res.json({prod : foundProducts,Cate : foundCategories })
          }else if(minPrice || maxPrice){
           const foundProducts = await product
@@ -431,7 +434,7 @@ const   loadShopWithCriteria = async(req,res)=>{
         }
         
     }catch(error){
-      console.log(error.message);
+      res.render("error/internalError",{error})
     }
 
 }
@@ -447,7 +450,7 @@ const getSingleProduct = async (req, res) => {
       activepage: "Shop",
     });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -507,7 +510,7 @@ const loadcart = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -547,7 +550,7 @@ const addToCart = async (req, res) => {
     await currentUser.save();
     res.redirect("/cart"); // Assuming you want to redirect to the cart page after adding the item.
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
     res.status(500).send("Internal Server Error");
   }
 };
@@ -600,7 +603,7 @@ const updateCartItem = async (req, res) => {
         totalCartSum: totSum,
       });
   } catch (error) {
-    console.error(error.message);
+    res.render("error/internalError",{error})
     res.status(500).send("Internal Server Error");
   }
 };
@@ -632,7 +635,7 @@ const removeFromCart = async (req, res) => {
     await currentUser.save();
     res.status(200).json({ message: "Item removed from cart successfully" });
   } catch (error) {
-    console.error(error.message);
+    res.render("error/internalError",{error})
     res.status(500).send("Internal Server Error");
   }
 };
@@ -647,7 +650,7 @@ const loadprofile = async (req, res) => {
     }
     res.render("user/userprofile", { customer, addresses, currentUser });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -659,7 +662,7 @@ const loadChangePassword = async (req, res) => {
     }
     res.render("user/changepassword", { userId: customer._id });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -695,7 +698,7 @@ const changePassword = async (req, res) => {
       userId: customer._id,
     });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -703,7 +706,7 @@ const loadAddaddress = async (req, res) => {
   try {
     res.render("user/addAddress");
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -721,7 +724,7 @@ const addAddress = async (req, res) => {
     await newAddress.save();
     res.redirect("/user/profile");
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 const deleteAddAddress = async (req, res) => {
@@ -729,7 +732,7 @@ const deleteAddAddress = async (req, res) => {
     await Address.findByIdAndDelete(req.query.addressId);
     res.redirect("/user/profile");
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -738,7 +741,7 @@ const loadEditAddress = async (req, res) => {
     const address = await Address.findById(req.query.addressId);
     res.render("user/editAddress", { address });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -759,7 +762,7 @@ const EditAddress = async (req, res) => {
     // console.log(req.body);
     res.redirect("/user/profile");
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -771,7 +774,7 @@ const getAddresses = async (req, res) => {
       addresses,
     });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -789,7 +792,7 @@ const changeDefaultAddress = async (req, res) => {
 
     res.redirect("/user/checkout");
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -841,9 +844,6 @@ const loadCheckout = async (req, res) => {
         }
       }, 0);
 
-      // grandTotal = grandTotal - discountAmount
-
-      // console.log("grandTotal",grandTotal)
       let insufficientStockProduct;
       cartProducts.forEach((cartProduct) => {
         if (cartProduct.product.stock_count < cartProduct.quantity) {
@@ -872,7 +872,7 @@ const loadCheckout = async (req, res) => {
       }
     }
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -1030,7 +1030,7 @@ const placeOrder = async (req, res) => {
      await currentUser.save()
      res.redirect('/orders')
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -1126,7 +1126,7 @@ await currentUser.save();
     // res.redirect('/order-successfull')
     res.json({ success: true });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -1145,7 +1145,7 @@ const getCoupons = async (req, res) => {
 
          })
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -1214,7 +1214,7 @@ const applyCoupon = async (req, res) => {
   });
 
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -1244,7 +1244,7 @@ const getOrders = async (req, res) => {
       activePage: "Profile",
     });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -1273,7 +1273,7 @@ const updateOrderStatus = async () => {
       { $set: { status: "Delivered" } }
     );
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -1297,7 +1297,7 @@ const getWallet = async (req, res) => {
       balance
     });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -1377,9 +1377,6 @@ const cancelOrder = async (req, res) => {
    }else{
             amount = foundProduct.product.price * foundProduct.quantity
    }
-
-
-
       foundOrder.totalAmount -= amount;
 
       if (foundOrder.totalAmount === 5) {
@@ -1411,7 +1408,7 @@ const cancelOrder = async (req, res) => {
     await foundOrder.save();
     res.redirect("/orders");
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -1419,7 +1416,6 @@ const getReturnProductForm = async (req, res) => {
   try {
     const Product = await product.findById(req.query.product);
     const currentUser = await Customer.findById(req.session.user);
-
     const category = req.query.category;
     const quantity = req.query.quantity;
 
@@ -1436,7 +1432,7 @@ const getReturnProductForm = async (req, res) => {
       order: req.query.order,
     });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -1470,7 +1466,7 @@ const requestReturnProduct = async (req, res) => {
     await foundOrder.save();
     res.redirect("/orders");
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -1496,7 +1492,7 @@ const loadInvoice = async (req, res) => {
       discount
     });
   } catch (error) {
-    console.log(error.message);
+    res.render("error/internalError",{error})
   }
 };
 
@@ -1537,5 +1533,5 @@ module.exports = {
   getCoupons,
   applyCoupon,
   loadInvoice,
-  loadShopWithCriteria 
+  loadShopWithCriteria,
 };

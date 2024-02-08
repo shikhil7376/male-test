@@ -92,58 +92,46 @@
 
         <%} %>
             <!--end messages-->
-  <div id="error-messages"></div>
 </div>
 
-
 <script>
-function validateForm() {
-  // Clear any previous error messages
-  const errorMessages = document.getElementById("error-messages");
-  errorMessages.innerHTML = "";
+  function validateForm() {
+      var name = document.getElementById('name').value;
+      var email = document.getElementById('email').value;
+      var password = document.getElementById('password').value;
+      var mobileNo = document.getElementById('mobileNo').value;
 
-  // Validate each field
-  const name = document.getElementById("name").value;
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  const mobileNo = document.getElementById("mobileNo").value;
+      // Name validation
+      if (name.trim() === "") {
+          alert("Please enter your name");
+          return false;
+      }
 
-  let isValid = true;
+      // Email validation
+      var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+          alert("Please enter a valid email address");
+          return false;
+      }
 
-  if (name.trim() === "") {
-    addErrorMessage("Please enter your name.");
-    isValid = false;
+      // Password validation
+      if (password.length < 6) {
+          alert("Password must be at least 6 characters long");
+          return false;
+      }
+
+      // Mobile number validation
+      var mobileRegex = /^[0-9]{10}$/;
+      if (!mobileRegex.test(mobileNo)) {
+          alert("Please enter a valid 10-digit mobile number");
+          return false;
+      }
+
+      // If all validations pass, the form will be submitted
+      return true;
   }
-
-  // Improved email validation using a regular expression
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    addErrorMessage("Please enter a valid email address.");
-    isValid = false;
-  }
-
-  if (password.length < 8) {
-    addErrorMessage("Password must be at least 8 characters long.");
-    isValid = false;
-  }
-
-  if (!mobileNo.match(/^[0-9]{10}$/)) {
-    addErrorMessage("Please enter a valid 10-digit mobile number.");
-    isValid = false;
-  }
-
-  return isValid;
-}
-
-function addErrorMessage(message) {
-  const errorMessages = document.getElementById("error-messages");
-  const p = document.createElement("p");
-  p.classList.add("error-message"); 
-  p.textContent = message;
-  errorMessages.appendChild(p);
-}
-
 </script>
+
 </body>
 </html>
 
