@@ -62,7 +62,7 @@
                         </th>
                       </tr>
                     </thead>
-                    <tbody style="font-size:medium;font-family:'Times New Roman', Times, serif">
+                    <tbody id="table-1" style="font-size:medium;font-family:'Times New Roman', Times, serif">
                       <% if (!salesReport.length) { %>
                       <tr>
                         <td colspan="6">
@@ -116,15 +116,16 @@
                       Total products sold: <%= productsCount %><br>
                       <strong>Total Revenue: ₹<%= totalRevenue.toFixed(2) %></strong>
                     </div>
-                    <% if (salesReport.length) { %>
-                      <div class="col-md-3 col-12 p-4">
-                        <button id="downloadButton">Download PDF</button>
-                        <a class="btn btn-success" id="downloadExcelButton">Download Excel</a>
-                      </div>
-                    <% } %>
+                   
                     
                   </div>
                 </div>
+                <% if (salesReport.length) { %>
+                  <div class="col-md-3 col-12 p-4">
+                    <a class="btn btn-primary"  id="downloadButton" style="padding: 15px;">Download PDF</a>
+                    <a class="btn btn-success" id="downloadExcelButton" style="padding: 15px;">Download Excel</a>
+                  </div>
+                <% } %>
               </div>
             </div>
           </div>
@@ -150,11 +151,9 @@
 <!-- ... previous HTML code ... -->
 
 <!-- Correct order of script tags: xlsx before html2pdf -->
-<script async defer src="https://buttons.github.io/buttons.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
-
-
 
 <script>
   function downloadExcel() {
@@ -170,6 +169,7 @@
      }
      document.getElementById('downloadExcelButton').addEventListener('click', downloadExcel);
      </script>
+
 
 <script>
   document.getElementById('downloadButton').addEventListener('click', function () {
