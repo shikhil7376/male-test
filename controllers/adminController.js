@@ -11,7 +11,6 @@ const Banner = require("../models/bannerModel");
 const loadAdminLogin = async (req, res) => {
   try {
     if (!req.session.admin) {
-      res.render("./admin/adminlogin");
     } else {
       res.redirect("admin/dashboard");
     }
@@ -24,9 +23,9 @@ const loginValidation = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     if (email === "") {
-      res.render("./admin/adminLogin", { message: "Email required" });
+      res.render("admin/adminLogin", { message: "Email required" });
     } else if (password === "") {
-      res.render("./admin/adminLogin", { message: "password is required" });
+      res.render("admin/adminLogin", { message: "password is required" });
     } else {
       next();
     }
@@ -46,20 +45,20 @@ const adminValid = async (req, res) => {
       validEmail === null ||
       validEmail === ""
     ) {
-      return res.render("./admin/adminLogin", { message: "email is not valid" });
+      return res.render("admin/adminLogin", { message: "email is not valid" });
     } else if (!/^\S+@\S+\.\S+$/.test(email) || email === "") {
-      res.render("./admin/adminLogin", { message: "Invalid Email " });
+      res.render("admin/adminLogin", { message: "Invalid Email " });
     } else {
       const dpassword = validEmail.password;
       const matchPassword = await bcrypt.compare(password, dpassword);
       if (!matchPassword) {
-        res.render("./admin/adminLogin", { message: "password is miss match" });
+        res.render("admin/adminLogin", { message: "password is miss match" });
       } else {
         if (validEmail.is_Admin === true) {
           req.session.admin = validEmail._id;
           res.redirect("/admin/dashboard");
         } else {
-          res.render("./admin/adminLogin", { message: "you are not admin" });
+          res.render("admin/adminLogin", { message: "you are not admin" });
         }
       }
     }

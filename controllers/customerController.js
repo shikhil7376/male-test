@@ -154,7 +154,7 @@ const loadRegister = async (req, res, next) => {
   }
 };
 // insert user
-const insertUser = async (req, res) => {
+const insertUser = async (req, res,next) => {
   const { name, email, password, mobile } = req.body;
   try {
    
@@ -196,9 +196,9 @@ const insertUser = async (req, res) => {
       const userData = await customer.save();
       if (userData) {
         //send the verification email
-        sendOTPVerificationEmail(userData, res);
+        sendOTPVerificationEmail(userData, res,next);
         const user_id = userData._id;
-        res.redirect(`/user/otpVerification?userId=${user_id}`);
+        return res.redirect(`/user/otpVerification?userId=${user_id}`);
       } else {
         res.render("user/register", {
           message: "account creation has been failed",
@@ -235,7 +235,7 @@ let transporter = nodemailer.createTransport({
 
 // console.log(process.env.AUTH_EMAIL, process.env.AUTH_PASS);
 
-const sendOTPVerificationEmail = async ({ _id, email }, res) => {
+const sendOTPVerificationEmail = async ({ _id, email }, res,next) => {
   try {
     const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
     // Mail options
@@ -269,12 +269,14 @@ const sendOTPVerificationEmail = async ({ _id, email }, res) => {
 
     // Send a single response at the end of the try block
   } catch (error) {
+    next(error);
+
     // Handle errors and send an error response
-    res.render("error/internalError",{error})
-    res.status(500).json({
-      status: "FAILED",
-      message: error.message,
-    });
+    // return res.render("error/internalError",{error})
+    // res.status(500).json({
+    //   status: "FAILED",
+    //   message: error.message,
+    // });
   }
 };
 
