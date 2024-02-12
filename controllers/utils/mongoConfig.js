@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 function connectDB() {
   mongoose
-    .connect("mongodb+srv://shikhilkrishnan2018:sw8CoMADTmww1Wde@cluster0.ljc9fy4.mongodb.net/")
+    .connect("mongodb://127.0.0.1:27017/MALE_FASHION")
     .then(() => console.log("DATABASE CONNECTED"))
     .catch((error) => console.log(error));
 }
