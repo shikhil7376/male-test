@@ -22,7 +22,6 @@ const uploadBannerImage =  upload.single('banner');
 
 const resizeBannerImages = async(req,res,next)=>{
     try{
-        console.log("...any chance...");
         if(!req.file) return next();
         req.file.originalname = `Banner-${Date.now()}.jpeg`;
         req.body.banner = req.file.originalname
@@ -35,7 +34,6 @@ const resizeBannerImages = async(req,res,next)=>{
         console.log(error.message);
     }
 }
-
 
 
 const userAuth=(req,res,next)=>{
@@ -88,8 +86,15 @@ const adminAuth=(req,res,next)=>{
 }
 
 
-
+// const cropImage = async(req,res,next)=>{
+//     try{
+//         const files =req.files
+//         console.log(files);
+//     }catch(error){
+//         console.log(error.message);
+//     }
+// }
 
 module.exports={
-    userAuth,adminAuth,logged,checkToBlock,resizeBannerImages,uploadBannerImage
+    userAuth,adminAuth,logged,checkToBlock,resizeBannerImages,uploadBannerImage,
 }

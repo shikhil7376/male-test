@@ -1,5 +1,6 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
+const sharp = require("sharp");
 const Customer = require("../models/customerModel");
 const productCategory = require("../models/productCategory");
 const product = require("../models/productModel");
@@ -8,9 +9,30 @@ const Return = require("../models/returnProductModel");
 const Coupon = require("../models/couponModel");
 const Offer = require("../models/offerModel");
 const Banner = require("../models/bannerModel");
+const Jimp = require('jimp');
+
+
+
+async function cropImage(file, width, height,quality) {
+  try {
+    const croppedImage = await sharp(file.buffer)
+      .resize({ width, height })  // Your desired dimensions
+      .jpeg({quality}) 
+      .toBuffer(); // Convert to buffer for database storage
+
+    // Return the cropped image buffer
+    return croppedImage;
+  } catch (error) {
+    console.error('Error cropping image:', error);
+    // Handle errors according to your requirements
+  }
+}
+
+
 const loadAdminLogin = async (req, res) => {
   try {
     if (!req.session.admin) {
+      res.render("admin/adminLogin");
     } else {
       res.redirect("admin/dashboard");
     }
@@ -18,7 +40,7 @@ const loadAdminLogin = async (req, res) => {
     res.render("error/internalError", { error });
   }
 };
-
+ 
 const loginValidation = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -72,29 +94,15 @@ const loadDash = async (req, res) => {
     const admin = await Customer.find({ is_Admin: true });
     const today = new Date();
     // Calculate the start and end dates for this month
-    const thisMonthStart = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      1,
-      0,
-      0,
-      0
-    );
-    const thisMonthEnd = new Date(
-      today.getFullYear(),
-      today.getMonth() + 1,
-      0,
-      23,
-      59,
-      59
-    );
-
-    console.log(thisMonthStart);
-    console.log(thisMonthEnd);
+    const thisMonthStart = new Date(today.getFullYear(),today.getMonth(),1,0,0,0);
+    const thisMonthEnd = new Date(today.getFullYear(),today.getMonth() + 1,0,23,59,59);
     // MongoDB aggregation pipeline to fetch the required data
     const pipeline = [
       {
         $match: {
+               status:{
+                   $nin:["Cancelled"]
+               },
           orderDate: {
             $gte: thisMonthStart,
             $lte: thisMonthEnd,
@@ -107,16 +115,8 @@ const loadDash = async (req, res) => {
             {
               $match: {
                 orderDate: {
-                  $gte: new Date(
-                    today.getFullYear(),
-                    today.getMonth(),
-                    today.getDate()
-                  ),
-                  $lt: new Date(
-                    today.getFullYear(),
-                    today.getMonth(),
-                    today.getDate() + 1
-                  ),
+                  $gte: new Date( today.getFullYear(), today.getMonth(), today.getDate()),           
+                  $lt: new Date( today.getFullYear(), today.getMonth(), today.getDate() + 1 ),
                 },
               },
             },
@@ -139,7 +139,22 @@ const loadDash = async (req, res) => {
     ];
 
     const order = await Order.aggregate(pipeline);
-
+     order.forEach((ord)=>{
+      console.log(ord);
+     })
+     const completedProductsSum = await Order.aggregate([
+      { $unwind: "$products" },
+      { $match: { "products.returnRequested": "Completed" } },
+      { 
+        $project: { 
+          _id: 0, 
+          totalPrice: { $multiply: ["$products.Price", "$products.quantity"] } 
+        } 
+      },
+      { $group: { _id: null, totalSum: { $sum: "$totalPrice" } } }
+    ]);
+        
+    const totalSum = completedProductsSum[0]?.totalSum || 0;
     let todaysOrders;
     let thisMonthsOrders;
     let thisMonthsTotalRevenue;
@@ -147,19 +162,19 @@ const loadDash = async (req, res) => {
 
     order.forEach((ord) => {
       todaysOrders = ord.todaysOrders[0] ? ord.todaysOrders[0].count : 0;
-      thisMonthsOrders = ord.thisMonthsOrders[0]
-        ? ord.thisMonthsOrders[0].count
-        : 0;
-      thisMonthsTotalRevenue = ord.thisMonthsTotalRevenue[0]
-        ? ord.thisMonthsTotalRevenue[0].total
-        : 0;
-      totalCustomersThisMonth = ord.totalCustomersThisMonth[0]
-        ? ord.totalCustomersThisMonth[0].count
-        : 0;
+      thisMonthsOrders = ord.thisMonthsOrders[0]? ord.thisMonthsOrders[0].count: 0;
+      if(totalSum){
+        thisMonthsTotalRevenue = ord.thisMonthsTotalRevenue[0]? ord.thisMonthsTotalRevenue[0].total-totalSum: 0;
+      }else{
+        
+      thisMonthsTotalRevenue = ord.thisMonthsTotalRevenue[0]? ord.thisMonthsTotalRevenue[0].total: 0;
+      }
+      totalCustomersThisMonth = ord.totalCustomersThisMonth[0]? ord.totalCustomersThisMonth[0].count: 0;
     });
 
     // for charts
     const orderChartData = await Order.find({ status: "Delivered" });
+ 
     // Initialize objects to store payment method counts and monthly order counts
     const paymentMethods = {};
     const monthlyOrderCountsCurrentYear = {};
@@ -170,16 +185,28 @@ const loadDash = async (req, res) => {
     // Iterate through each order
     orderChartData.forEach((order) => {
       // Extract payment method and order date from the order object
-      const { paymentMethod, orderDate } = order;
-
+      const { paymentMethod, orderDate,products} = order;
       // Count payment methods
+     
       if (paymentMethod) {
         if (!paymentMethods[paymentMethod]) {
-          paymentMethods[paymentMethod] = order.totalAmount;
+            paymentMethods[paymentMethod] = order.totalAmount;
+      console.log("A"+ paymentMethods[paymentMethod]);
+        } else if( products && products.length > 0){
+          console.log("here>>"+products);
+            let totalAmount = products.reduce((acc, product) => {
+                if (product.returnRequested === 'Completed') {
+                    acc += product.Price * product.quantity;
+                }
+                return acc;
+            }, 0);
+            paymentMethods[paymentMethod] -= totalAmount;  
         } else {
-          paymentMethods[paymentMethod] += order.totalAmount;
+            paymentMethods[paymentMethod] += order.totalAmount;
         }
       }
+     
+    
 
       // Count orders by month
       if (orderDate) {
@@ -223,7 +250,7 @@ const adminLogout = (req, res) => {
   try {
     if (req.session.admin) {
       req.session.destroy();
-      res.redirect("/admin/dashboard");
+    return res.redirect("/admin/login");
     }
   } catch (error) {
     res.render("error/internalError", { error });
@@ -339,6 +366,7 @@ const loadAddCategory = async (req, res) => {
 
 const addProductcategory = async (req, res) => {
   try {
+    
     const categoryName = req.body.categoryName.trim();
     const description = req.body.description.trim();
     const offers = await Offer.find({ is_deleted: false });
@@ -587,8 +615,6 @@ const loadProductCreate = async (req, res) => {
 };
 
 const createProduct = async (req, res) => {
-  console.log("HAI");
-  console.log(req.body);
   const offers = await Offer.find({ is_deleted: false });
   const Categories = await productCategory.find();
   const {
@@ -651,6 +677,12 @@ const createProduct = async (req, res) => {
       stock = false;
     }
 
+    // const croppedImages = [];
+    // for (const file of req.files) {
+    //   const croppedImageBuffer = await cropImage(file, 200, 200); // Example dimensions
+    //   const imageData = croppedImageBuffer ? croppedImageBuffer : file.buffer;
+    // }
+
     // Create the product
     const Product = new product({
       product_name: productname,
@@ -660,13 +692,26 @@ const createProduct = async (req, res) => {
       description:Description,
       category: category,
       in_stock: stock,
+      image: [],
     });
 
-    // Assuming req.files is an array of uploaded image files
-    req.files.forEach((file) => {
-      Product.image.push({ data: file.buffer, contentType: file.mimetype });
-    });
+    for (const file of req.files) {
+      const croppedImageBuffer = await cropImage(file, 200, 200,90); // Example dimensions
+      const imageData = croppedImageBuffer ? croppedImageBuffer : file.buffer;
+    
+      // Add cropped image data/ID to the product's image array
+      Product.image.push({
+        data: imageData, // or image ID if storing references
+        contentType: file.mimetype,
+      });
+    }
 
+    // req.files.forEach((file) => {
+
+    //   Product.image.push({ data: file.buffer, contentType: file.mimetype });
+    // });
+
+    
     if (req.body.offer) {
       Product.offer = req.body.offer;
       const offerm = await Offer.findById(req.body.offer);
@@ -1391,7 +1436,6 @@ const getAddBanner = (req, res) => {
 };
 const addBanner = async (req, res) => {
   try {
-    console.log("...here......");
     const { name, description, banner } = req.body;
     const newBanner = await Banner.create({
       name,
@@ -1420,9 +1464,9 @@ const loadEditBanner = async (req, res) => {
 };
 
 const editBanner = async (req, res) => {
+  console.log(req.file);
   try {
     const bannerId = req.params.id;
-    console.log(req.body);
     const updatedBanner = await Banner.findByIdAndUpdate(bannerId, req.body);
     updatedBanner.name = req.body.name;
     updatedBanner.description = req.body.description;

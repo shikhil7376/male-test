@@ -60,7 +60,7 @@
                     <div class="card-body">
                       <p class="mb-4">Today’s Orders</p>
                       <p class="fs-30 mb-2">
-                 
+                        <h3 class="card-title mb-2"><%= todaysOrders %></h3>
                       </p>
                     </div>
                   </div>
@@ -70,7 +70,7 @@
                     <div class="card-body">
                       <p class="mb-4">Monthly Orders</p>
                       <p class="fs-30 mb-2">
-                     
+                        <h3 class="card-title mb-2"><%= thisMonthsOrders %></h3>
                       </p>
                     </div>
                   </div>
@@ -82,7 +82,7 @@
                     <div class="card-body">
                       <p class="mb-4">Monthly Revenue</p>
                       <p class="fs-30 mb-2">
-                     
+                        <h3 class="card-title text-nowrap mb-1">₹<%= thisMonthsTotalRevenue %></h3>
                       </p>
                     </div>
                   </div>
@@ -92,7 +92,7 @@
                     <div class="card-body">
                       <p class="mb-4">Number of Customers</p>
                       <p class="fs-30 mb-2">
-                  
+                        <h3 class="card-title mb-2"><%= totalCustomersThisMonth %></h3>
                       </p>
                     </div>
                   </div>
@@ -172,7 +172,8 @@
     const wltCount = '<%= paymentMethods.wlt ?paymentMethods.wlt: 0  %>'
     const rzpCount = '<%= paymentMethods.rzp ?paymentMethods.rzp: 0  %>'
 
-    const paymentMethodData = {
+    const 
+    paymentMethodData = {
       labels: ['COD', 'Wallet', 'Online'],
       datasets: [{
         data: [codCount, wltCount, rzpCount],

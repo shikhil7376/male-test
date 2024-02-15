@@ -1,7 +1,7 @@
 const express=require('express')
 const admin_route = express.Router()
 const Auth=require('../middleware/Auth')
-const{loadAdminLogin, loginValidation, adminValid,loadDash,displayCustomers,loadCategory, loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate, productDeactivate, UnblockTheUser, blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests,returnRequsetActions,loadCoupons,getAddNewCoupon,addNewCoupon,couponAction,deleteImgDelete,loadEditCategory,loadOfferPage,loadAddOfferPage,createOffer,loadOfferEdit,saveEditOffer,deleteOffer,activeOffer,EditCategory,deleteCategoryImg,getBanner,getAddBanner,addBanner,getSalesReport,loadEditBanner,editBanner,deleteBanner}=require("../controllers/adminController")
+const{loadAdminLogin, loginValidation, adminValid,loadDash,displayCustomers,loadCategory, loadAddCategory,addProductcategory,deletecategory,loadProductPage,loadProductCreate,createProduct,productActivate, productDeactivate, UnblockTheUser, blockTheUser,loadProductEditPage,editProduct,adminLogout,loadOrder,updateActionOrder,updateOrderCancel,getreturnRequests,returnRequsetActions,loadCoupons,getAddNewCoupon,addNewCoupon,couponAction,deleteImgDelete,loadEditCategory,loadOfferPage,loadAddOfferPage,createOffer,loadOfferEdit,saveEditOffer,deleteOffer,activeOffer,EditCategory,deleteCategoryImg,getBanner,getAddBanner,addBanner,getSalesReport,loadEditBanner,editBanner,deleteBanner,}=require("../controllers/adminController")
 const multer = require("multer")
 const storage = multer.memoryStorage()
 const upload = multer({storage:storage})
@@ -14,6 +14,7 @@ admin_route.get('/dashboard',Auth.adminAuth,loadDash)
 admin_route.get('/login',loadAdminLogin)
 admin_route.post('/login',loginValidation,adminValid)
 admin_route.post("/logout",Auth.adminAuth, adminLogout);
+
 
 //CUSTOMER MANAGEMENT
 admin_route.get('/customers',Auth.adminAuth,displayCustomers)
@@ -69,12 +70,12 @@ admin_route.get('/banner',Auth.adminAuth,getBanner)
             .get('/banner/addBanner',Auth.adminAuth,getAddBanner)
             .post('/banner/addBanner',Auth.uploadBannerImage,Auth.resizeBannerImages,addBanner)
             .get('/banner/editBanner/:id',Auth.adminAuth,loadEditBanner)
-            .post('/banner/editBanner/:id',Auth.adminAuth,editBanner)
+            .post('/banner/editBanner/:id',Auth.uploadBannerImage,Auth.resizeBannerImages,editBanner)
             .get('/banner/deleteBanner/:id',Auth.adminAuth,deleteBanner)
+
  // SALES REPORT
  admin_route.get("/sales-report",Auth.adminAuth,getSalesReport)
             .post("/sales-report",Auth.adminAuth,getSalesReport)
 
-
-          
+      
 module.exports=admin_route

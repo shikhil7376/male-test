@@ -18,6 +18,14 @@
   <!-- endinject -->
   <link rel="shortcut icon" href="/admin/images/favicon.png" />
 </head>
+<style>
+  .image-container {
+  display: flex;
+  flex-wrap: wrap; 
+  gap: 10px;
+}
+</style>
+
 
 <body>
   <div class="container-scroller">
@@ -140,8 +148,9 @@
                             <div class="form-group">
                               <label>Images Upload (Required: 3)</label>
                               <div class="input-group col-md-12">
-                                <input type="file" id="images" multiple  name="image"  class="form-control file-upload-info" required>
+                                <input type="file" id="images" multiple  name="image"  class="form-control file-upload-info" required onchange="previewImages()">
                               </div>
+                                 <div id="imagePreview" class="mt-2 image-container"></div>
                             </div>
                             <!-- Submit and Clear Buttons -->
                             <button type="submit" class="btn btn-primary mb-2">Submit</button>
@@ -169,6 +178,65 @@
     </div>
     <!-- page-body-wrapper ends -->
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+  
+  <script>
+    function previewImages() {
+      var previewDiv = document.getElementById('imagePreview');
+      previewDiv.innerHTML = ''; // Clear previous previews
+  
+      var input = document.getElementById('images');
+      var files = input.files;
+      var currentImageCount = previewDiv.querySelectorAll('.mt-2.image-container').length;
+  
+      if (files.length + currentImageCount > 3) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Only 3 images are allowed to be uploaded.',
+        });
+        input.value = '';
+        return;
+      }
+  
+      for (var i = 0; i < files.length; i++) {
+        var reader = new FileReader();
+        reader.onload = (function (file) {
+          return function (e) {
+            var imgContainer = document.createElement('div');
+            var img = document.createElement('img');
+            var deleteButton = document.createElement('button');
+  
+            img.src = e.target.result;
+            img.style.maxWidth = '100px';
+            img.style.marginBottom = '100px';
+            img.style.marginRight = '10px';
+  
+            deleteButton.innerHTML = 'Delete';
+            deleteButton.className = 'btn btn-danger btn-sm';
+            deleteButton.onclick = function () {
+              imgContainer.remove(); // Remove the image container on delete
+              currentImageCount--;
+            };
+  
+            imgContainer.appendChild(img);
+            imgContainer.appendChild(deleteButton);
+  
+            previewDiv.appendChild(imgContainer);
+          };
+        })(files[i]);
+  
+        reader.readAsDataURL(files[i]);
+      }
+  
+      // Update input.value after displaying previews (comment if not needed)
+      // input.value = ''; // This line may not be necessary depending on your use case
+    }
+  </script>
+  
+    
+  
+  
   <!-- container-scroller -->
   <!-- plugins:js -->
   <script src="/admin/vendors/js/vendor.bundle.base.js"></script>

@@ -46,7 +46,7 @@
             <div class="col-8  grid-margin stretch-card">
               <div class="card">
                 <div class="card-body">
-                  <form class="forms-sample" method="post" action="/admin/banner/editBanner/<%=banner._id%>" >
+                  <form class="forms-sample" method="post" action="/admin/banner/editBanner/<%=banner._id%>" enctype="multipart/form-data" >
                     <div class="form-group">
                       <label for="exampleInputName1">Banner Name</label>
                       <input type="text" name="name" value="<%=banner.name%>" required class="form-control" id="exampleInputName1" placeholder="Category name">
@@ -67,7 +67,7 @@
                       </div>
                     </div>
                     <div class="col-2" height="100px" width="100px">
-                      <img id="preview" src="/banners/<%=banner.banner %>" width="200">
+                      <img id="preview"  width="200">
                     </div>
                     <button type="submit" class="btn btn-primary mr-2">Submit</button>
                   </form>

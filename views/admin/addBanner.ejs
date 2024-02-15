@@ -76,9 +76,7 @@
                 </div>
             </div>
         </div>
-
     </div>
-
     </div>
     </div>
   
@@ -110,6 +108,7 @@
   <script src="/admin/js/template.js"></script>
   <script src="/admin/js/settings.js"></script>
   <script src="/admin/js/todolist.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
   <!-- endinject -->
   <!-- Custom js for this page-->
   <!-- End custom js for this page-->
@@ -127,13 +126,27 @@
     }
     hideErrorMessage();
 
-
     const previewImages = (event) => {
       const imageFiles = event.target.files;
       const imageFilesLength = imageFiles.length;
+        
+     
+      if (imageFilesLength > 1) {
+        // Display a SweetAlert if more than one image is selected
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Only a single image is allowed to be uploaded.',
+        });
+
+        // Reset the input to clear selected files
+        event.target.value = "";
+        return;
+      }
       if (imageFilesLength > 0) {
         const imageSrc = URL.createObjectURL(imageFiles[0]);
-        const imagePreviewElement = document.querySelector("#preview");
+       const imagePreviewElement = document.querySelector("#preview");
+       console.log(imagePreviewElement);
         imagePreviewElement.src = imageSrc;
         imagePreviewElement.style.display = "block";
         imagePreviewElement.style.height = "100%";
