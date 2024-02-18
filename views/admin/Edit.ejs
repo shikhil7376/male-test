@@ -18,6 +18,14 @@
   <!-- endinject -->
   <link rel="shortcut icon" href="/admin/images/favicon.png" />
 </head>
+<style>
+  .error-message {
+    color: red;
+    margin-top: 5px; /* Adjust top margin as needed */
+    margin-bottom: 5px; /* Adjust bottom margin as needed */
+    font-size: 14px; /* Adjust font size as needed */
+}
+</style>
 
 <body>
   <div class="container-scroller">
@@ -46,7 +54,7 @@
                           <h4 class="card-title">Product Information</h4>
                           <p class="card-description text-info">Basic product info</p>
 
-                          <form action="/admin/product/Edit" id="productForm" method="post" class="forms-sample"
+                          <form action="/admin/product/Edit" id="productForm" method="post" class="forms-sample" onsubmit="return validateForm(event)"
                           enctype="multipart/form-data">
 
                           <input type="hidden" value="<%= id %>" name="id">
@@ -54,6 +62,7 @@
                             <div class="form-group">
                               <label for="productName">Product Name</label>
                               <input type="text" class="form-control " name="productName" id="productName" placeholder="Name" value="<%=Product.product_name %>">
+                              <div id="productNameError" class="error-message"></div>
                             </div>
               
                            
@@ -62,6 +71,7 @@
                             <div class="form-group">
                               <label for="brandName">Brand Name</label>
                               <input type="text" class="form-control " name="brandName" id="brandName" placeholder="Brand Name"  value="<%= Product.brand_name %>">
+                              <div id="brandNameError" class="error-message"></div>
                             </div>
               
             
@@ -70,6 +80,7 @@
                             <div class="form-group">
                               <label for="price">Price</label>
                               <input type="number" class="form-control " name="price" id="price" placeholder="Price" value="<%= Product.price %>">
+                              <div id="priceNameError" class="error-message"></div>
                             </div>
               
                            
@@ -78,13 +89,14 @@
                             <div class="form-group">
                               <label for="stockCount">Stock Count</label>
                               <input type="number" class="form-control " name="stockCount" id="stockCount" placeholder="Count" value="<%= Product.stock_count %>" >
+                              <div id="stockCountNameError" class="error-message"></div>
                             </div>
               
                             <!-- Description -->
                             <div class="form-group">
                               <label for="description">Description</label>
                               <textarea class="form-control" id="description" name="description" rows="8" placeholder="Write about the Product"><%= Product.description %></textarea>
-
+                              <div id="descriptionNameError" class="error-message"></div>
                             </div>
               
                             <!-- Product Categories and Tags -->
@@ -212,9 +224,114 @@
     </div>
     <!-- page-body-wrapper ends -->
   </div>
+
+  <script>
+
+    function validateForm(event){
+      
+      var productName = document.getElementById('productName').value;
+      var brandName = document.getElementById('brandName').value;
+      var description =document.getElementById('description').value;
+      var price =document.getElementById('price').value;
+      var stockCount =document.getElementById('stockCount').value;
+    
+      productNameError.innerHTML = "";
+      brandNameError.innerHTML=""
+      descriptionNameError.innerHTML=""
+      priceNameError.innerHTML=""
+      stockCountNameError.innerHTML=""
+      var isValid = true;
+    
+      if (productName.trim() === "") {
+        productNameError.innerHTML = "Please enter a product name.";
+        isValid = false;
+      } else {
+        // Use a regular expression to check if the product name contains only letters
+        var lettersOnlyRegex = /^[A-Za-z]+$/;
+        
+        if (!lettersOnlyRegex.test(productName)) {
+          productNameError.innerHTML = "Product name should contain only letters.";
+          isValid = false;
+        } else if (productName.length < 3 || productName.length > 20) {
+          productNameError.innerHTML = "Product name should be between 3 and 20 characters.";
+          isValid = false;
+        }
+      }
+    
+      if (brandName.trim() === "") {
+        brandNameError.innerHTML = "Please enter a brand name.";
+        isValid = false;
+      }else{
+        var lettersOnlyRegex = /^[A-Za-z]+$/;
+        
+        if (!lettersOnlyRegex.test(brandName)) {
+          brandNameError.innerHTML = "brand name should contain only letters.";
+          isValid = false;
+      } else if (brandName.length < 3 || brandName.length > 20) {
+          brandNameError.innerHTML = "brand name should be between 3 and 20 characters.";
+          isValid = false;
+        }
+    }
+    
+    if (description.trim() === "") {
+        descriptionNameError.innerHTML = "Please enter description.";
+        isValid = false;
+      }else{
+        var lettersOnlyRegex = /^[A-Za-z]+$/;
+        
+        if (!lettersOnlyRegex.test(brandName)) {
+          descriptionNameError.innerHTML = "descrpition should contain only letters.";
+          isValid = false;
+      } else if (description.length < 3 || description.length > 20) {
+          descriptionNameError.innerHTML = "description should be between 3 and 20 characters.";
+          isValid = false;
+        }
+    }
+    
+    if (price.trim()===""){
+      priceNameError.innerHTML="please enter price"
+      isValid=false
+    }else{
+      var numericRegex = /^\d+$/;
+        if(!numericRegex.test(price) || price<0){
+          priceNameError.innerHTML="price should be non-negative integer"
+          isValid=false
+        }
+    }
+    
+    if (stockCount.trim() === "") {
+        stockCountNameError.innerHTML = "Please enter stock count.";
+        isValid = false;
+      } else {
+        var numericRegex = /^\d+$/;
+        if (!numericRegex.test(stockCount) || stockCount < 0) {
+          stockCountNameError.innerHTML = "Stock count should be a non-negative integer.";
+          isValid = false;
+        }
+      }
+    
+    
+                if (!isValid) {
+        // Prevent form submission if there are validation errors
+        event.preventDefault(); // This line is missing in your code
+        return false
+      }
+    
+                return true
+    }
+    
+    </script>
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
   <script>
     function submitForm() {
-      alert('Form submitted'); // or console.log('Form submitted') for debugging
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+         text: 'Form submitted successfully.',
+        }); // or console.log('Form submitted') for debugging
     }
   </script>
 

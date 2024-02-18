@@ -36,7 +36,14 @@
       <div class="main-panel">
         <div class="content-wrapper">
           <div class="row">
-           
+            <ul class="navbar-nav w-100">
+              <li class="nav-item w-100">
+                <form class="nav-link mt-2 mt-md-0 d-none d-lg-flex search" action="/admin/customers" method="get">
+                  <input type="text" class="form-control" name="search" placeholder="Search users">
+                  <button class="btn-info">Search</button>
+                </form>
+              </li>
+            </ul>
             
             <div class="col-lg-12 grid-margin stretch-card">
               <div class="card">
@@ -90,6 +97,15 @@
                     <% } %>
                   </div>
                 </div>
+                <nav aria-label="Page navigation">
+                  <ul class="pagination">
+                      <% for (let i = 1; i <= totalPages; i++) { %>
+                          <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                              <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                          </li>
+                      <% } %>
+                  </ul>
+                </nav>
               </div>
             </div>
           

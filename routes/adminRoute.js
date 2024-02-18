@@ -57,7 +57,7 @@ admin_route.get("/coupons",Auth.adminAuth,loadCoupons)
            .patch('/coupons/action/:id',Auth.adminAuth,couponAction)
             
 // OFFER MANAGEMENT
-  admin_route.get("/Offer",Auth.adminAuth,loadOfferPage)
+ admin_route.get("/Offer",Auth.adminAuth,loadOfferPage)
              .get("/offer/create",Auth.adminAuth,loadAddOfferPage)
              .post("/offer/create",Auth.adminAuth,createOffer)
              .get("/offer/:id/Edit-offer/",Auth.adminAuth,loadOfferEdit)

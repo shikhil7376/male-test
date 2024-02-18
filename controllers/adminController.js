@@ -13,11 +13,11 @@ const Jimp = require('jimp');
 
 
 
-async function cropImage(file, width, height,quality) {
+async function cropImage(file, width, height,value) {
   try {
     const croppedImage = await sharp(file.buffer)
       .resize({ width, height })  // Your desired dimensions
-      .jpeg({quality}) 
+      .jpeg({quality:value}) 
       .toBuffer(); // Convert to buffer for database storage
 
     // Return the cropped image buffer
@@ -189,24 +189,24 @@ const loadDash = async (req, res) => {
       // Count payment methods
      
       if (paymentMethod) {
-        if (!paymentMethods[paymentMethod]) {
-            paymentMethods[paymentMethod] = order.totalAmount;
-      console.log("A"+ paymentMethods[paymentMethod]);
-        } else if( products && products.length > 0){
-          console.log("here>>"+products);
-            let totalAmount = products.reduce((acc, product) => {
-                if (product.returnRequested === 'Completed') {
-                    acc += product.Price * product.quantity;
-                }
-                return acc;
-            }, 0);
-            paymentMethods[paymentMethod] -= totalAmount;  
-        } else {
-            paymentMethods[paymentMethod] += order.totalAmount;
-        }
+          if(products && products.length){
+            let totalAmount = products.reduce((acc,product)=>{
+              if(product.returnRequested === 'Completed'){
+                acc += product.Price * product.quantity;
+              }
+              return acc
+            },0)
+            paymentMethods[paymentMethod] = order.totalAmount; 
+            if(totalAmount){
+              paymentMethods[paymentMethod] -= totalAmount; 
+              console.log(paymentMethods[paymentMethod]);
+            }else{
+              paymentMethods[paymentMethod] += order.totalAmount;
+            }
+          }
       }
      
-    
+
 
       // Count orders by month
       if (orderDate) {
@@ -259,24 +259,21 @@ const adminLogout = (req, res) => {
 
 // CUSTOMERS
 const displayCustomers = async (req, res) => {
-  const { query } = req.query;
-  console.log(req.query);
+    let query = req.query.search
+    const page = parseInt(req.query.page) || 1
+    const itemsPerPage = 10
+    const totalUser = await Customer.countDocuments()
+    const totalPages = Math.ceil(totalUser/itemsPerPage)
   try {
-    let users;
-    if (query) {
-      users = await Customer.find({
-        name: { $regex: ".*" + query + ".*" },
-        is_Admin: false,
-        is_varified: true,
-      });
-      if (users.length > 0) {
-        return res.render("admin/users", { users, query });
+    let users
+    if(query){
+      users = await Customer.find({name:{$regex:query,$options:"i"},is_Admin:false,is_varified:true})
+      if(users.length>0){
+        return res.render("admin/users",{users,totalPages,currentPage:page})
       }
-    } else {
-      users = await Customer.find({ is_varified: true, is_Admin: false });
-      if (users.length > 0) {
-        return res.render("admin/users", { users, query });
-      }
+    }else{
+      users = await Customer.find({is_varified:true,is_Admin:false}).skip((page-1)*itemsPerPage).limit(itemsPerPage).exec()
+      res.render("admin/users",{users,totalPages,currentPage:page})
     }
   } catch (error) {
     res.render("error/internalError", { error });
@@ -640,6 +637,14 @@ const createProduct = async (req, res) => {
       }); 
     }
 
+    const existingProduct = await product.findOne({ product_name: { $regex: new RegExp('^' + productname + '$', 'i') } });
+    if (existingProduct) {
+      return res.render("admin/addproduct", {
+        message: "Product name already exists. Choose a different product name.",
+        Categories,
+        offers
+      });
+    }
     const productRegex = /^[a-zA-Z\s]+$/;
     if (!productRegex.test( productname,brandname)) {
       return res.render("admin/addproduct", {
@@ -1470,7 +1475,9 @@ const editBanner = async (req, res) => {
     const updatedBanner = await Banner.findByIdAndUpdate(bannerId, req.body);
     updatedBanner.name = req.body.name;
     updatedBanner.description = req.body.description;
-    updatedBanner.banner = req.body.banner;
+    if(req.file){
+      updatedBanner.banner = req.body.banner;
+    }
     await updatedBanner.save();
     if (!updatedBanner) {
       res.redirect("/admin/banner/banner");

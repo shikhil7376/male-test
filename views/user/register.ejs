@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Register</title>
-<style>
-    body {
+    <title>Register</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
         }
 
         .login-container {
-            width: 350px;
+            width: 400px;
             margin: 0 auto;
             background-color: #fff;
             padding: 20px;
@@ -54,85 +55,119 @@
             position: relative;
             top: 10px;
         }
-</style>
+    </style>
 </head>
 <body>
-<div class="login-container">
-  <h2>Register</h2>
-  <form action="/register" method="post" onsubmit="return validateForm()">
-    
-    <div class="form-group">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
-    </div>
-    <div class="form-group">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-    
-    </div>
-    <div class="form-group">
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-    </div>
-    <div class="form-group">
-        <label for="mobileNo">Mobile Number:</label>
-        <input type="text" id="mobileNo" name="mobile" required pattern="[0-9]{10}" title="Enter a valid 10-digit mobile number">
-    </div>
+    <div class="login-container">
+        <h2>Register</h2>
+        <form action="/register" method="post" onsubmit="return validateForm()" id="register-form">
         
-    <div class="btn-container">
-      <button type="submit" class="btn" id="login">Register</button>
-    </div>
-  </form>
-       <!--error messages-->
-       <% if (typeof message !="undefined" ) {%>
-
-        <p class="mt-3 text-info ">
-            <%= message %>
-        </p>
-
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+                <p class="text-danger" id="username-error-display"></p>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                <p class="text-danger" id="email-error-display"></p>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                <p class="text-danger" id="password-error-display"></p>
+            </div>
+            <div class="form-group">
+                <label for="mobileNo">Mobile Number:</label>
+                <input type="text" id="mobileNo" pattern="9876[0-9]{6}" maxlength="10" name="mobile" required  title="Enter a valid 10-digit mobile number">
+                <p class="text-danger" id="phone-error-display"></p>
+            </div>
+            
+            <div class="btn-container">
+                <button type="submit" class="btn" id="login">Register</button>
+            </div>
+        </form>
+        <!--error messages-->
+        <% if (typeof message !="undefined" ) {%>
+            <p class="mt-3 text-info ">
+                <%= message %>
+            </p>
         <%} %>
-            <!--end messages-->
-</div>
+        <!--end messages-->
+    </div>
 
-<script>
-  function validateForm() {
-      var name = document.getElementById('name').value;
-      var email = document.getElementById('email').value;
-      var password = document.getElementById('password').value;
-      var mobileNo = document.getElementById('mobileNo').value;
+    <script>
+        const form = document.getElementById('register-form');
 
-      // Name validation
-      if (name.trim() === "") {
-          alert("Please enter your name");
-          return false;
-      }
+        const usernameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        const phoneInput = document.getElementById('mobileNo');
+        const passwordInput = document.getElementById('password');
 
-      // Email validation
-      var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-          alert("Please enter a valid email address");
-          return false;
-      }
+        function validateForm() {
+            let hasErrors = false;
+            document.getElementById("username-error-display").innerHTML = "";
+            document.getElementById("email-error-display").innerHTML = "";
+            document.getElementById("phone-error-display").innerHTML = "";
+            document.getElementById("password-error-display").innerHTML = "";
 
-      // Password validation
-      if (password.length < 6) {
-          alert("Password must be at least 6 characters long");
-          return false;
-      }
+            if (!usernameInput.value) {
+                hasErrors = true;
+                document.getElementById("username-error-display").innerHTML = "Please enter a username.";
+            }
 
-      // Mobile number validation
-      var mobileRegex = /^[0-9]{10}$/;
-      if (!mobileRegex.test(mobileNo)) {
-          alert("Please enter a valid 10-digit mobile number");
-          return false;
-      }
+            if (!emailInput.value) {
+                hasErrors = true;
+                document.getElementById("email-error-display").innerHTML = "Please enter an email.";
+            } else if (!emailInput.value.match(/^[A-Za-z\._\-0-9]*[@][A-Za-z]*[\.][a-z]{2,4}$/)) {
+                hasErrors = true;
+                document.getElementById("email-error-display").innerHTML = "Please enter a valid email.";
+            }
 
-      // If all validations pass, the form will be submitted
-      return true;
-  }
-</script>
+            if (!phoneInput.value) {
+                hasErrors = true;
+                document.getElementById("phone-error-display").innerHTML = "Please enter a phone number.";
+            } else if (phoneInput.value.length !== 10) {
+                hasErrors = true;
+                document.getElementById("phone-error-display").innerHTML = "Please enter a valid 10-digit phone number.";
+            }
+
+            if (!passwordInput.value) {
+                hasErrors = true;
+                document.getElementById("password-error-display").innerHTML = "Please enter a password.";
+            } else if (passwordInput.value.length < 6) {
+                hasErrors = true;
+                document.getElementById("password-error-display").innerHTML = "Password must be at least 6 characters long.";
+            } else {
+                const specialCharacters = /[!@#$%^&*()_+{}\[\]:;<>,.?~\\-]/;
+                if (!specialCharacters.test(passwordInput.value)) {
+                    hasErrors = true;
+                    document.getElementById("password-error-display").innerHTML =
+                        "Password must contain at least 1 special character.";
+                }
+                const capitalLetters = /[A-Z]/;
+                if (!capitalLetters.test(passwordInput.value)) {
+                    hasErrors = true;
+                    document.getElementById("password-error-display").innerHTML =
+                        "Password must contain at least 1 capital letter.";
+                }
+                const smallLetters = /[a-z]/;
+                if (!smallLetters.test(passwordInput.value)) {
+                    hasErrors = true;
+                    document.getElementById("password-error-display").innerHTML =
+                        "Password must contain at least 1 small letter.";
+                }
+            }
+            return !hasErrors;
+        }
+
+        form.addEventListener('submit', function(event) {
+            if (!validateForm()) {
+                event.preventDefault(); // Prevent form submission if there are errors
+            }
+        });
+    </script>
 
 </body>
 </html>
-
 

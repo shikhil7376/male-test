@@ -157,8 +157,6 @@ const loadRegister = async (req, res, next) => {
 const insertUser = async (req, res,next) => {
   const { name, email, password, mobile } = req.body;
   try {
-   
-
     const name = req.body.name.trim();
     const email = req.body.email.trim();
     const password = req.body.password.trim();
@@ -233,7 +231,6 @@ let transporter = nodemailer.createTransport({
   },
 });
 
-// console.log(process.env.AUTH_EMAIL, process.env.AUTH_PASS);
 
 const sendOTPVerificationEmail = async ({ _id, email }, res,next) => {
   try {
@@ -246,8 +243,6 @@ const sendOTPVerificationEmail = async ({ _id, email }, res,next) => {
       html: `<p>Enter <b>${otp}</b> in the app to verify your email address and complete the verification</p>
                    <p>This code <b>expires in 1 hour</b>.</p>`,
     };
-
-    console.log(otp);
 
     // Hash the OTP
     const saltRounds = 10;
@@ -270,13 +265,6 @@ const sendOTPVerificationEmail = async ({ _id, email }, res,next) => {
     // Send a single response at the end of the try block
   } catch (error) {
     next(error);
-
-    // Handle errors and send an error response
-    // return res.render("error/internalError",{error})
-    // res.status(500).json({
-    //   status: "FAILED",
-    //   message: error.message,
-    // });
   }
 };
 
@@ -761,7 +749,6 @@ const EditAddress = async (req, res) => {
         },
       }
     );
-    // console.log(req.body);
     res.redirect("/user/profile");
   } catch (error) {
     res.render("error/internalError",{error})
@@ -790,8 +777,6 @@ const changeDefaultAddress = async (req, res) => {
     await Address.findByIdAndUpdate(req.body.addressId, {
       $set: { default: true },
     });
-    //  const previousPage = req.headers.referer || '/user/checkout'
-
     res.redirect("/user/checkout");
   } catch (error) {
     res.render("error/internalError",{error})
@@ -947,8 +932,6 @@ const placeOrder = async (req, res) => {
       await newOrder.save();
 
       const order = await Order.findById(newOrder._id);
-
-      // res.redirect("/order-successfull");
       res.render("user/orderSuccesful", { order,final });
     } else if (req.body.method === "rzp") {
       const razorpay = new Razorpay({
@@ -1050,7 +1033,6 @@ const saveRzpOrder = async (req, res) => {
     if (transactionId && orderId && signature) {
       currentUser.cart.forEach(async (item) => {
         const foundProduct = await product.findById(item.product._id);
-        // console.log("foundProduct:", foundProduct);
         foundProduct.stock_count -= item.quantity;
         await foundProduct.save();
       });
@@ -1125,7 +1107,6 @@ if (currentUsedCoupon) {
 await currentUser.save();    
       await currentUser.save();
     }
-    // res.redirect('/order-successfull')
     res.json({ success: true });
   } catch (error) {
     res.render("error/internalError",{error})
@@ -1239,7 +1220,6 @@ const getOrders = async (req, res) => {
       },
       { $sort: { orderDate: -1 } },
     ]);
-  //  console.log(orders);
     res.render("user/orders", {
       currentUser,
       orders,
@@ -1291,8 +1271,6 @@ const getWallet = async (req, res) => {
     return acc+ value.amount
     },0);
    
-    
-// console.log(total,"total amount");
     res.render("user/wallet", {
       total,
       currentUser,
@@ -1475,7 +1453,6 @@ const requestReturnProduct = async (req, res) => {
 const loadInvoice = async (req, res) => {
   const id = req.params.id;
   let discount = req.query.discount || 0;
-  // console.log(req.query.discount);
   const order = await Order.findById(id).populate("products.product");
   const totalHt = order.totalAmount - 5;
   const totalAmount = order.totalAmount -5;

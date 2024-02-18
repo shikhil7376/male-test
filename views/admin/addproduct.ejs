@@ -6,6 +6,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Skydash Admin</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
   <!-- plugins:css -->
   <link rel="stylesheet" href="/admin/vendors/feather/feather.css">
   <link rel="stylesheet" href="/admin/vendors/ti-icons/css/themify-icons.css">
@@ -24,6 +25,15 @@
   flex-wrap: wrap; 
   gap: 10px;
 }
+
+.error-message {
+    color: red;
+    margin-top: 5px; /* Adjust top margin as needed */
+    margin-bottom: 5px; /* Adjust bottom margin as needed */
+    font-size: 14px; /* Adjust font size as needed */
+}
+
+
 </style>
 
 
@@ -53,7 +63,8 @@
                         <div class="card-body" style="font-size:larger;font-family:'Times New Roman', Times, serif;font-weight: bold;">
                           <h4 class="card-title">Product Information</h4>
                           <p class="card-description text-info">Basic product info</p>
-                          <form action="/admin/product/create" method="post" enctype="multipart/form-data">
+                          <form action="/admin/product/create" method="post" enctype="multipart/form-data" id="register-form" onsubmit="return validateForm(event)">
+
                             <% if (message !== "") { %>
                               <p class="text-danger"><%= message %></p>
                             <% } %>
@@ -62,6 +73,7 @@
                             <div class="form-group" >
                               <label for="productName">Product Name</label>
                               <input type="text" class="form-control " name="productName" id="productName" placeholder="Name">
+                              <div id="productNameError" class="error-message"></div>
                             </div>
               
                            
@@ -70,6 +82,7 @@
                             <div class="form-group">
                               <label for="brandName">Brand Name</label>
                               <input type="text" class="form-control " name="brandName" id="brandName" placeholder="Brand Name">
+                              <div id="brandNameError" class="error-message"></div>
                             </div>
               
             
@@ -78,6 +91,7 @@
                             <div class="form-group">
                               <label for="price">Price</label>
                               <input type="number" class="form-control " name="price" id="price" placeholder="Price">
+                              <div id="priceNameError" class="error-message"></div>
                             </div>
               
                            
@@ -86,12 +100,14 @@
                             <div class="form-group">
                               <label for="stockCount">Stock Count</label>
                               <input type="number" class="form-control " name="stockCount" id="stockCount" placeholder="Count">
+                              <div id="stockCountNameError" class="error-message"></div>
                             </div>
               
                             <!-- Description -->
                             <div class="form-group">
                               <label for="description">Description</label>
                               <textarea class=" form-control" id="description" name="description" rows="8" placeholder="Write about the Product"></textarea>
+                              <div id="descriptionNameError" class="error-message"></div>
                             </div>
               
                             <!-- Product Categories and Tags -->
@@ -118,7 +134,7 @@
                     <!--offers  -->
                             <div class="form-group">
                               <label for="price">Offer</label>
-                              <select class="form-control form-control-lg text-dark" name="offer" id="category" >
+                              <select class="form-control form-control-lg text-dark" name="offer" id="offer" >
                                 <option value="-1" disabled selected>Select an offer</option>
                                 <% offers.forEach(offer => { %>
                                   <option value="<%= offer._id %>"> <%= offer.name %> </option>
@@ -153,8 +169,9 @@
                                  <div id="imagePreview" class="mt-2 image-container"></div>
                             </div>
                             <!-- Submit and Clear Buttons -->
-                            <button type="submit" class="btn btn-primary mb-2">Submit</button>
+                            <button type="submit" class="btn btn-primary mb-2" >Submit</button>
                             <button type="reset" class="btn btn-primary mb-2">Clear</button>
+                            
                           </form>
 
                         </div>
@@ -180,15 +197,117 @@
   </div>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
   
+<script>
+
+function validateForm(event){
+  
+  var productName = document.getElementById('productName').value;
+  var brandName = document.getElementById('brandName').value;
+  var description =document.getElementById('description').value;
+  var price =document.getElementById('price').value;
+  var stockCount =document.getElementById('stockCount').value;
+
+  productNameError.innerHTML = "";
+  brandNameError.innerHTML=""
+  descriptionNameError.innerHTML=""
+  priceNameError.innerHTML=""
+  stockCountNameError.innerHTML=""
+  var isValid = true;
+
+  if (productName.trim() === "") {
+    productNameError.innerHTML = "Please enter a product name.";
+    isValid = false;
+  } else {
+    // Use a regular expression to check if the product name contains only letters
+    var lettersOnlyRegex = /^[A-Za-z]+$/;
+    
+    if (!lettersOnlyRegex.test(productName)) {
+      productNameError.innerHTML = "Product name should contain only letters.";
+      isValid = false;
+    } else if (productName.length < 3 || productName.length > 20) {
+      productNameError.innerHTML = "Product name should be between 3 and 20 characters.";
+      isValid = false;
+    }
+  }
+
+  if (brandName.trim() === "") {
+    brandNameError.innerHTML = "Please enter a brand name.";
+    isValid = false;
+  }else{
+    var lettersOnlyRegex = /^[A-Za-z]+$/;
+    
+    if (!lettersOnlyRegex.test(brandName)) {
+      brandNameError.innerHTML = "brand name should contain only letters.";
+      isValid = false;
+  } else if (brandName.length < 3 || brandName.length > 20) {
+      brandNameError.innerHTML = "brand name should be between 3 and 20 characters.";
+      isValid = false;
+    }
+}
+
+if (description.trim() === "") {
+    descriptionNameError.innerHTML = "Please enter description.";
+    isValid = false;
+  }else{
+    var lettersOnlyRegex = /^[A-Za-z]+$/;
+    
+    if (!lettersOnlyRegex.test(brandName)) {
+      descriptionNameError.innerHTML = "descrpition should contain only letters.";
+      isValid = false;
+  } else if (description.length < 3 || description.length > 20) {
+      descriptionNameError.innerHTML = "description should be between 3 and 20 characters.";
+      isValid = false;
+    }
+}
+
+if (price.trim()===""){
+  priceNameError.innerHTML="please enter price"
+  isValid=false
+}else{
+  var numericRegex = /^\d+$/;
+    if(!numericRegex.test(price) || price<0){
+      priceNameError.innerHTML="price should be non-negative integer"
+      isValid=false
+    }
+}
+
+if (stockCount.trim() === "") {
+    stockCountNameError.innerHTML = "Please enter stock count.";
+    isValid = false;
+  } else {
+    var numericRegex = /^\d+$/;
+    if (!numericRegex.test(stockCount) || stockCount < 0) {
+      stockCountNameError.innerHTML = "Stock count should be a non-negative integer.";
+      isValid = false;
+    }
+  }
+
+
+            if (!isValid) {
+    // Prevent form submission if there are validation errors
+    event.preventDefault(); // This line is missing in your code
+    return false
+  }
+
+            return true
+}
+
+</script>
+
   <script>
     function previewImages() {
       var previewDiv = document.getElementById('imagePreview');
       previewDiv.innerHTML = ''; // Clear previous previews
   
       var input = document.getElementById('images');
+      // console.log("input"+input);
       var files = input.files;
+     console.log(files);
+     for(let i=0;i<files.length;i++){
+      console.log(files[i]);
+     }
+      let count = files.length;
       var currentImageCount = previewDiv.querySelectorAll('.mt-2.image-container').length;
-  
       if (files.length + currentImageCount > 3) {
         Swal.fire({
           icon: 'error',
@@ -201,40 +320,29 @@
   
       for (var i = 0; i < files.length; i++) {
         var reader = new FileReader();
-        reader.onload = (function (file) {
+        reader.onload = (function (file, index) {
           return function (e) {
             var imgContainer = document.createElement('div');
             var img = document.createElement('img');
-            var deleteButton = document.createElement('button');
-  
             img.src = e.target.result;
             img.style.maxWidth = '100px';
             img.style.marginBottom = '100px';
             img.style.marginRight = '10px';
-  
-            deleteButton.innerHTML = 'Delete';
-            deleteButton.className = 'btn btn-danger btn-sm';
-            deleteButton.onclick = function () {
-              imgContainer.remove(); // Remove the image container on delete
-              currentImageCount--;
-            };
-  
+            img.dataset.index = index; // Assign data_index attribute
             imgContainer.appendChild(img);
-            imgContainer.appendChild(deleteButton);
+       
   
             previewDiv.appendChild(imgContainer);
           };
-        })(files[i]);
+        })(files[i], i); // Pass the current index to the closure
   
         reader.readAsDataURL(files[i]);
       }
-  
-      // Update input.value after displaying previews (comment if not needed)
-      // input.value = ''; // This line may not be necessary depending on your use case
+
     }
   </script>
   
-    
+
   
   
   <!-- container-scroller -->

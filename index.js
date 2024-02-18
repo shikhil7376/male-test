@@ -32,6 +32,5 @@ app.use((req,res,next)=>{
 
 connectDB();
 
-// const PORT = 8000;
 const PORT = process.env.PORT
 app.listen(PORT, () => console.log(`server running....${PORT}`));
