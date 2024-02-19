@@ -18,7 +18,14 @@
   <!-- endinject -->
   <link rel="shortcut icon" href="/admin/images/favicon.png" />
 </head>
-
+<style>
+  .error-message {
+    color: red;
+    margin-top: 5px; /* Adjust top margin as needed */
+    margin-bottom: 5px; /* Adjust bottom margin as needed */
+    font-size: 14px; /* Adjust font size as needed */
+}
+</style>
 <body>
   <div class="container-scroller">
     <!-- partial:../../partials/_navbar.html -->
@@ -39,14 +46,15 @@
                         <div class="card-body" style="font-size:larger;font-family:'Times New Roman', Times, serif;font-weight: bold;">
                           <h4 class="card-title">Add New Coupon</h4>
         
-                          <form class="forms-sample" action="/admin/new-coupon" method="post">
+                          <form class="forms-sample" action="/admin/new-coupon" method="post" onsubmit="return validateForm(event)">
                             <% if (message !== "") { %>
                               <p class="text-danger"><%= message %></p>
                             <% } %>
                             <div>
                               <div class="form-group col-md-12">
                                 <label for="exampleInputName1">Description</label>
-                                <input type="text" class="form-control" name="description" id="exampleInputName1" placeholder="Description" required>
+                                <input type="text" class="form-control" name="description" id="description" placeholder="Description" required>
+                                <div id="descriptionNameError" class="error-message"></div>
                               </div>
                             </div>
         
@@ -65,19 +73,22 @@
         
                               <div class="form-group col-md-6">
                                 <label for="exampleInputName1" id="discountAmountLabel">Discount Amount / Discount Percentage</label>
-                                <input type="number" class="form-control" name="discountAmount" id="exampleInputName1" placeholder="Discount Amount / Discount Percentage" required>
+                                <input type="number" class="form-control" name="discountAmount" id="discountAP" placeholder="Discount Amount / Discount Percentage" required>
+                                <div id="discountAPNameError" class="error-message"></div>
                               </div>
                             </div>
         
                             <div class="d-flex justify-content-between mt-3 mb-3">
                               <div class="col-md-6 form-group">
                                 <label for="exampleInputName1">Minumum Purchase Amount</label>
-                                <input type="number" class="form-control" name="minimumPurchaseAmount" id="exampleInputName1" placeholder="Minumum Purchase Amount" required>
+                                <input type="number" class="form-control" name="minimumPurchaseAmount" id="minimumPurchaseAmount" placeholder="Minumum Purchase Amount" required>
+                                <div id="minimumPurchaseAmountNameError" class="error-message"></div>
                               </div>
         
                               <div class="col-md-6 form-group">
                                 <label for="exampleInputName1">Usage Limit</label>
-                                <input type="number" class="form-control" name="usageLimit" id="exampleInputName1" placeholder="Limit" required>
+                                <input type="number" class="form-control" name="usageLimit" id="usageLimit" placeholder="Limit" required>
+                                <div id="usageLimitNameError" class="error-message"></div>
                               </div>
                             </div>
         
@@ -114,6 +125,82 @@
 </div>
 <!-- container-scroller -->
 <!-- plugins:js -->
+
+<script>
+
+function validateForm(event){
+  var description =document.getElementById('description').value;
+  var discountAP =document.getElementById('discountAP').value;
+  var minimumPurchaseAmount =document.getElementById('minimumPurchaseAmount').value;
+  var usageLimit=document.getElementById('usageLimit').value;
+  descriptionNameError.innerHTML=""
+  discountAPNameError.innerHTML=""
+  minimumPurchaseAmountNameError.innerHTML=""
+  usageLimitNameError.innerHTML=""
+
+  var isValid = true;
+
+  if (description.trim() === "") {
+    descriptionNameError.innerHTML = "Please enter description.";
+    isValid = false;
+  }else{
+    var lettersOnlyRegex = /^[A-Za-z]+$/;
+    
+    if (!lettersOnlyRegex.test(description)) {
+      descriptionNameError.innerHTML = "descrpition should contain only letters.";
+      isValid = false;
+  } else if (description.length < 3 || description.length > 20) {
+      descriptionNameError.innerHTML = "description should be between 3 and 20 characters.";
+      isValid = false;
+    }
+}
+
+if (discountAP.trim()===""){
+  discountAPNameError.innerHTML="please enter discount amount/percentage"
+  isValid=false
+}else{
+  var numericRegex = /^\d+$/;
+    if(!numericRegex.test(discountAP) || discountAP<0){
+      discountAPNameError.innerHTML="discount amount/percentage should be non-negative integer"
+      isValid=false
+    }
+}
+
+if (minimumPurchaseAmount.trim()===""){
+  minimumPurchaseAmountNameError.innerHTML="please enter minimum purchase amount"
+  isValid=false
+}else{
+  var numericRegex = /^\d+$/;
+    if(!numericRegex.test(minimumPurchaseAmount) || minimumPurchaseAmount<0){
+      minimumPurchaseAmountNameError.innerHTML="minimumPurchaseAmount should be non-negative integer"
+      isValid=false
+    }
+}
+
+if (usageLimit.trim()===""){
+  usageLimitNameError.innerHTML="please enter usageLimit"
+  isValid=false
+}else{
+  var numericRegex = /^\d+$/;
+    if(!numericRegex.test(usageLimit) || usageLimit<0){
+      usageLimitNameError.innerHTML="usageLimit should be non-negative integer"
+      isValid=false
+    }
+}
+
+if (!isValid) {
+    // Prevent form submission if there are validation errors
+    event.preventDefault(); // This line is missing in your code
+    return false
+  }
+
+            return true
+}
+
+</script>
+
+
+
 <script src="/admin/vendors/js/vendor.bundle.base.js"></script>
 <!-- endinject -->
 <!-- Plugin js for this page -->

@@ -17,6 +17,14 @@
   <link rel="stylesheet" href="/admin/css/vertical-layout-light/style.css">
   <!-- endinject -->
   <link rel="shortcut icon" href="/admin/images/favicon.png" />
+  <style>
+    .error-message {
+    color: red;
+    margin-top: 5px; /* Adjust top margin as needed */
+    margin-bottom: 5px; /* Adjust bottom margin as needed */
+    font-size: 14px; /* Adjust font size as needed */
+}
+  </style>
 </head>
 
 <body>
@@ -46,14 +54,16 @@
             <div class="col-8  grid-margin stretch-card">
               <div class="card">
                 <div class="card-body">
-                  <form class="forms-sample" method="post" action="/admin/banner/editBanner/<%=banner._id%>" enctype="multipart/form-data" >
+                  <form class="forms-sample" method="post" action="/admin/banner/editBanner/<%=banner._id%>" enctype="multipart/form-data" onsubmit="return validateForm(event)">
                     <div class="form-group">
                       <label for="exampleInputName1">Banner Name</label>
-                      <input type="text" name="name" value="<%=banner.name%>" required class="form-control" id="exampleInputName1" placeholder="Category name">
+                      <input type="text" name="name" value="<%=banner.name%>" required class="form-control" id="banner" placeholder="Category name">
+                      <div id="bannerNameError" class="error-message"></div>
                     </div>
                     <div class="form-group">
                         <label for="exampleTextarea1">Description </label>
-                        <textarea class="form-control" required name="description" id="exampleTextarea1" rows="6x"><%=banner.description %></textarea>
+                        <textarea class="form-control" required name="description" id="description" rows="6x"><%=banner.description %></textarea>
+                        <div id="descriptionNameError" class="error-message"></div>
                     </div>
                     
                     <div class="form-group">
@@ -98,6 +108,59 @@
     </div>
     <!-- page-body-wrapper ends -->
   </div>
+  <script>
+
+    function validateForm(event){
+      var banner = document.getElementById('banner').value;
+      var description= document.getElementById('description').value;
+      bannerNameError.innerHTML=""
+      descriptionNameError.innerHTML=""
+      var isValid = true;
+
+      if (banner.trim() === "") {
+    bannerNameError.innerHTML = "Please enter a banner name.";
+    isValid = false;
+  } else {
+    // Use a regular expression to check if the product name contains only letters
+    var lettersOnlyRegex = /^[A-Za-z]+$/;
+    
+    if (!lettersOnlyRegex.test(banner)) {
+      bannerNameError.innerHTML = "banner name should contain only letters.";
+      isValid = false;
+    } else if (banner.length < 3 || banner.length > 20) {
+      bannerNameError.innerHTML = "banner name should be between 3 and 20 characters.";
+      isValid = false;
+    }
+  }
+
+  if (description.trim() === "") {
+    descriptionNameError.innerHTML = "Please enter a description.";
+    isValid = false;
+  } else {
+    // Use a regular expression to check if the product name contains only letters
+    var lettersOnlyRegex = /^[A-Za-z]+$/;
+    
+    if (!lettersOnlyRegex.test(description)) {
+      descriptionNameError.innerHTML = "description should contain only letters.";
+      isValid = false;
+    } else if (description.length < 3 || description.length > 20) {
+      bannerNameError.innerHTML = "description should be between 3 and 20 characters.";
+      isValid = false;
+    }
+  }
+
+
+
+  if (!isValid) {
+    // Prevent form submission if there are validation errors
+    event.preventDefault(); // This line is missing in your code
+    return false
+  }
+
+            return true
+  
+    }
+  </script>
 
   <script>
   const previewImages = (event) => {

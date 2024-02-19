@@ -17,6 +17,14 @@
   <link rel="stylesheet" href="/admin/css/vertical-layout-light/style.css">
   <!-- endinject -->
   <link rel="shortcut icon" href="/admin/images/favicon.png" />
+  <style>
+    .error-message {
+    color: red;
+    margin-top: 5px; /* Adjust top margin as needed */
+    margin-bottom: 5px; /* Adjust bottom margin as needed */
+    font-size: 14px; /* Adjust font size as needed */
+}
+  </style>
 </head>
 
 <body>
@@ -48,7 +56,7 @@
                       
                         <div class="card-body">
                         
-                            <form action="/admin/offer/create/" method="post" id="Offer-Form">
+                            <form action="/admin/offer/create/" method="post" id="Offer-Form" onsubmit="return validateForm(event)">
                                 <% if (message !== "") { %>
                                     <p class="text-danger"><%= message %></p>
                                   <% } %>
@@ -56,6 +64,7 @@
                                     <label for="exampleInputCity1">Offer Name :</label>
                                     <input type="text" class="form-control" name="name"
                                         id="Offername" placeholder="Enter the offer name" >
+                                        <div id="offerNameError" class="error-message"></div>
                                 </div>
                                 <div id="nameError" style="color: red;"></div>
                                 <div class="form-group">
@@ -63,6 +72,7 @@
                                     <input type="text" class="form-control" name="discount"
                                     id="discount" placeholder="enter the offer Percentage"
                                     >
+                                    <div id="discountNameError" class="error-message"></div>
                                 </div>
                                 <div id="dicountError" style="color: red;"></div>
                                 <div class="form-group">
@@ -84,6 +94,7 @@
                                     <input type="text" class="form-control" name="status"
                                         id="Status" placeholder="Enter the Description"
                                         >
+                                        <div id="statusNameError" class="error-message"></div>
                                 </div>
                                 <div id="status" style="color: red;"></div>
                         </div>
@@ -123,6 +134,80 @@
   </div>
   <!-- container-scroller -->
   <!-- plugins:js -->
+
+<script>
+    function validateForm(event){
+        var Offername = document.getElementById('Offername').value;
+        var discount = document.getElementById('discount').value
+        var status = document.getElementById('Status').value
+        offerNameError.innerHTML=""
+        discountNameError.innerHTML=""
+        statusNameError.innerHTML=""
+        var isValid = true;
+
+        if (Offername.trim() === "") {
+    offerNameError.innerHTML = "Please enter a offer name.";
+    isValid = false;
+  } else {
+    // Use a regular expression to check if the product name contains only letters
+    var lettersOnlyRegex = /^[A-Za-z]+$/;
+    
+    if (!lettersOnlyRegex.test(Offername)) {
+      offerNameError.innerHTML = "Offer name should contain only letters.";
+      isValid = false;
+    } else if (Offername.length < 3 || Offername.length > 20) {
+      offerNameError.innerHTML = "Offer name should be between 3 and 20 characters.";
+      isValid = false;
+    }
+  }
+
+  if (discount.trim()===""){
+  discountNameError.innerHTML="please enter discount"
+  isValid=false
+}else{
+  var numericRegex = /^\d+$/;
+    if(!numericRegex.test(discount) || discount<0){
+      discountNameError.innerHTML="discount should be non-negative integer"
+      isValid=false
+    }
+}
+
+
+if (status.trim() === "") {
+    statusNameError.innerHTML = "Please enter status.";
+    isValid = false;
+  } else {
+    // Use a regular expression to check if the product name contains only letters
+    var lettersOnlyRegex = /^[A-Za-z]+$/;
+    
+    if (!lettersOnlyRegex.test(status)) {
+     statusNameError.innerHTML = "status should contain only letters.";
+      isValid = false;
+    } else if (status.length < 3 || status.length > 20) {
+     statusNameError.innerHTML = "status should be between 3 and 20 characters.";
+      isValid = false;
+    }
+  }
+
+  
+  if (!isValid) {
+    // Prevent form submission if there are validation errors
+    event.preventDefault(); // This line is missing in your code
+    return false
+  }
+
+            return true
+    }
+</script>
+
+
+
+
+
+
+
+
+
   <script src="/admin/vendors/js/vendor.bundle.base.js"></script>
   <!-- endinject -->
   <!-- Plugin js for this page -->
