@@ -38,15 +38,15 @@
               <div class="card-body">
                 <h4 class="card-title">Sales Report</h4>
                 <form action="/admin/sales-report?filtered=true" method="post">
-                  <input class="m-1" type="date" name="from">
-                  <input class="m-1" type="date" name="upto">
+                  <input class="m-1" type="date" name="from" style="font-size: medium, Times, serif;font-weight: bold;color:black">
+                  <input class="m-1" type="date" name="upto" style="font-size: medium, Times, serif;font-weight: bold;color:black">
                   <button class="btn btn-outline-primary btn-sm m-1" type="submit">Apply</button>
                 </form>
                 <div class="table-responsive">
                   <% let productsCount = 0 %>
                   <% let totalRevenue = 0 %>
                   <table class="table table-striped" id="salesReportTable">
-                    <thead  style="font-size:larger;font-family:'Times New Roman', Times, serif;font-weight: bold;">
+                    <thead  style="font-size: medium, Times, serif;font-weight: bold;color:black">
                       <tr>
                         <th>
                           User
@@ -62,7 +62,7 @@
                         </th>
                       </tr>
                     </thead>
-                    <tbody id="table-1" style="font-size:medium;font-family:'Times New Roman', Times, serif">
+                    <tbody id="table-1" style="font-size: medium, Times, serif;font-weight:500;color:gray">
                       <% if (!salesReport.length) { %>
                       <tr>
                         <td colspan="6">
@@ -111,7 +111,7 @@
                     </tbody>
                   </table>
                   <div class="d-flex">
-                    <div class="col-md-9 col-12 pt-3" style="font-size: large;font-family:'Times New Roman', Times, serif;font-weight: bold;">
+                    <div class="col-md-9 col-12 pt-3" style="font-size: medium, Times, serif;font-weight:500;color:gray">
                       <!-- Total orders done: <%= salesReport.length %><br> -->
                       Total products sold: <%= productsCount %><br>
                       <strong>Total Revenue: ₹<%= totalRevenue.toFixed(2) %></strong>

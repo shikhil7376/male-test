@@ -6,7 +6,7 @@
       <div class="row">
         <div class="col-md-12 mb-0">
           <a href="/">Home</a> <span class="mx-2 mb-0">/</span> 
-          <strong class="text-black"><%= productData.product_name %></strong>
+          <strong style="text-transform: uppercase;" class="text-black"><%= productData.product_name %></strong>
         </div>
       </div>
     </div>
@@ -61,11 +61,11 @@
         <!-- Product information -->
         <div class="d-md-flex justify-content-between">
           <div class="col-md-6 col-12 order-md-1">
-            <h2 class="text-black"><%= productData.product_name %></h2>
+            <h2 style="text-transform: uppercase;" class="text-black"><%= productData.product_name %></h2>
             <p>
                 <%= productData.description %>
             </p>
-            <p class="mb-4">Ex numquam veritatis debitis minima quo error quam eos dolorum quidem
+            <p style=" font-size: medium;font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;" class="mb-4">Ex numquam veritatis debitis minima quo error quam eos dolorum quidem
               perferendis. Quos repellat dignissimos minus, eveniet nam voluptatibus molestias
               omnis
               reiciendis perspiciatis illum hic magni iste, velit aperiam quis.
@@ -79,7 +79,7 @@
                
                   <% if (productData.offerPrice> 0 && productData.categoryOfferPrice > 0) { %>
                     <% if(productData.offerPrice < productData.categoryOfferPrice){  %>
-                      <span>&#8377;<%= productData.offerPrice %></span> <span><del class="text-danger"> <%=productData.price %> </del></span>
+                      <span style="font-weight: 500;">&#8377;<%= productData.offerPrice %></span> <span><del class="text-danger"> <%=productData.price %> </del></span>
                <% }else{  %>
                  
 
@@ -99,14 +99,14 @@
 
               <% }else{%>
                 <!-- Display original price -->
-               <span>&#8377;<%= productData.price%></span>
+               <span style="font-weight: 500;">&#8377;<%= productData.price%></span>
                 <% }%>
 
 
 
 
                   <% if(productData.stock_count){  %>
-                  <p><strong class="text-dark h6" id="stock">Stock: <%= productData.stock_count %></strong></p>
+                  <p style="font-weight: 500;"><strong style="font-weight: 600;"  class="text-dark h6" id="stock">Stock: <%= productData.stock_count %></strong></p>
                   <% } %>
                   <% if(!productData.stock_count){ %>
                   <p class="text-danger mt-5">Currently Unavailable</p>

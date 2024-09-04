@@ -52,7 +52,7 @@
                     />
                   </div>
                   <div class="product__cart__item__text">
-                    <h6><%= cartItem.product.product_name %></h6>
+                    <h5 style="font-size: small; font-weight: 500; text-transform: uppercase; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;"><%= cartItem.product.product_name %></h5>
                     <% if (cartItem.product.offerPrice> 0 && cartItem.product.categoryOfferPrice > 0) { %>
                       <% if(cartItem.product.offerPrice < cartItem.product.categoryOfferPrice){  %>
                         <span>&#8377;<%= cartItem.product.offerPrice %></span> <span><del class="text-danger"> <%=cartItem.product.price %> </del></span>
