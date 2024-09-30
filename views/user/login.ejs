@@ -6,16 +6,23 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 
         <style>
-            body {
-                font-family: Arial, sans-serif;
-                background-color: #f4f4f4;
-            }
-
+           body {
+         font-family: Arial, sans-serif;
+         background-image: url('/customer/img/hero/loginfix.jpg');
+         background-size: cover;
+         background-position: center;
+         background-repeat: no-repeat;
+         height: 100vh;
+         margin: 0;
+         display: flex;
+         justify-content: center;
+         align-items: center;
+}
             .login-container {
                 width: 400px;
                 margin: 0 auto;
-                margin-top: 40px;
-                background-color: #fff;
+                margin-top: 100px;
+                /* background-color: ; */
                 padding: 20px;
                 border-radius: 5px;
                 box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
@@ -66,21 +73,21 @@
     </head>
     <body>
     <div class="login-container">
-        <h2>Login</h2>
+        <h2 style="font-size: medium, Times, serif;font-weight: bold ;color:white"> Hi, Welcome! </h2>
         <form action="/user-Login" method="post" id="register-form" >
         <div class="form-group">
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
+            <label for="email"style="font-size: medium, Times, serif;color:white">Email:</label>
+            <input type="email" id="email" name="email" required style="font-size: medium, Times, serif">
             <p class="text-danger" id="email-error-display"></p>
         </div>
         <div class="form-group">
-            <label for="password">Password:</label>
+            <label for="password" style="font-size: medium, Times, serif;color:white">Password:</label>
             <input type="password" id="password" name="password" required>
             <p class="text-danger" id="password-error-display"></p>
         </div>
         
         <div class="btn-container">
-            <button type="submit" class="btn" id="login">Login</button>
+            <button type="submit" class="btn" id="login" style="font-weight: bold;border: 2px solid gray;">Login</button>
         </div>
         </form>
         <!--error messages-->
@@ -92,9 +99,9 @@
 
             <%} %>
                 <!--end messages-->
-        <div>
-        <a href="/register" >  <button class="btn btn-secondary"  id="register">SignUp</button></a>
-        <a href="#"> <button class="btn btn-secondary" id="loginAdmin">forgot password?</button></a>
+        <div style="padding: 10px;">
+            <span style="font-size: medium, Times, serif;color:white"> Don't have an account?</span>
+        <a href="/register" > register  </a>
         </div>
 
     </div>

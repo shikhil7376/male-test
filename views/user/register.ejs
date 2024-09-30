@@ -11,7 +11,7 @@
 
         .login-container {
             width: 400px;
-            margin: 0 auto;
+            margin: 50px auto;
             background-color: #fff;
             padding: 20px;
             border-radius: 5px;
@@ -59,32 +59,32 @@
 </head>
 <body>
     <div class="login-container">
-        <h2>Register</h2>
+        <h2 style="font-size: medium, Times, serif;font-weight: bold">Register</h2>
         <form action="/register" method="post" onsubmit="return validateForm()" id="register-form">
         
             <div class="form-group">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
+                <label for="name"style="font-size: medium, Times, serif;font-weight: bold color:#7c7979 ;">name:</label>
+                <input type="text" id="name" name="name" required style="border-radius: 30px; padding: 10px; border: 1px solid #7c7979;">
                 <p class="text-danger" id="username-error-display"></p>
             </div>
             <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
+                <label for="email"style="font-size: medium, Times, serif;font-weight: bold color:#7c7979 ;">email:</label>
+                <input type="email" id="email" name="email" required style="border-radius: 30px; padding: 10px; border: 1px solid #7c7979;">
                 <p class="text-danger" id="email-error-display"></p>
             </div>
             <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
+                <label for="password"style="font-size: medium, Times, serif;font-weight: bold color:#7c7979 ;">password:</label>
+                <input type="password" id="password" name="password" required style="border-radius: 30px; padding: 10px; border: 1px solid #7c7979;">
                 <p class="text-danger" id="password-error-display"></p>
             </div>
             <div class="form-group">
-                <label for="mobileNo">Mobile Number:</label>
-                <input type="text" id="mobileNo" pattern="9876[0-9]{6}" maxlength="10" name="mobile" required  title="Enter a valid 10-digit mobile number">
+                <label for="mobileNo"style="font-size: medium, Times, serif;font-weight: bold color:#7c7979 ;">mobile:</label>
+                <input type="text" id="mobileNo" pattern="9876[0-9]{6}" maxlength="10" name="mobile" required  title="Enter a valid 10-digit mobile number" style="border-radius: 30px; padding: 10px; border: 1px solid #7c7979;">
                 <p class="text-danger" id="phone-error-display"></p>
             </div>
             
             <div class="btn-container">
-                <button type="submit" class="btn" id="login">Register</button>
+                <button type="submit" class="btn" id="login" style="font-weight: bold;border: 2px solid gray;">Register</button>
             </div>
         </form>
         <!--error messages-->
